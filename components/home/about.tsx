@@ -34,7 +34,7 @@ export default function About() {
   };
 
   return (
-    <div className="bg-gray-50 py-6 md:py-24">
+    <div className="bg-gray-50 py-6 md:py-24 ">
       <Card className="max-w-[1400px] w-full mx-auto p-6 md:p-8 shadow-sm border-none font-serif">
         <CardContent className="p-0">
           {/* Başlık */}
