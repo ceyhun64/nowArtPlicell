@@ -1,20 +1,16 @@
-"use client";
-import React from "react";
-import type { NextPage } from "next";
+// page.tsx
 import Products from "@/components/products/products";
 import Navbar from "@/components/layout/navbar";
 import Topbar from "@/components/layout/topbar";
 import Footer from "@/components/layout/footer";
 
-const ProductsPage: NextPage = () => {
+export default function ProductsPage() {
   return (
     <div>
       <Topbar />
       <Navbar />
-      <Products />
+      <Products /> {/* Products: "use client" */}
       <Footer />
     </div>
   );
-};
-
-export default ProductsPage;
+}
