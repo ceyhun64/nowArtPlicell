@@ -1,0 +1,71 @@
+[
+  {
+    "id": 101,
+    "customer": "Ahmet Yılmaz",
+    "email": "ahmet@example.com",
+    "status": "paid",
+    "createdAt": "2025-10-01T12:34:56Z",
+    "paidPrice": "1.250,00 TL",
+    "totalPrice": "1.300,00 TL",
+    "paymentMethod": "Kredi Kartı",
+    "transactionId": "TXN123456789",
+    "items": [
+      {
+        "name": "Ahşap Masa",
+        "unitPrice": "500,00 TL",
+        "quantity": 2,
+        "totalPrice": "1.000,00 TL",
+        "mainImage": "/products/wooden-table.jpg"
+      },
+      {
+        "name": "Sandalye",
+        "unitPrice": "150,00 TL",
+        "quantity": 2,
+        "totalPrice": "300,00 TL",
+        "mainImage": "/products/chair.jpg"
+      }
+    ],
+    "address": {
+      "firstName": "Ahmet",
+      "lastName": "Yılmaz",
+      "title": "Ev Adresi",
+      "address": "Mevlana Cd. No:12",
+      "district": "Kadıköy",
+      "city": "İstanbul",
+      "country": "Türkiye",
+      "zip": "34000",
+      "phone": "+905551112233"
+    }
+  },
+  {
+    "id": 102,
+    "customer": "Elif Demir",
+    "email": "elif@example.com",
+    "status": "shipped",
+    "createdAt": "2025-09-28T09:10:00Z",
+    "paidPrice": "750,00 TL",
+    "totalPrice": "800,00 TL",
+    "paymentMethod": "Havale",
+    "transactionId": "TXN987654321",
+    "items": [
+      {
+        "name": "Kupa",
+        "unitPrice": "150,00 TL",
+        "quantity": 5,
+        "totalPrice": "750,00 TL",
+        "mainImage": "/products/mug.jpg"
+      }
+    ],
+    "address": {
+      "firstName": "Elif",
+      "lastName": "Demir",
+      "title": "Ofis",
+      "address": "Atatürk Blv. No:45",
+      "district": "Çankaya",
+      "city": "Ankara",
+      "country": "Türkiye",
+      "zip": "06000",
+      "phone": "+905556667788"
+    }
+  }
+]

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import SocialSidebar from "@/components/layout/socialSidebar";
+import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
+import ScrollToTopButton from "@/components/layout/scrollToTop"; // Yeni buton
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,15 +22,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Sayfa içeriği ve koşullu sidebar */}
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+
+        {/* Scroll to Top Butonu */}
+        <ScrollToTopButton />
       </body>
     </html>
   );

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "title": "Modern Sanatta Minimalizm",
+    "author": "Abdulkadir Cer",
+    "category": "Sanat",
+    "date": "2025-01-15",
+    "image": "/images/blog1.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Evinizde Doğal Işık Kullanımı",
+    "author": "Elif Yılmaz",
+    "category": "Dekorasyon",
+    "date": "2025-03-22",
+    "image": "/images/blog2.jpg"
+  }
+]

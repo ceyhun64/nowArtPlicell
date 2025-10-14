@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "title": "Modern Desenli Perde",
+    "pricePerM2": 349.99,
+    "rating": 5,
+    "reviewCount": 128,
+    "mainImage": "/products/product1main.png",
+    "subImage": "/products/product1sub1.png",
+    "category": "duz-seri"
+  },
+  {
+    "id": 2,
+    "title": "Klasik İran Motifli Perde",
+    "pricePerM2": 429.9,
+    "rating": 4,
+    "reviewCount": 97,
+    "mainImage": "/products/product2main.png",
+    "subImage": "/products/product2sub1.png",
+    "category": "baskili"
+  },
+  {
+    "id": 3,
+    "title": "Minimalist Gri Perde",
+    "pricePerM2": 299.5,
+    "rating": 4,
+    "reviewCount": 56,
+    "mainImage": "/products/product3main.png",
+    "subImage": "/products/product3sub1.png",
+    "category": "duz-seri"
+  },
+  {
+    "id": 4,
+    "title": "Vintage El Dokuma Perde",
+    "pricePerM2": 549.0,
+    "rating": 5,
+    "reviewCount": 213,
+    "mainImage": "/products/product4main.png",
+    "subImage": "/products/product4sub1.png",
+    "category": "jakar"
+  },
+  {
+    "id": 5,
+    "title": "Bohem Tarzı Perde",
+    "pricePerM2": 389.0,
+    "rating": 3,
+    "reviewCount": 41,
+    "mainImage": "/products/product5main.png",
+    "subImage": "/products/product5sub1.png",
+    "category": "cift-sistem-tul"
+  },
+  {
+    "id": 6,
+    "title": "Yün Dokuma Perde",
+    "pricePerM2": 699.99,
+    "rating": 5,
+    "reviewCount": 320,
+    "mainImage": "/products/product6main.png",
+    "subImage": "/products/product6sub1.png",
+    "category": "tekli-tul"
+  },
+  {
+    "id": 7,
+    "title": "Yün Dokuma Perde",
+    "pricePerM2": 699.99,
+    "rating": 5,
+    "reviewCount": 320,
+    "mainImage": "/products/product7main.png",
+    "subImage": "/products/product7sub1.png",
+    "category": "tekli-tul"
+  },
+  {
+    "id": 8,
+    "title": "Yün Dokuma Perde",
+    "pricePerM2": 699.99,
+    "rating": 5,
+    "reviewCount": 320,
+    "mainImage": "/products/product8main.png",
+    "subImage": "/products/product8sub1.png",
+    "category": "tekli-tul"
+  }
+]
