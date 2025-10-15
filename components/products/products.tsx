@@ -1,6 +1,8 @@
+// "use client" directive remains for client-side hooks
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
+// useSearchParams ve useRouter burada kalır.
 import { useSearchParams, useRouter } from "next/navigation";
 import ProductCard from "./productCard";
 import Filter from "./filter";
@@ -13,6 +15,7 @@ import {
   StretchHorizontal,
   StretchVertical,
 } from "lucide-react";
+// seedProducts'ın doğru yoldan import edildiğini varsayıyoruz.
 import seedProducts from "@/seed/products.json";
 import { cn } from "@/lib/utils";
 import {
@@ -59,7 +62,9 @@ const categoryNames: Record<string, string> = {
   aksesuar: "PERDE AKSESUAR",
 };
 
-const Products: React.FC = () => {
+// Orijinal mantığı içeren ana bileşen. Artık doğrudan dışa aktarılmıyor.
+// Bu bileşen, istemci tarafı hook'ları içerir.
+const ProductsContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -120,7 +125,7 @@ const Products: React.FC = () => {
 
     if (selectedCategory === "tum-urunler") return seedProducts;
 
-    return seedProducts.filter((p: ProductData) => {
+    return (seedProducts as ProductData[]).filter((p: ProductData) => {
       const categoryMatch =
         p.category.toLowerCase().replace(/\s+/g, "-") === selectedCategory;
       const subMatch = selectedSub
@@ -151,6 +156,8 @@ const Products: React.FC = () => {
   }, [filteredProducts, sort]);
 
   if (!isReady) {
+    // Bu yükleme durumunu Suspense'in fallback'ine taşıdık,
+    // ancak `isReady` state'i hala gerekli olabilir.
     return (
       <div className="flex justify-center items-center py-20 text-gray-500">
         Ürünler yükleniyor...
@@ -355,6 +362,23 @@ const Products: React.FC = () => {
         )}
       </main>
     </div>
+  );
+};
+
+// Bu bileşen, sayfanızda (örneğin app/products/page.tsx) import etmeniz gereken yeni varsayılan dışa aktarımdır.
+// ProductsContent bileşenini <Suspense> içinde sarmalayarak Vercel/Next.js hatasını çözer.
+const Products: React.FC = () => {
+  // Suspense için basit bir yüklenme göstergesi (fallback)
+  const loadingFallback = (
+    <div className="flex justify-center items-center py-20 text-gray-500">
+      Sayfa yükleniyor...
+    </div>
+  );
+
+  return (
+    <Suspense fallback={loadingFallback}>
+      <ProductsContent />
+    </Suspense>
   );
 };
 
