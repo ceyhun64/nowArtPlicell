@@ -5,29 +5,50 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+// Görselleri import ederek Next.js optimizer kullanıyoruz
+import hero25 from "@/public/heroes/25.jpg";
+import hero27 from "@/public/heroes/27.jpg";
+import hero28 from "@/public/heroes/28.jpg";
+import hero30 from "@/public/heroes/30.jpg";
+import hero32 from "@/public/heroes/32.jpg";
+import hero33 from "@/public/heroes/33.jpg";
+import hero34 from "@/public/heroes/34.jpg";
+import hero19 from "@/public/heroes/19.jpg";
+import hero22 from "@/public/heroes/22.jpg";
+import hero23 from "@/public/heroes/23.jpg";
+import hero24 from "@/public/heroes/24.jpg";
+
 const images = [
-  "/heroes/25.jpg",
-  "/heroes/27.jpg",
-  "/heroes/28.jpg",
-  "/heroes/30.jpg",
-  "/heroes/32.jpg",
-  "/heroes/33.jpg",
-  "/heroes/34.jpg",
-  "/heroes/19.jpg",
-  "/heroes/22.jpg",
-  "/heroes/23.jpg",
-  "/heroes/24.jpg",
+  hero25,
+  hero27,
+  hero28,
+  hero30,
+  hero32,
+  hero33,
+  hero34,
+  hero19,
+  hero22,
+  hero23,
+  hero24,
 ];
 
 export default function Heroes(): React.ReactElement {
   const [current, setCurrent] = useState(0);
 
+  // Otomatik slider
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % images.length);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  // Sonraki görseli preload et (TypeScript uyumlu)
+  useEffect(() => {
+    const nextIndex = (current + 1) % images.length;
+    const img = new window.Image();
+    img.src = images[nextIndex].src;
+  }, [current]);
 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % images.length);
   const prevSlide = () =>
@@ -59,16 +80,14 @@ export default function Heroes(): React.ReactElement {
                 href="/products"
                 className="block h-full w-full group cursor-pointer"
               >
-                {/* Görsel */}
                 <Image
                   src={src}
                   alt={`Hero ${index + 1}`}
-                  fill
+                  width={1400}
+                  height={600}
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  style={{ borderRadius: 0 }}
-                  priority={index === 0} // İlk görsel için öncelik
-                  placeholder="blur" // Blur efektli placeholder
-                  blurDataURL="/placeholder.jpg" // küçük bir placeholder görseli
+                  priority={index === 0} // İlk görsel öncelikli
+                  placeholder="blur" // Blur efekti
                 />
 
                 {/* Gradient overlay */}
