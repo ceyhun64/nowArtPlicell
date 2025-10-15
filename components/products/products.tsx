@@ -43,7 +43,7 @@ interface ProductData {
   subcategory?: string;
 }
 
-// Kategori isimleri
+// === Kategori İsimleri ===
 const categoryNames: Record<string, string> = {
   "tum-urunler": "TÜM ÜRÜNLER",
   "duz-seri": "DÜZ SERİ",
@@ -66,9 +66,9 @@ const Products: React.FC = () => {
   const categoryFromUrl = searchParams.get("category");
   const subFromUrl = searchParams.get("sub");
 
-  // State başlangıçları
-  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3); // masaüstü
-  const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2); // mobil için başlangıç 2
+  // === State ===
+  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3);
+  const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [sort, setSort] = useState<"az" | "za" | "priceLow" | "priceHigh">(
     "az"
   );
@@ -78,41 +78,59 @@ const Products: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
+  // === Kategori & Sub Normalizasyonu ===
   useEffect(() => {
-    setSelectedCategory(categoryFromUrl || "tum-urunler");
-    setSelectedSub(subFromUrl || null);
+    const normalize = (value: string | null) =>
+      value ? value.toLowerCase().replace(/\s+/g, "-") : null;
+
+    const normalizedCategory = normalize(categoryFromUrl) || "tum-urunler";
+    const normalizedSub = normalize(subFromUrl);
+
+    setSelectedCategory(normalizedCategory);
+    setSelectedSub(normalizedSub);
     setIsReady(true);
   }, [categoryFromUrl, subFromUrl]);
 
+  // === Grid Değiştirici ===
   const handleGridChange = (cols: 1 | 2 | 3 | 4) => setGridCols(cols);
 
+  // === Kategori Seçimi ===
   const handleSelectCategory = (category: string, sub?: string | null) => {
-    setSelectedCategory(category);
-    setSelectedSub(sub ?? null);
-    setIsCategoriesOpen(false); // mobilde açılır kapanmasını sağla
+    const normalizedCategory = category.toLowerCase().replace(/\s+/g, "-");
+    const normalizedSub = sub ? sub.toLowerCase().replace(/\s+/g, "-") : null;
 
-    if (category === "tum-urunler") {
+    setSelectedCategory(normalizedCategory);
+    setSelectedSub(normalizedSub);
+    setIsCategoriesOpen(false);
+
+    if (normalizedCategory === "tum-urunler") {
       router.push("/products");
-    } else if (sub) {
-      router.push(`/products?category=${category}&sub=${sub}`);
+    } else if (normalizedSub) {
+      router.push(
+        `/products?category=${normalizedCategory}&sub=${normalizedSub}`
+      );
     } else {
-      router.push(`/products?category=${category}`);
+      router.push(`/products?category=${normalizedCategory}`);
     }
   };
 
+  // === Filtrelenmiş Ürünler ===
   const filteredProducts = useMemo(() => {
     if (!isReady) return [];
 
     if (selectedCategory === "tum-urunler") return seedProducts;
 
     return seedProducts.filter((p: ProductData) => {
-      if (selectedSub) {
-        return p.category === selectedCategory && p.subcategory === selectedSub;
-      }
-      return p.category === selectedCategory;
+      const categoryMatch =
+        p.category.toLowerCase().replace(/\s+/g, "-") === selectedCategory;
+      const subMatch = selectedSub
+        ? p.subcategory?.toLowerCase().replace(/\s+/g, "-") === selectedSub
+        : true;
+      return categoryMatch && subMatch;
     });
   }, [selectedCategory, selectedSub, isReady]);
 
+  // === Sıralama ===
   const sortedProducts = useMemo(() => {
     const sorted = [...filteredProducts];
     switch (sort) {
@@ -141,7 +159,7 @@ const Products: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row md:space-x-8 px-4 md:px-20 py-8 bg-gray-50 font-serif  mx-auto">
+    <div className="flex flex-col md:flex-row md:space-x-8 px-4 md:px-20 py-8 bg-gray-50 font-serif mx-auto">
       {/* Sol Filtre (Desktop) */}
       <aside className="hidden md:block md:w-1/4 mb-6 md:mb-0">
         <div className="sticky top-28">
@@ -154,20 +172,21 @@ const Products: React.FC = () => {
 
       {/* Ürün Alanı */}
       <main className="flex-1">
-        {/* Üst Bar: Başlık + Mobil/Masaüstü Kontroller */}
+        {/* Üst Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           {/* Başlık */}
           <h2 className="text-2xl font-semibold text-stone-800">
             {selectedSub
-              ? `${categoryNames[selectedCategory]} / ${selectedSub}`
+              ? selectedSub.replace(/-/g, " ").toUpperCase()
               : selectedCategory === "tum-urunler"
-              ? "Tüm Ürünler"
-              : categoryNames[selectedCategory]}
+              ? "TÜM ÜRÜNLER"
+              : categoryNames[selectedCategory] ||
+                selectedCategory.toUpperCase()}
           </h2>
 
           {/* Kontroller */}
           <div className="flex items-center gap-3">
-            {/* Mobil: Kategoriler, Grid, Sıralama yan yana */}
+            {/* Mobil Kontroller */}
             <div className="flex md:hidden items-center gap-3">
               {/* Kategoriler Butonu */}
               <Sheet open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
@@ -214,8 +233,7 @@ const Products: React.FC = () => {
                 </SheetContent>
               </Sheet>
 
-              {/* 👇 Mobil Grid Toggle Butonu — 1’li ↔ 2’li geçiş + tooltip + aktif durum */}
-              {/* 👇 Mobil Grid Toggle Butonu — 1’li ↔ 2’li geçiş */}
+              {/* Mobil Grid Toggle */}
               <div className="flex items-center bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:hidden">
                 <button
                   onClick={() =>
@@ -262,7 +280,7 @@ const Products: React.FC = () => {
               </Select>
             </div>
 
-            {/* Masaüstü: Sadece Grid ve Sıralama */}
+            {/* Masaüstü Kontroller */}
             <div className="hidden md:flex items-center gap-3">
               {/* Grid Seçici */}
               <div className="flex items-center bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -316,14 +334,14 @@ const Products: React.FC = () => {
           <div
             className={cn(
               "grid gap-6 font-sans",
-              mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", // mobil
+              mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2",
               gridCols === 2
                 ? "sm:grid-cols-2"
                 : gridCols === 3
                 ? "sm:grid-cols-3"
                 : gridCols === 4
                 ? "sm:grid-cols-4"
-                : "sm:grid-cols-3" // masaüstü
+                : "sm:grid-cols-3"
             )}
           >
             {sortedProducts.map((product) => (

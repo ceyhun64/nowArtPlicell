@@ -55,7 +55,7 @@ export default function ProductTabs({ productTitle }: ProductTabsProps) {
   ];
 
   return (
-    <section className="mt-16">
+    <section className="mt-16 mb-8">
       {/* Sekme Başlıkları */}
       <div className="flex border-b border-gray-200 mb-8">
         <button
@@ -87,59 +87,65 @@ export default function ProductTabs({ productTitle }: ProductTabsProps) {
       <Card className="border-gray-200 shadow-sm rounded-2xl bg-white">
         <CardContent className="p-8">
           {activeTab === "description" && (
-            <div className="text-gray-700">
-              <table className="w-full text-left border-collapse mb-10">
-                <tbody>
-                  {tableData.map((item, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-100 last:border-none"
-                    >
-                      <td className="py-3 font-medium text-gray-900 w-1/3">
-                        {item.label}
-                      </td>
-                      <td className="py-3 text-gray-600 w-2/3">{item.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="text-gray-700 space-y-6">
+              {/* Ürün Bilgi Tablosu */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm sm:text-base">
+                  <tbody>
+                    {tableData.map((item, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 last:border-none"
+                      >
+                        <td className="py-2 sm:py-3 font-medium text-gray-900 w-1/2 md:w-1/3 text-xs  sm:text-base">
+                          {item.label}
+                        </td>
+                        <td className="py-2 sm:py-3 text-gray-600 w-1/2 md:w-2/3 text-xs sm:text-base">
+                          {item.value}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-              <Separator className="my-8" />
+              <Separator className="my-4 sm:my-8" />
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              {/* Bilgilendirici Metin */}
+              <div className="space-y-4 sm:space-y-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Pilise Perde Siparişi Verirken Nelere Dikkat Etmeliyiz?
                 </h3>
-                <p className="mb-6 leading-relaxed text-gray-600">
+                <p className="text-sm sm:text-base leading-relaxed text-gray-600">
                   İlk defa pilise perde siparişi veriyorsanız, ölçü, montaj,
                   kumaş ve renk seçimi gibi süreçlere dikkat etmeniz faydalı
                   olur. Aşağıda doğru sipariş vermeniz için bazı ipuçlarını
                   paylaştık.
                 </p>
 
-                <h4 className="text-base font-semibold text-gray-900 mb-2">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">
                   Doğru Ölçü Almak
                 </h4>
-                <p className="mb-6 text-sm leading-relaxed text-gray-600">
+                <p className="text-sm sm:text-base leading-relaxed text-gray-600">
                   Ölçü almadan önce “NowArt perde ölçüsü nasıl alınır”
                   rehberimize göz atın. Metre yardımıyla dikey ve yatay ölçüleri
                   dikkatlice hesaplayın. Milimetrik ölçü almak, tam uyumlu bir
                   perde için önemlidir.
                 </p>
 
-                <h4 className="text-base font-semibold text-gray-900 mb-2">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">
                   Desen ve Renk Seçimi
                 </h4>
-                <p className="mb-6 text-sm leading-relaxed text-gray-600">
+                <p className="text-sm sm:text-base leading-relaxed text-gray-600">
                   Pilise perdelerde tül, jakarlı, düz seri, %100 karartmalı veya
                   %70 karartmalı seçenekler mevcuttur. Odanızın tarzına uygun
                   desen ve rengi seçerek siparişinizi oluşturabilirsiniz.
                 </p>
 
-                <h4 className="text-base font-semibold text-gray-900 mb-2">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">
                   Pilise Perde Montajı
                 </h4>
-                <p className="mb-6 text-sm leading-relaxed text-gray-600">
+                <p className="text-sm sm:text-base leading-relaxed text-gray-600">
                   Ürünü teslim aldığınızda montaj konusunda endişelenmeyin.
                   Kılavuzdaki adımları izleyerek kolayca monte edebilirsiniz.
                   Aparatlar pakete dahildir.

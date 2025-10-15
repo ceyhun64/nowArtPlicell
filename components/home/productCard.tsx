@@ -8,7 +8,7 @@ import Link from "next/link";
 interface ProductCardProps {
   id: number;
   mainImage: string;
-  subImage: string; // artık tek alt görsel
+  subImage: string;
   title: string;
   pricePerM2: number;
   rating: number;
@@ -34,7 +34,7 @@ export default function ProductCard({
       stars.push(
         <Star
           key={i}
-          className={`h-4 w-4 ${
+          className={`h-3 sm:h-4 w-3 sm:w-4 ${
             i <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
           }`}
         />
@@ -46,14 +46,14 @@ export default function ProductCard({
   return (
     <Link href={`/products/${id}`} className="block group relative">
       <Card
-        className="w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        className="w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         {/* Görsel */}
         <div className="relative overflow-hidden">
           <img
-            src={hovered && subImage ? subImage : mainImage} // artık tek alt görsel
+            src={hovered && subImage ? subImage : mainImage}
             alt={title}
             className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -62,13 +62,13 @@ export default function ProductCard({
           <button
             type="button"
             onClick={(e) => {
-              e.preventDefault(); // Link tıklamasını engelle
+              e.preventDefault(); 
               setFavorited(!favorited);
             }}
-            className="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
+            className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 bg-white/80 rounded-full p-1.5 sm:p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
           >
             <Heart
-              className={`h-5 w-5 transition-colors ${
+              className={`h-4 sm:h-5 w-4 sm:w-5 transition-colors ${
                 favorited ? "text-red-500 fill-red-500" : "text-gray-400"
               }`}
             />
@@ -76,21 +76,23 @@ export default function ProductCard({
         </div>
 
         {/* Bilgi Alanı */}
-        <CardContent className="p-5">
-          <h2 className="text-base font-semibold text-stone-800 leading-snug line-clamp-2">
+        <CardContent className="py-0.5 px-3 sm:p-5">
+          <h2 className="text-base sm:text-base font-semibold text-stone-800 leading-snug line-clamp-2">
             {title}
           </h2>
 
-          <div className="mt-2 flex items-center">
+          <div className="mt-1 flex items-center">
             <div className="flex space-x-0.5">{renderStars()}</div>
-            <span className="ml-2 text-sm text-gray-500">({reviewCount})</span>
+            <span className="ml-1 text-xs sm:text-sm text-gray-500">
+              ({reviewCount})
+            </span>
           </div>
 
-          <div className="mt-3">
-            <p className="text-lg font-semibold text-stone-800">
+          <div className="mt-2 sm:mt-3">
+            <p className="text-sm sm:text-lg font-semibold text-red-500">
               {pricePerM2.toFixed(2)} TL
             </p>
-            <p className="text-xs text-gray-500">Metrekare Fiyatı</p>
+            <p className="text-xs sm:text-sm text-gray-500">Metrekare Fiyatı</p>
           </div>
         </CardContent>
       </Card>

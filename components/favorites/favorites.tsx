@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import ProductCard from "./productCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // === Tip Tanımları ===
 interface Product {
@@ -59,7 +60,7 @@ export default function Favorites() {
     setTimeout(() => {
       setFavorites(SAHTE_FAVORILER);
       setLoading(false);
-    }, 1000);
+    }, 1200);
   }, []);
 
   // === Favoriden Kaldırma ===
@@ -67,20 +68,37 @@ export default function Favorites() {
     setFavorites((prev) => prev.filter((fav) => fav.product.id !== productId));
   };
 
+  // === Skeleton Bileşeni ===
+  const FavoriteSkeleton = () => (
+    <div className="flex flex-col gap-3 rounded-lg border border-gray-200 shadow-md p-3">
+      <Skeleton className="w-full h-60 rounded-md" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+      <div className="flex items-center justify-between mt-2">
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-4 w-1/5" />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
+    <div className="max-w-7xl mx-auto px-4 md:px-20 py-16">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
 
       {loading ? (
-        <div className="p-4 rounded-md bg-indigo-50 text-gray-700 animate-pulse">
-          Favoriler yükleniyor...
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <FavoriteSkeleton key={i} />
+          ))}
         </div>
       ) : favorites.length === 0 ? (
         <div className="p-4 rounded-md bg-indigo-50 text-gray-700">
           Henüz favorilerinize ürün eklemediniz.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {favorites.map((fav) => (
             <ProductCard
               key={fav.product.id}

@@ -150,17 +150,19 @@ export default function Products(): React.ReactElement {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
-      <Sidebar />
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
+      {/* Sidebar */}
+      <Sidebar  />
 
+      {/* Main content */}
       <main
         className={`flex-1 p-4 md:p-8 transition-all ${
-          isMobile ? "" : "ml-64"
+          isMobile ? "" : "md:ml-64"
         }`}
       >
         {/* Başlık */}
-        <div className="flex justify-between items-center mb-6 ms-12 mt-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#001e59]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#001e59] ms-12">
             Ürün Yönetimi
           </h1>
         </div>
@@ -215,7 +217,7 @@ export default function Products(): React.ReactElement {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-100 text-[#001e59]">
               <tr>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   <input
                     type="checkbox"
                     checked={
@@ -225,22 +227,22 @@ export default function Products(): React.ReactElement {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   ID
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   Ürün Adı
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   Kategori
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   Fiyat
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200">
                   Puan
                 </th>
-                <th className="px-4 py-3 font-medium border-b border-gray-200 text-center">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 font-medium border-b border-gray-200 text-center">
                   İşlemler
                 </th>
               </tr>
@@ -254,26 +256,30 @@ export default function Products(): React.ReactElement {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(product.id)}
                       onChange={() => handleSelectOne(product.id)}
                     />
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{product.id}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-700">
+                    {product.id}
+                  </td>
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 font-medium text-gray-900">
                     {product.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600">
                     {product.category}
                   </td>
-                  <td className="px-4 py-3 text-[#001e59] font-semibold">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-[#001e59] font-semibold">
                     {product.pricePerM2} TL
                   </td>
-                  <td className="px-4 py-3 text-gray-800">{product.rating}</td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center gap-2">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-800">
+                    {product.rating}
+                  </td>
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                    <div className="flex flex-col sm:flex-row justify-center gap-2">
                       <UpdateProductDialog
                         product={product}
                         onUpdate={handleUpdate}

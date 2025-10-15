@@ -12,9 +12,8 @@ import {
 import {
   Package,
   ShoppingCart,
-  CreditCard,
   Users,
-  Settings,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -88,14 +87,6 @@ export default function AdminDashboard() {
         href: "/admin/orders",
       },
       {
-        id: "subscribers",
-        title: "Aboneler",
-        stat: 312,
-        description: "Abone listesini görüntüle",
-        icon: <CreditCard size={24} className="text-yellow-500" />,
-        href: "/admin/subscribers",
-      },
-      {
         id: "users",
         title: "Kullanıcılar",
         stat: 98,
@@ -104,12 +95,12 @@ export default function AdminDashboard() {
         href: "/admin/users",
       },
       {
-        id: "settings",
-        title: "Ayarlar",
-        stat: "",
-        description: "Site ayarlarını yönet",
-        icon: <Settings size={24} className="text-pink-500" />,
-        href: "/admin/settings",
+        id: "blogs",
+        title: "Bloglar",
+        stat: 312,
+        description: "Blog listesini görüntüle",
+        icon: <FileText size={24} className="text-yellow-500" />,
+        href: "/admin/blogs",
       },
     ];
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 // next/link yerine <a> etiketi kullanılacaktır.
 
 export default function Topbar() {
@@ -44,12 +45,12 @@ export default function Topbar() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-full">
         {/* Sol Bölüm — Sadece masaüstünde görünür */}
         <div className="hidden md:block flex-shrink-0">
-          <a // next/link yerine <a> kullanıldı
-            href="/siparis-sorgula"
+          <Link // next/link yerine <a> kullanıldı
+            href="/profile/orders"
             className="hover:text-[#cce7ff] transition-colors"
           >
             Sipariş Sorgula
-          </a>
+          </Link>
         </div>
 
         {/* Orta Bölüm — Kayar Mesaj Alanı */}

@@ -242,7 +242,7 @@ export default function AddProductDialog({
           <DialogFooter className="mt-6 flex justify-end gap-3">
             <Button
               onClick={() => setOpen(false)}
-              className="border border-gray-300 text-gray-700 hover:bg-gray-100"
+              variant={"outline"}
             >
               İptal
             </Button>

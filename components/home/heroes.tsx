@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const images = [
   "/heroes/25.jpg",
@@ -54,21 +55,27 @@ export default function Heroes(): React.ReactElement {
               className="relative w-[100%] flex-shrink-0 h-full shadow-lg"
               style={{ width: `${100 / images.length}%` }}
             >
-              {/* Next.js Image kullanımı */}
-              <Image
-                src={src}
-                alt={`Hero ${index + 1}`}
-                fill
-                style={{ objectFit: "cover", borderRadius: 0 }}
-                onError={(e) => {
-                  e.currentTarget.src = `https://placehold.co/1400x600/001e59/ffffff?text=Görsel+Bulunamadı+${
-                    index + 1
-                  }`;
-                }}
-              />
+              <Link
+                href="/products"
+                className="block h-full w-full group cursor-pointer"
+              >
+                {/* Görsel */}
+                <Image
+                  src={src}
+                  alt={`Hero ${index + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  style={{ borderRadius: 0 }}
+                  onError={(e) => {
+                    e.currentTarget.src = `https://placehold.co/1400x600/001e59/ffffff?text=Görsel+Bulunamadı+${
+                      index + 1
+                    }`;
+                  }}
+                />
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+              </Link>
             </div>
           ))}
         </div>

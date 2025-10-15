@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, X } from "lucide-react";
 import { toast } from "sonner";
 import seedProducts from "@/seed/products.json";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -41,6 +41,7 @@ const profiles = [
   { name: "GRİ", src: "/profiles/gri.jpg" },
   { name: "KAHVE", src: "/profiles/kahve.jpg" },
   { name: "KREM", src: "/profiles/krem.jpg" },
+  { name: "SİYAH", src: "/profiles/siyah.jpg" },
 ];
 
 export default function ProductDetail() {
@@ -52,6 +53,7 @@ export default function ProductDetail() {
     (p) => p.id === productId
   );
 
+  const [acceptedMeasurement, setAcceptedMeasurement] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(profiles[0].name);
@@ -59,6 +61,10 @@ export default function ProductDetail() {
   const [en, setEn] = useState(0);
   const [boy, setBoy] = useState(0);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
+  const [openMainImage, setOpenMainImage] = useState(false);
+  const [selectedMainImage, setSelectedMainImage] = useState<string | null>(
+    null
+  );
 
   if (!product) {
     return (
@@ -92,64 +98,150 @@ export default function ProductDetail() {
   const handleQuantityChange = (delta: number) =>
     setQuantity((prev) => Math.max(1, prev + delta));
 
+  // ✅ Yeni state'ler (profil görsel modalı için)
+  const [openProfileImage, setOpenProfileImage] = useState(false);
+  const [selectedProfileImage, setSelectedProfileImage] = useState<
+    string | null
+  >(null);
+
+  if (!product) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl font-semibold text-gray-600">
+        Ürün bulunamadı.
+      </div>
+    );
+  }
+
+  // ✅ Profil tıklanınca modal açma
+  const handleProfileClick = (profileSrc: string) => {
+    setSelectedProfileImage(profileSrc);
+    setOpenProfileImage(true);
+  };
+
   return (
-    <div className="bg-gradient-to-b from-white to-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 md:px-10 py-12">
+    <div className="bg-gradient-to-b from-white to-gray-50 min-h-screen mt-4 md:mt-8">
+      <div className="container mx-auto px-4 md:px-10 ">
         <Breadcrumb />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-4 md:mt-8">
           {/* SOL - Ürün Görselleri */}
-          <div
-            className={`flex justify-center gap-6 ${
-              isMobile ? "" : "sticky top-28 self-start"
-            }`}
-          >
-            {/* Thumbnail List */}
-            {!isMobile && (
-              <div className="flex flex-col items-center gap-4 w-28">
-                {[{ url: product.mainImage }, { url: product.subImage }].map(
-                  (img, index) => (
-                    <Card
-                      key={index}
-                      onClick={() => setActiveIndex(index)}
-                      className={`overflow-hidden cursor-pointer rounded-xl transition-all duration-300 flex justify-center items-center  ${
-                        activeIndex === index
-                          ? "border-[#92e676] shadow-md "
-                          : "border-transparent hover:border-gray-300"
-                      }`}
-                    >
-                      <Image
-                        src={img.url}
-                        alt={`Thumbnail ${index}`}
-                        width={100}
-                        height={100}
-                        className="object-contain w-full h-full p-0 bg-white"
-                        unoptimized
-                      />
-                    </Card>
-                  )
-                )}
-              </div>
-            )}
+          {/* SOL - Ürün Görselleri */}
+          <div className="lg:sticky lg:top-28 lg:self-start lg:h-fit lg:flex lg:gap-6">
+            {/* Masaüstü: küçük resimler solda */}
+            <div className="hidden lg:flex flex-col items-center gap-4 w-28">
+              {[{ url: product.mainImage }, { url: product.subImage }].map(
+                (img, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setActiveIndex(index)}
+                    className={`overflow-hidden cursor-pointer rounded-xl transition-all duration-300 flex justify-center items-center border-2 ${
+                      activeIndex === index
+                        ? "border-[#92e676] shadow-md"
+                        : "border-transparent hover:border-gray-300"
+                    }`}
+                  >
+                    <Image
+                      src={img.url}
+                      alt={`Thumbnail ${index}`}
+                      width={100}
+                      height={100}
+                      className="object-cover w-full h-full"
+                      unoptimized
+                    />
+                  </div>
+                )
+              )}
+            </div>
 
             {/* Ana Görsel */}
-            <Card className="flex-1 border border-gray-200 rounded-3xl shadow-sm bg-white overflow-hidden group">
-              <CardContent className="p-0 relative flex justify-center items-center">
-                <Image
-                  src={
+            <div className="flex-1 overflow-hidden rounded-3xl shadow-sm bg-white relative">
+              <Image
+                src={
+                  activeIndex === 0
+                    ? product.mainImage
+                    : product.subImage || product.mainImage
+                }
+                alt={product.title}
+                width={500}
+                height={500}
+                className="object-cover w-full max-h-[500px] cursor-pointer" // ✅ cursor-pointer
+                onClick={() => {
+                  setSelectedMainImage(
                     activeIndex === 0
                       ? product.mainImage
                       : product.subImage || product.mainImage
-                  }
-                  alt={product.title}
-                  width={0}
-                  height={0}
-                  sizes="100vw"
+                  );
+                  setOpenMainImage(true);
+                }}
+                unoptimized
+              />
+
+              {/* Sol ve Sağ Oklar */}
+              <button
+                onClick={() => setActiveIndex((prev) => (prev === 0 ? 1 : 0))}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 text-gray-700 rounded-full p-2 shadow-md"
+              >
+                &#10094;
+              </button>
+              <button
+                onClick={() => setActiveIndex((prev) => (prev === 1 ? 0 : 1))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 text-gray-700 rounded-full p-2 shadow-md"
+              >
+                &#10095;
+              </button>
+            </div>
+          </div>
+          {openMainImage && selectedMainImage && (
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-100"
+              onClick={() => setOpenMainImage(false)}
+            >
+              <div
+                className="relative bg-white rounded-2xl overflow-hidden shadow-2xl max-w-[95%] md:max-w-[90%] lg:max-w-[1200px] w-full max-h-[90vh]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setOpenMainImage(false)}
+                  className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 shadow-md z-10"
+                >
+                  <X size={28} className="text-gray-700" />
+                </button>
+                <Image
+                  src={selectedMainImage}
+                  alt="Büyük Ürün Görseli"
+                  width={1200}
+                  height={1200}
+                  className="object-contain h-full m-full"
                   unoptimized
-                  className="h-[600px] w-auto object-contain transition-transform duration-500 group-hover:scale-105"
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Mobil: küçük resimler büyük resmin altında */}
+          <div className="flex flex-row justify-start gap-3 lg:hidden overflow-x-auto scrollbar-hide">
+            {[{ url: product.mainImage }, { url: product.subImage }].map(
+              (img, index) => (
+                <div
+                  key={index}
+                  onClick={() => setActiveIndex(index)}
+                  className={`overflow-hidden cursor-pointer rounded-xl transition-all duration-300 flex justify-center items-center border-2 ${
+                    activeIndex === index
+                      ? "border-[#92e676] shadow-md"
+                      : "border-transparent hover:border-gray-300"
+                  }`}
+                >
+                  <Image
+                    src={img.url}
+                    alt={`Thumbnail ${index}`}
+                    width={100}
+                    height={100}
+                    className="object-cover "
+                    unoptimized
+                  />
+                </div>
+              )
+            )}
           </div>
 
           {/* SAĞ - Bilgiler */}
@@ -169,9 +261,9 @@ export default function ProductDetail() {
             {/* 🎨 Renk */}
             <section>
               <h2 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
-                Renk Seçiniz
+                Renk
               </h2>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-4 gap-2 sm:gap-4">
                 {(seedProducts as ProductData[])
                   .filter(
                     (p) =>
@@ -188,20 +280,24 @@ export default function ProductDetail() {
                           !isActive &&
                           (window.location.href = `/products/${p.id}`)
                         }
-                        className={`p-2 cursor-pointer border rounded-xl flex justify-center items-center transition-all ${
-                          isActive
-                            ? "border-[#001e59] shadow-md"
-                            : "border-gray-200 hover:border-gray-400 hover:scale-105"
-                        }`}
+                        className={`cursor-pointer border rounded-xl flex justify-center items-center transition-all p-1
+              ${
+                isActive
+                  ? "border-[#001e59] shadow-md"
+                  : "border-gray-200 hover:border-gray-400 hover:scale-105"
+              }
+            `}
                       >
-                        <Image
-                          src={p.mainImage}
-                          alt={p.title}
-                          width={100}
-                          height={100}
-                          className="object-contain h-24 w-auto"
-                          unoptimized
-                        />
+                        <div className="w-23 h-23 md:w-36 md:h-36 flex justify-center items-center ">
+                          <Image
+                            src={p.mainImage}
+                            alt={p.title}
+                            width={100}
+                            height={100}
+                            className="object-contain w-full h-full rounded-xl p-1.5"
+                            unoptimized
+                          />
+                        </div>
                       </Card>
                     );
                   })}
@@ -209,24 +305,28 @@ export default function ProductDetail() {
             </section>
 
             {/* 🧩 Profil */}
+            {/* 🧩 PROFİLLER */}
             <section>
               <h2 className="text-sm font-semibold text-gray-800 mb-4 uppercase tracking-wide">
-                Profil Seçimi
+                Profiller
               </h2>
-
-              <div className="flex items-center space-x-4 overflow-x-auto pb-3 scrollbar-hide p-3">
+              <div className="grid grid-cols-4 gap-4 lg:flex lg:items-center lg:space-x-4 lg:overflow-x-auto lg:pb-3 lg:p-3">
                 {profiles.map((profile) => {
                   const isActive = selectedProfile === profile.name;
                   return (
                     <div
                       key={profile.name}
-                      onClick={() => setSelectedProfile(profile.name)}
-                      className={`relative flex-shrink-0 w-16 h-16 rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 
-            ${
-              isActive
-                ? "ring-1 ring-[#001e59] ring-offset-2 scale-105 shadow-md"
-                : "hover:ring-1 hover:ring-gray-300"
-            }`}
+                      onClick={() => {
+                        setSelectedProfile(profile.name);
+                        handleProfileClick(profile.src); // ✅ modalı aç
+                      }}
+                      className={`relative w-full aspect-square rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 
+                    ${
+                      isActive
+                        ? "ring-1 ring-[#001e59] ring-offset-2 scale-105 shadow-md"
+                        : "hover:ring-1 hover:ring-gray-300"
+                    }
+                  `}
                     >
                       <Image
                         src={profile.src}
@@ -238,11 +338,12 @@ export default function ProductDetail() {
                       />
                       <span
                         className={`absolute bottom-1.5 left-1/2 -translate-x-1/2 text-xs font-medium px-2 py-0.5 rounded-md 
-              ${
-                isActive
-                  ? "bg-[#001e59] text-white"
-                  : "bg-white/80 text-gray-700"
-              }`}
+                      ${
+                        isActive
+                          ? "bg-[#001e59] text-white"
+                          : "bg-white/80 text-gray-700"
+                      }
+                    `}
                       >
                         {profile.name}
                       </span>
@@ -252,6 +353,33 @@ export default function ProductDetail() {
               </div>
             </section>
 
+            {/* 🔍 PROFİL GÖRSEL MODALI */}
+            {openProfileImage && selectedProfileImage && (
+              <div
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-100"
+                onClick={() => setOpenProfileImage(false)} // Boş alana tıklayınca kapansın
+              >
+                <div
+                  className="relative bg-white rounded-2xl overflow-hidden shadow-2xl max-w-[90%] md:max-w-xl"
+                  onClick={(e) => e.stopPropagation()} // içeriğe tıklayınca kapanmasın
+                >
+                  <button
+                    onClick={() => setOpenProfileImage(false)}
+                    className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1 shadow-md"
+                  >
+                    <X size={22} className="text-gray-700" />
+                  </button>
+                  <Image
+                    src={selectedProfileImage}
+                    alt="Seçilen Profil"
+                    width={500}
+                    height={500}
+                    className="object-contain w-full h-full"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            )}
             {/* ⚙️ Aparat Seçimi */}
             <section>
               <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
@@ -288,16 +416,18 @@ export default function ProductDetail() {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">
                 Ölçü Bilgileri
               </h4>
-              <div className="flex justify-between gap-3">
+
+              {/* DEĞİŞİKLİK: EN ve BOY için ayrı bir satır (flex) oluşturduk. */}
+              <div className="flex justify-between gap-3 mb-3">
                 {[
                   { label: "EN (cm)", value: en, setValue: setEn },
                   { label: "BOY (cm)", value: boy, setValue: setBoy },
                 ].map((field) => (
                   <div
                     key={field.label}
-                    className="flex items-center gap-2 flex-1"
+                    className="flex items-center gap-2 flex-1" // flex-1 sayesinde EN ve BOY yarı yarıya yer kaplayacak
                   >
-                    <label className="text-xs font-medium text-gray-500 w-16 text-right">
+                    <label className="text-xs sm:text-sm font-medium text-gray-500 w-12 text-right">
                       {field.label}
                     </label>
                     <Input
@@ -310,23 +440,23 @@ export default function ProductDetail() {
                           field.setValue(0);
                         }
                       }}
-                      className="text-center h-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-[#001e59]/40"
+                      className="text-center h-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-[#001e59]/40 w-full"
                       placeholder="0"
                     />
                   </div>
                 ))}
+              </div>
 
-                {/* M2 */}
-                <div className="flex items-center gap-2 flex-1">
-                  <label className="text-xs font-medium text-gray-500 w-8 text-right">
-                    m²
-                  </label>
-                  <Input
-                    value={`${calculatedM2}`}
-                    readOnly
-                    className="text-center h-10 bg-gray-100 cursor-default rounded-lg border-gray-200"
-                  />
-                </div>
+              {/* DEĞİŞİKLİK: M2 için ayrı bir satır (div) oluşturduk. */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-500 w-12 text-right">
+                  m²
+                </label>
+                <Input
+                  value={`${calculatedM2}`}
+                  readOnly
+                  className="text-center h-10 bg-gray-100 cursor-default rounded-lg border-gray-200 w-full"
+                />
               </div>
             </section>
 
@@ -376,15 +506,42 @@ export default function ProductDetail() {
                 </Button>
               </div>
             </div>
+            {/* ✅ Ölçü Onayı Checkbox */}
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="measurement-confirm"
+                  checked={acceptedMeasurement}
+                  onCheckedChange={(checked) =>
+                    setAcceptedMeasurement(Boolean(checked))
+                  }
+                />
+                <label
+                  htmlFor="measurement-confirm"
+                  className="text-sm font-semibold"
+                >
+                  Ölçülerimi doğru aldım ve oluşabilecek hataları kabul
+                  ediyorum.
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMeasureModal(true)}
+                className="text-blue-600 underline hover:text-blue-800 transition-colors text-sm ml-7 mt-1"
+              >
+                Ölçü Nasıl Alınır?
+              </button>
+            </div>
 
+            {/* 🔗 Ölçü Nasıl Alınır linki */}
             {/* 🛒 Sepet & Favori */}
-            <div className="flex gap-4 mt-8 items-center">
+            <div className="flex gap-2 md:gap-4 mt-2 md:mt-3 items-center">
               <Button
                 className="flex-1 h-12 text-base font-semibold bg-[#001e59] hover:bg-[#002d80] text-white rounded-xl transition-all shadow-md flex justify-between items-center px-6"
                 onClick={handleAddToCart}
               >
                 <span>SEPETE EKLE</span>
-                <span className="text-sm font-normal text-gray-200">
+                <span className="text-md font-normal text-gray-200">
                   ₺{totalPrice}
                 </span>
               </Button>

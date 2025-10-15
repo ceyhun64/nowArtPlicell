@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Trash2, PlusCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -98,7 +99,7 @@ export default function Adreslerim() {
     setTimeout(() => {
       setAdresler(SAHTE_ADRESLER);
       setLoading(false);
-    }, 600);
+    }, 700);
   }, []);
 
   const handleSil = (id: string) => {
@@ -154,122 +155,183 @@ export default function Adreslerim() {
     setDuzenlenenAdres(null);
   };
 
-  if (loading)
-    return <p className="text-center mt-10 text-gray-500">Yükleniyor...</p>;
+  // ✅ Skeleton Yükleme Ekranı
+  if (loading) {
+    return (
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16">
+          <div className="w-full max-w-2xl space-y-6">
+            {/* Başlık Skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-72" />
+            </div>
 
+            {/* Adres Kartları Skeleton */}
+            {[...Array(2)].map((_, i) => (
+              <Card
+                key={i}
+                className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white"
+              >
+                <CardContent className="p-6 space-y-3">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-4 w-64" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-4 w-32" />
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal render
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
       <Sidebar />
-      <div className="w-full max-w-3xl md:mt-4 md:ms-16 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">Adreslerim</h2>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => {
-              setYeniAdresForm((prev) => !prev);
-              setDuzenleForm(false);
-            }}
+      <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16 bg-cover bg-center relative">
+        <div className="w-full max-w-2xl space-y-6 relative z-10">
+          {/* Başlık */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center md:text-left"
           >
-            {yeniAdresForm ? (
-              <span className="text-lg font-bold">×</span>
-            ) : (
-              <>
-                <PlusCircle size={18} /> Yeni Adres Ekle
-              </>
-            )}
-          </Button>
-        </div>
+            <h2 className="text-3xl font-bold text-gray-800">Adreslerim</h2>
+            <p className="text-gray-800">
+              Adreslerinizi buradan yönetebilirsiniz
+            </p>
+          </motion.div>
 
-        <AnimatePresence>
-          {yeniAdresForm && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+          {/* Yeni Adres / Düzenle */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => {
+                setYeniAdresForm((prev) => !prev);
+                setDuzenleForm(false);
+              }}
             >
-              <Card className="mb-6 border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Yeni Adres</h3>
-                  <AdresForm
-                    formData={ekleFormData}
-                    setFormData={setEkleFormData}
-                    onSave={handleEkleKaydet}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {duzenleForm && duzenlenenAdres && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-            >
-              <Card className="mb-6 border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Adresi Düzenle</h3>
-                  <AdresForm
-                    formData={duzenleFormData}
-                    setFormData={setDuzenleFormData}
-                    onSave={handleDuzenleKaydet}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!yeniAdresForm && !duzenleForm && (
-          <div className="flex flex-col gap-4">
-            {adresler.length > 0 ? (
-              adresler.map((a) => (
-                <Card
-                  key={a.id}
-                  className="p-4 bg-white border border-gray-200 shadow-sm"
-                >
-                  <div className="flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {a.title}
-                      </h3>
-                      <p className="text-sm text-gray-700 mt-1">
-                        {a.firstName} {a.lastName}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">{a.address}</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {a.district} — {a.city} {a.zip}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">{a.phone}</p>
-                    </div>
-                    <div className="mt-4 flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDuzenle(a)}
-                        className="p-2"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSil(a.id)}
-                        className="p-2 bg-red-600 hover:bg-red-700"
-                      >
-                        <Trash2 className="w-4 h-4 text-white" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <div className="p-4 rounded-md bg-blue-100 text-sm text-gray-700">
-                Henüz kayıtlı adresiniz yok. Yeni bir adres ekleyebilirsiniz.
-              </div>
-            )}
+              {yeniAdresForm ? (
+                <span className="text-lg font-bold">×</span>
+              ) : (
+                <>
+                  <PlusCircle size={18} /> Yeni Adres Ekle
+                </>
+              )}
+            </Button>
           </div>
-        )}
+
+          {/* Formlar */}
+          <AnimatePresence>
+            {yeniAdresForm && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
+                  <CardContent className="p-8">
+                    <h3 className="text-lg font-semibold mb-4">Yeni Adres</h3>
+                    <AdresForm
+                      formData={ekleFormData}
+                      setFormData={setEkleFormData}
+                      onSave={handleEkleKaydet}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {duzenleForm && duzenlenenAdres && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
+                  <CardContent className="p-8">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Adresi Düzenle
+                    </h3>
+                    <AdresForm
+                      formData={duzenleFormData}
+                      setFormData={setDuzenleFormData}
+                      onSave={handleDuzenleKaydet}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Adres Listesi */}
+          {!yeniAdresForm && !duzenleForm && (
+            <div className="flex flex-col gap-4">
+              {adresler.length > 0 ? (
+                adresler.map((a) => (
+                  <Card
+                    key={a.id}
+                    className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white"
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            {a.title}
+                          </h3>
+                          <p className="text-sm text-gray-700 mt-1">
+                            {a.firstName} {a.lastName}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {a.address}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {a.district} — {a.city} {a.zip}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {a.phone}
+                          </p>
+                        </div>
+                        <div className="mt-4 flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDuzenle(a)}
+                            className="p-2"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSil(a.id)}
+                            className="p-2 bg-red-600 hover:bg-red-700"
+                          >
+                            <Trash2 className="w-4 h-4 text-white" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="p-4 rounded-md bg-blue-100 text-sm text-gray-700">
+                  Henüz kayıtlı adresiniz yok. Yeni bir adres ekleyebilirsiniz.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

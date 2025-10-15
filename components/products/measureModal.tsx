@@ -31,7 +31,7 @@ const MeasureModal: React.FC<MeasureModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm  z-100 flex justify-center items-center">
       <div className="relative bg-white rounded-2xl shadow-xl w-[90%] md:w-[500px] p-6">
         {/* Kapat Butonu */}
         <button

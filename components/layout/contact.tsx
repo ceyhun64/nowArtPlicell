@@ -28,7 +28,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div className="max-w-7xl mx-auto px-6 py-16 md:py-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Sol: Bilgiler */}
       <div className="space-y-8">
         <h2 className="text-3xl font-bold text-gray-900">İletişim</h2>

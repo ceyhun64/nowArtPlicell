@@ -61,19 +61,19 @@ export default function PromoCards() {
         <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide">
           <PromoCard
             imageUrl="/heroes/22.jpg"
-            link="/ayricaliklar"
+            link="/products"
             buttonText="NowArt Ayrıcalıktır"
           />
 
           <PromoCard
             imageUrl="/heroes/23.jpg"
-            link="/magaza"
+            link="/products"
             buttonText="Mağazaya Git"
           />
 
           <PromoCard
             imageUrl="/heroes/21.jpg"
-            link="/kampanya"
+            link="/products"
             buttonText="Fırsatları Kaçırmayın"
           />
         </div>

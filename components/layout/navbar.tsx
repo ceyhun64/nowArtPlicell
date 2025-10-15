@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/sheet";
 import LoginModal from "./login";
 import RegisterModal from "./register";
+import ForgotPasswordModal from "./forgotPassword";
+import Link from "next/link";
 
 interface MenuItem {
   label: string;
@@ -67,9 +69,9 @@ const MobileNestedMenu = ({
               className="hover:bg-gray-100 transition-colors py-2 px-3 text-base cursor-pointer"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <a href={subItem.href ?? "#"} className="block text-stone-600">
+              <Link href={subItem.href ?? "#"} className="block text-stone-600">
                 {subItem.label}
-              </a>
+              </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -99,9 +101,12 @@ const MobileNestedMenu = ({
                 className="hover:bg-gray-100 transition-colors py-2 px-3 text-base cursor-pointer"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <a href={subItem.href ?? "#"} className="block text-stone-600">
+                <Link
+                  href={subItem.href ?? "#"}
+                  className="block text-stone-600"
+                >
                   {subItem.label}
-                </a>
+                </Link>
               </DropdownMenuItem>
             ))}
             <DropdownMenuItem
@@ -123,13 +128,13 @@ const MobileNestedMenu = ({
 
   // Alt öğesi yoksa normal link
   return (
-    <a
+    <Link
       href={item.href ?? "#"}
       onClick={() => setIsMobileMenuOpen(false)}
       className="text-stone-700 text-lg font-medium hover:text-[#001e59] transition-colors block py-2"
     >
       {item.label}
-    </a>
+    </Link>
   );
 };
 
@@ -140,6 +145,7 @@ export default function Navbar(): React.ReactElement {
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   // Menü verileri
   const kurumsalItems: MenuItem[] = [
@@ -150,24 +156,22 @@ export default function Navbar(): React.ReactElement {
     { label: "Banka Hesapları", href: "/institutional/bank_accounts" },
   ];
 
-  const medyaItems: MenuItem[] = [{ label: "Videolar", href: "/media/videos" }];
-
   // Görseldeki Ürün Kategorileri (Artık href de içerebilir)
   const productCategories: MenuItem[] = [
     // NOT: Buradaki label'lar artık 'Products' bileşenindeki categoryNames'deki değerlerle EŞLEŞMELİ.
-    { label: "DÜZ SERİ", href: "/products?category=duz-seri" }, // slug: duz-seri
+    { label: "DÜZ SERİ", href: "products?category=duz-seri" }, // slug: duz-seri
     { label: "DİMOUT", href: "/products?category=dimout" }, // slug: dimout
     { label: "ÇİFT SİSTEM TÜL", href: "/products?category=cift-sistem-tul" }, // slug: cift-sistem-tul
     { label: "BLACKOUT", href: "/products?category=blackout" }, // slug: blackout
     { label: "JAKAR", href: "/products?category=jakar" }, // slug: jakar
-    {
-      label: "%100 KARARTMALI PERDELER",
-      href: "/products?category=yuzde-yuz-karartmali",
-    }, // slug: yuzde-yuz-karartmali
-    {
-      label: "%70 KARARTMALI PERDELER",
-      href: "/products?category=yuzde-yetmis-karartmali",
-    }, // slug: yuzde-yetmis-karartmali
+    // {
+    //   label: "%100 KARARTMALI PERDELER",
+    //   href: "/products?category=yuzde-yuz-karartmali",
+    // }, // slug: yuzde-yuz-karartmali
+    // {
+    //   label: "%70 KARARTMALI PERDELER",
+    //   href: "/products?category=yuzde-yetmis-karartmali",
+    // }, // slug: yuzde-yetmis-karartmali
     { label: "TEKLİ TÜL", href: "/products?category=tekli-tul" }, // slug: tekli-tul
     { label: "BASKILI", href: "/products?category=baskili" }, // slug: baskili
     { label: "HONEYCOMB", href: "/products?category=honeycomb" }, // slug: honeycomb
@@ -184,7 +188,6 @@ export default function Navbar(): React.ReactElement {
       href: "/products", // 'Tüm Ürünler' için genel sayfa
     },
     { label: "Blog", href: "/blog" },
-    { label: "Medya", subItems: medyaItems },
     { label: "S.S.S", href: "/faq" },
     { label: "İletişim", href: "/contact" },
   ];
@@ -238,7 +241,7 @@ export default function Navbar(): React.ReactElement {
                     {/* Ek Butonlar */}
                     <div className="flex flex-col space-y-2 border-t pt-4 mt-4">
                       <a
-                        href="/order-tracking"
+                        href="/profile/orders"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <Button
@@ -282,7 +285,7 @@ export default function Navbar(): React.ReactElement {
             </div>
 
             {/* Orta Logo */}
-            <a href="/" className="flex justify-center flex-shrink-0">
+            <Link href="/" className="flex justify-center flex-shrink-0">
               {" "}
               {/* justify-center eklendi */}
               <img
@@ -292,13 +295,13 @@ export default function Navbar(): React.ReactElement {
                 height={80}
                 className="mb-3"
               />
-            </a>
+            </Link>
 
             {/* Sağ ikonlar */}
             <div className="flex items-center w-1/3 justify-end space-x-1 sm:space-x-2">
               {" "}
               {/* Sağ grubu tanımladık ve justify-end ile sağa yasladık */}
-              <a href="/search">
+              <Link href="/search">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -306,8 +309,8 @@ export default function Navbar(): React.ReactElement {
                 >
                   <Search className="h-5 w-5" />
                 </Button>
-              </a>
-              <a href="/favorites">
+              </Link>
+              <Link href="/favorites">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -318,7 +321,7 @@ export default function Navbar(): React.ReactElement {
                     0
                   </span>
                 </Button>
-              </a>
+              </Link>
               {/* Sepet */}
               <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
                 <SheetTrigger asChild>
@@ -377,12 +380,14 @@ export default function Navbar(): React.ReactElement {
                       </label>
                     </div>
                     <div className="flex space-x-3 pt-2">
-                      <Button
-                        variant="outline"
-                        className="flex-1 text-black border-black hover:bg-gray-50"
-                      >
-                        Sepete Git
-                      </Button>
+                      <Link href={"/cart"}>
+                        <Button
+                          variant="outline"
+                          className="flex-1 text-black border-black hover:bg-gray-50"
+                        >
+                          Sepete Git
+                        </Button>
+                      </Link>
                       <Button
                         variant="default"
                         className="flex-1 bg-[#001e59] text-white hover:bg-slate-800"
@@ -413,9 +418,9 @@ export default function Navbar(): React.ReactElement {
 
             {/* Menü */}
             <div className="flex space-x-6 items-center">
-              <a href="/" className={menuItemClass}>
+              <Link href="/" className={menuItemClass}>
                 Anasayfa
-              </a>
+              </Link>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -428,11 +433,13 @@ export default function Navbar(): React.ReactElement {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-48 shadow-lg border border-gray-200 rounded-md bg-white">
                   {kurumsalItems.map((item) => (
-                    <DropdownMenuItem
-                      key={item.label}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <a href={item.href ?? "#"}>{item.label}</a>
+                    <DropdownMenuItem asChild key={item.label}>
+                      <Link
+                        href={item.href ?? "#"}
+                        className="block w-full hover:bg-gray-50 px-2 py-1.5 rounded-sm"
+                      >
+                        {item.label}
+                      </Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -449,33 +456,35 @@ export default function Navbar(): React.ReactElement {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-60 shadow-lg border border-gray-200 rounded-md bg-white">
                   {productCategories.map((item) => (
-                    <DropdownMenuItem
-                      key={item.label}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <a href={item.href ?? "/products"}>{item.label}</a>
+                    <DropdownMenuItem asChild key={item.label}>
+                      <Link
+                        href={item.href ?? "/products"}
+                        className="block w-full px-2 py-1.5 rounded-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </Link>
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuItem className="hover:bg-gray-50 transition-colors font-semibold">
-                    <a href="/products">Tüm Ürünler</a>
+                    <Link href="/products">Tüm Ürünler</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <a href="/blog" className={menuItemClass}>
+              <Link href="/blog" className={menuItemClass}>
                 Blog
-              </a>
-              <a href="/faq" className={menuItemClass}>
+              </Link>
+              <Link href="/faq" className={menuItemClass}>
                 S.S.S
-              </a>
-              <a href="/contact" className={menuItemClass}>
+              </Link>
+              <Link href="/contact" className={menuItemClass}>
                 İletişim
-              </a>
+              </Link>
             </div>
 
             {/* Sağ İkonlar */}
             <div className="flex items-center space-x-4">
-              <a href="/search">
+              <Link href="/search">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -483,7 +492,7 @@ export default function Navbar(): React.ReactElement {
                 >
                   <Search className="h-5 w-5" />
                 </Button>
-              </a>
+              </Link>
 
               <Button
                 variant="ghost"
@@ -492,7 +501,7 @@ export default function Navbar(): React.ReactElement {
               >
                 Giriş Yap
               </Button>
-              <a href="/favorites">
+              <Link href="/favorites">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -503,7 +512,7 @@ export default function Navbar(): React.ReactElement {
                     0
                   </span>
                 </Button>
-              </a>
+              </Link>
 
               {/* Sepet */}
               <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
@@ -607,13 +616,25 @@ export default function Navbar(): React.ReactElement {
           </Sheet>
         </div>
       </div>
-
+  
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
         onRegisterClick={() => {
           setIsLoginOpen(false);
           setIsRegisterOpen(true);
+        }}
+        onForgotPasswordClick={() => {
+          setIsLoginOpen(false);
+          setIsForgotPasswordOpen(true);
+        }}
+      />
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+        onBackToLogin={() => {
+          setIsForgotPasswordOpen(false);
+          setIsLoginOpen(true);
         }}
       />
 

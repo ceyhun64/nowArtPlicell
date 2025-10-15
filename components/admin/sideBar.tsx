@@ -156,7 +156,7 @@ export default function AdminSidebar(): React.ReactElement {
             <div className="flex justify-between items-center px-6 py-6 border-b border-gray-200">
               <Link
                 href="/admin/dashboard"
-                className="text-xl font-bold text-gray-900"
+                className="text-xl font-bold text-gray-900 ms-10"
                 onClick={() => setIsOpen(false)}
               >
                 NewArt<span className="text-[#92e676]">Admin</span>

@@ -39,7 +39,7 @@ export default function RegisterModal({
           <Input type="password" placeholder="Şifre" className="w-full" />
           <Button
             type="submit"
-            className="w-full bg-[#92e676] hover:bg-gray-700"
+            className="w-full bg-[#92e676] hover:bg-green-500"
           >
             Kayıt Ol
           </Button>

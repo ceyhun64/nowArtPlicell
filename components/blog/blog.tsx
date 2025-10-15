@@ -27,13 +27,13 @@ const mockBlogs: Blog[] = [
     date: "10 Şubat 2025",
     excerpt:
       "Doğru perde seçimi ile yaşam alanlarınızı hem fonksiyonel hem de estetik olarak tamamlayabilirsiniz...",
-    image: "/blog/blog2.jpg",
+    image: "/blog/blog1.jpg",
   },
 ];
 
 export default function BlogPage() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16 space-y-12">
+    <div className="max-w-7xl mx-auto px-6 py-16  space-y-12">
       <h1 className="text-4xl font-bold text-gray-900 text-center mb-12">
         Bloglar
       </h1>

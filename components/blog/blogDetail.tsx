@@ -41,7 +41,7 @@ Renk ve Malzeme Uyumu
     
 Doğru malzeme seçimi, mekanın ışık alımı ve dekorasyon tarzı ile birebir uyumlu olmalıdır...
 `,
-    image: "/blog/blog2.jpg",
+    image: "/blog/blog1.jpg",
   },
 ];
 

@@ -311,28 +311,29 @@ export default function Orders() {
   if (loading) return <Loading />;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900 flex-col md:flex-row">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
       {/* Sidebar */}
       <Sidebar />
 
+      {/* Main Content */}
       <main
         className={`flex-1 p-4 md:p-8 transition-all duration-300 ${
-          isMobile ? "ml-0" : "ml-64"
+          isMobile ? "ml-0" : "md:ml-64"
         }`}
       >
         {/* Başlık */}
-        <div className="flex justify-between items-center mb-6 ms-12 mt-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#001e59]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#001e59] ms-12">
             Sipariş Yönetimi
           </h1>
         </div>
 
         {/* Üst Araç Çubuğu */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Button
               variant="default"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
                 selectedIds.length > 0
                   ? "bg-[#001e59] text-white hover:bg-[#002b87]"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -363,7 +364,7 @@ export default function Orders() {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full md:w-64 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-[#001e59] focus:outline-none"
+              className="w-full sm:w-64 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-[#001e59] focus:outline-none"
             />
           </div>
         </div>
@@ -373,7 +374,7 @@ export default function Orders() {
           <table className="min-w-full text-left text-gray-800">
             <thead className="bg-gray-100 text-[#001e59]">
               <tr>
-                <th className="px-3 py-3 border-b border-gray-200">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                   <input
                     type="checkbox"
                     checked={
@@ -383,19 +384,31 @@ export default function Orders() {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th className="px-3 py-3 border-b border-gray-200">ID</th>
-                <th className="px-3 py-3 border-b border-gray-200">Müşteri</th>
-                <th className="px-3 py-3 border-b border-gray-200">Email</th>
-                <th className="px-3 py-3 border-b border-gray-200">Ürünler</th>
-                <th className="px-3 py-3 border-b border-gray-200">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  ID
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  Müşteri
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
+                  Email
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  Ürünler
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden md:table-cell">
                   Ödenen Tutar
                 </th>
-                <th className="px-3 py-3 border-b border-gray-200">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
                   Ödeme Yöntemi
                 </th>
-                <th className="px-3 py-3 border-b border-gray-200">Durum</th>
-                <th className="px-3 py-3 border-b border-gray-200">Tarih</th>
-                <th className="px-3 py-3 border-b border-gray-200 text-center">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
+                  Durum
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden xl:table-cell">
+                  Tarih
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 text-center">
                   İşlemler
                 </th>
               </tr>
@@ -420,32 +433,38 @@ export default function Orders() {
                       key={order.id}
                       className="hover:bg-gray-50 transition-all border-b border-gray-100"
                     >
-                      <td className="px-3 py-3">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3">
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(order.id)}
                           onChange={() => handleSelectOne(order.id)}
                         />
                       </td>
-                      <td className="px-3 py-3 text-gray-700">{order.id}</td>
-                      <td className="px-3 py-3 text-gray-900 font-medium">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-700">
+                        {order.id}
+                      </td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-900 font-medium">
                         {order.customer}
                       </td>
-                      <td className="px-3 py-3 text-gray-600">{order.email}</td>
-                      <td className="px-3 py-3 text-gray-600 max-w-xs truncate">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-600 hidden sm:table-cell">
+                        {order.email}
+                      </td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-600 max-w-xs truncate">
                         {order.products.join(", ")}
                       </td>
-                      <td className="px-3 py-3 font-semibold text-emerald-600">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 font-semibold text-emerald-600 hidden md:table-cell">
                         {order.paidPrice}
                       </td>
-                      <td className="px-3 py-3 text-gray-700">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-700 hidden lg:table-cell">
                         {order.paymentMethod}
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 hidden lg:table-cell">
                         {getStatusBadge(order.status)}
                       </td>
-                      <td className="px-3 py-3 text-gray-500">{order.date}</td>
-                      <td className="px-3 py-3 flex flex-col sm:flex-row gap-2 justify-center">
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-gray-500 hidden xl:table-cell">
+                        {order.date}
+                      </td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 flex flex-col sm:flex-row gap-2 justify-center">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button

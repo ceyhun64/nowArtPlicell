@@ -35,7 +35,7 @@ export default function MostPreferred({
   };
 
   return (
-    <section className="mx-auto w-full max-w-8xl px-4 sm:px-8 lg:px-12 py-16 bg-gray-50 font-serif rounded-3xl relative">
+    <section className="mx-auto w-full max-w-8xl px-4 sm:px-8 lg:px-12 py-8 md:py-16 bg-gray-50 font-serif rounded-3xl relative">
       {/* Başlık ve oklar */}
       <div className="flex items-center justify-center md:justify-between mb-4 md:mb-12">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800 text-center tracking-tight">

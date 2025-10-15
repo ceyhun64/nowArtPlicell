@@ -139,20 +139,22 @@ export default function Blogs(): React.ReactElement {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
+      {/* Sidebar */}
       <Sidebar />
 
-      <main className={`flex-1 p-4 md:p-8 ${isMobile ? "" : "ml-64"}`}>
+      {/* Main Content */}
+      <main className={`flex-1 p-4 md:p-8 ${isMobile ? "" : "md:ml-64"}`}>
         {/* Başlık */}
-        <div className="flex justify-between items-center mb-6 ms-12 mt-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#001e59]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#001e59] ms-12">
             Blog Yönetimi
           </h1>
         </div>
 
         {/* Üst Araç Çubuğu */}
-        <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between ms-12">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
             <Button
               className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
                 selectedIds.length > 0
@@ -173,7 +175,7 @@ export default function Blogs(): React.ReactElement {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
             <Select onValueChange={(val) => setFilter(val)} defaultValue="all">
               <SelectTrigger className="w-full sm:w-48 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#001e59]/20">
                 <SelectValue placeholder="Kategori seç" />
@@ -197,11 +199,11 @@ export default function Blogs(): React.ReactElement {
         </div>
 
         {/* Blog Tablosu */}
-        <div className="ms-12 bg-white border border-gray-200 rounded-2xl shadow-md overflow-x-auto">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-md overflow-x-auto">
           <table className="min-w-full text-left text-gray-800">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
-                <th className="px-4 py-3 border-b border-gray-200">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
                   <input
                     type="checkbox"
                     checked={
@@ -211,12 +213,22 @@ export default function Blogs(): React.ReactElement {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th className="px-4 py-3 border-b border-gray-200">ID</th>
-                <th className="px-4 py-3 border-b border-gray-200">Başlık</th>
-                <th className="px-4 py-3 border-b border-gray-200">Yazar</th>
-                <th className="px-4 py-3 border-b border-gray-200">Kategori</th>
-                <th className="px-4 py-3 border-b border-gray-200">Tarih</th>
-                <th className="px-4 py-3 border-b border-gray-200 text-center">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                  ID
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                  Başlık
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
+                  Yazar
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden md:table-cell">
+                  Kategori
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
+                  Tarih
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-center">
                   İşlemler
                 </th>
               </tr>
@@ -240,30 +252,30 @@ export default function Blogs(): React.ReactElement {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <td className="px-4 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(blog.id)}
                         onChange={() => handleSelectOne(blog.id)}
                       />
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
                       {blog.id}
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200 font-medium text-gray-900">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 font-medium text-gray-900">
                       {blog.title}
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200 text-gray-700">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-700 hidden sm:table-cell">
                       {blog.author}
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200 text-gray-700">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-700 hidden md:table-cell">
                       {blog.category}
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200 text-gray-500">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-500 hidden lg:table-cell">
                       {blog.date}
                     </td>
-                    <td className="px-4 py-2 border-b border-gray-200 text-center">
-                      <div className="flex justify-center gap-2">
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-center">
+                      <div className="flex flex-col sm:flex-row justify-center gap-2">
                         <UpdateBlogDialog blog={blog} onUpdate={handleUpdate} />
                         <Button
                           variant="default"
@@ -283,7 +295,7 @@ export default function Blogs(): React.ReactElement {
         </div>
 
         {/* Sayfalama */}
-        <div className="mt-6 flex justify-center ms-12">
+        <div className="mt-6 flex justify-center">
           <DefaultPagination
             totalItems={filteredBlogs.length}
             itemsPerPage={15}

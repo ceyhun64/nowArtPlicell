@@ -18,18 +18,20 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRegisterClick: () => void;
+  onForgotPasswordClick: () => void; // burayı ekle
 }
 
 export default function LoginModal({
   isOpen,
   onClose,
   onRegisterClick,
+  onForgotPasswordClick, // burayı ekle
 }: LoginModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="sm:max-w-md rounded-2xl p-6 bg-white dark:bg-neutral-900 shadow-2xl border border-neutral-200 dark:border-neutral-800">
+          <DialogContent className="sm:max-w-md rounded-2xl p-6 bg-white dark:bg-neutral-900 shadow-2xl border border-neutral-200  dark:border-neutral-800">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
                 Giriş Yap
@@ -47,25 +49,31 @@ export default function LoginModal({
             >
               <Input
                 type="email"
-                placeholder="E-posta"
+                placeholder="E-posta adresiniz"
                 className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 focus:ring-2 focus:ring-purple-500"
               />
               <Input
                 type="password"
-                placeholder="Şifre"
+                placeholder="Şifreniz"
                 className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 focus:ring-2 focus:ring-purple-500"
               />
+              <button
+                type="button"
+                onClick={onForgotPasswordClick}
+                className="text-sm text-[#001e59] hover:underline font-medium self-end"
+              >
+                Şifremi Unuttum
+              </button>
 
               <Button
                 type="submit"
-                className="w-full bg-[#92e676] hover:bg-gray-900 text-white transition-all rounded-xl py-2"
+                className="w-full bg-[#92e676] hover:bg-green-500 text-white transition-all rounded-xl py-2"
               >
-                
                 Giriş Yap
               </Button>
             </motion.form>
 
-            <DialogFooter className="mt-4 flex justify-center">
+            <DialogFooter className="mt-4 flex flex-col items-center justify-center space-y-2 text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Hesabınız yok mu?{" "}
                 <button
@@ -77,8 +85,6 @@ export default function LoginModal({
                 </button>
               </p>
             </DialogFooter>
-
-         
           </DialogContent>
         </Dialog>
       )}

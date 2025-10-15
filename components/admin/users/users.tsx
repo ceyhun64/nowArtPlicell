@@ -133,27 +133,29 @@ export default function Users(): React.JSX.Element {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
+      {/* Sidebar */}
       <Sidebar />
 
+      {/* Main Content */}
       <main
         className={`flex-1 p-4 md:p-8 transition-all ${
-          isMobile ? "" : "ml-64"
+          isMobile ? "" : "md:ml-64"
         }`}
       >
         {/* Başlık */}
-        <div className="flex justify-between items-center mb-6 ms-12 mt-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#001e59]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#001e59] ms-12">
             Kullanıcılar
           </h1>
         </div>
 
         {/* Araç Çubuğu */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto ms-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
             <Button
               variant="default"
-              className={`w-full md:w-auto rounded-xl shadow-sm transition-all ${
+              className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
                 selectedIds.length > 0
                   ? "bg-red-500 hover:bg-red-600 text-white cursor-pointer"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -169,17 +171,17 @@ export default function Users(): React.JSX.Element {
               placeholder="Ad, soyad veya email ara..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-64 rounded-xl bg-white border border-gray-300 text-gray-900 placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-[#001e59]/30"
+              className="w-full sm:w-64 rounded-xl bg-white border border-gray-300 text-gray-900 placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-[#001e59]/30"
             />
           </div>
         </div>
 
         {/* Kullanıcı Tablosu */}
-        <div className="overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-md ms-12">
+        <div className="overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-md">
           <table className="min-w-full text-left text-gray-800">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
-                <th className="px-3 py-3 border-b border-gray-200">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                   <input
                     type="checkbox"
                     checked={
@@ -189,13 +191,25 @@ export default function Users(): React.JSX.Element {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th className="px-3 py-3 border-b border-gray-200">ID</th>
-                <th className="px-3 py-3 border-b border-gray-200">Ad</th>
-                <th className="px-3 py-3 border-b border-gray-200">Soyad</th>
-                <th className="px-3 py-3 border-b border-gray-200">Telefon</th>
-                <th className="px-3 py-3 border-b border-gray-200">Email</th>
-                <th className="px-3 py-3 border-b border-gray-200">Adresler</th>
-                <th className="px-3 py-3 border-b border-gray-200 text-center">
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  ID
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  Ad
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
+                  Soyad
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
+                  Telefon
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden md:table-cell">
+                  Email
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
+                  Adresler
+                </th>
+                <th className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 text-center">
                   İşlemler
                 </th>
               </tr>
@@ -216,29 +230,29 @@ export default function Users(): React.JSX.Element {
                     key={user.id}
                     className="hover:bg-gray-50 transition-all duration-150"
                   >
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(user.id)}
                         onChange={() => handleSelectOne(user.id)}
                       />
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                       {user.id}
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                       {user.name}
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
                       {user.surname}
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
                       {user.phone || "-"}
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden md:table-cell">
                       {user.email}
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -275,7 +289,7 @@ export default function Users(): React.JSX.Element {
                         </DialogContent>
                       </Dialog>
                     </td>
-                    <td className="px-3 py-2 border-b border-gray-200 text-center">
+                    <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 text-center">
                       <Button
                         variant="default"
                         size="sm"
@@ -293,7 +307,7 @@ export default function Users(): React.JSX.Element {
         </div>
 
         {/* Sayfalama */}
-        <div className="mt-6 flex justify-center ms-12">
+        <div className="mt-6 flex justify-center">
           <DefaultPagination
             totalItems={filteredUsers.length}
             itemsPerPage={15}
