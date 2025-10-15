@@ -66,11 +66,9 @@ export default function Heroes(): React.ReactElement {
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                   style={{ borderRadius: 0 }}
-                  onError={(e) => {
-                    e.currentTarget.src = `https://placehold.co/1400x600/001e59/ffffff?text=Görsel+Bulunamadı+${
-                      index + 1
-                    }`;
-                  }}
+                  priority={index === 0} // İlk görsel için öncelik
+                  placeholder="blur" // Blur efektli placeholder
+                  blurDataURL="/placeholder.jpg" // küçük bir placeholder görseli
                 />
 
                 {/* Gradient overlay */}
