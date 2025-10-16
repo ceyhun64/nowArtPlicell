@@ -49,7 +49,7 @@ export default function WhyChooseUsPage() {
     {
       title: "Instagram’dan Gerçek Proje Paylaşımları",
       description:
-        "Instagram hesaplarımızda (@NowArtperde ve @modabuse.tekstil) üretimden montaja kadar tüm süreçleri şeffaf şekilde paylaşıyoruz. Gerçek projeleri ve müşteri yorumlarını görebilirsiniz.",
+        "Instagram hesaplarımızda (@NowArtperde ve @NowArt.tekstil) üretimden montaja kadar tüm süreçleri şeffaf şekilde paylaşıyoruz. Gerçek projeleri ve müşteri yorumlarını görebilirsiniz.",
     },
     {
       title: "Uygun Fiyat Politikası & Kampanyalar",
