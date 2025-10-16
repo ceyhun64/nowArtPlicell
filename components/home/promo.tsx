@@ -5,9 +5,9 @@ import Image, { StaticImageData } from "next/image";
 import { Button } from "../ui/button";
 
 // Statik import, Next.js otomatik optimize eder
-import hero21 from "@/public/heroes/21.jpg";
-import hero22 from "@/public/heroes/22.jpg";
-import hero23 from "@/public/heroes/23.jpg";
+import hero21 from "@/public/heroes/21.webp";
+import hero22 from "@/public/heroes/22.webp";
+import hero23 from "@/public/heroes/23.webp";
 
 interface PromoCardProps {
   image: StaticImageData;

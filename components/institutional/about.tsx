@@ -8,9 +8,9 @@ import Image from "next/image"; // Image bileşenini import ediyoruz
 
 export default function AboutPage() {
   // Sabit görsel yollarını belirliyoruz
-  const image1 = "/heroes/2.jpg";
-  const image2 = "/heroes/8.jpg";
-  const image3 = "/heroes/33.jpg";
+  const image1 = "/heroes/2.webp";
+  const image2 = "/heroes/8.webp";
+  const image3 = "/heroes/33.webp";
 
   // Bir görsel bileşeni oluşturma helper'ı (Önceki koddan)
   const ImageBlock = ({ src, alt }: { src: string; alt: string }) => (
@@ -46,7 +46,7 @@ export default function AboutPage() {
           üretimini en ileri teknolojiyle gerçekleştiriyoruz.
         </p>
 
-        {/* SABİT GÖRSEL 1: /heroes/2.jpg */}
+        {/* SABİT GÖRSEL 1: /heroes/2.webp */}
         <ImageBlock src={image1} alt="NowArt modern üretim tesisimiz" />
 
         <h2 className="text-2xl font-semibold text-gray-900">
@@ -69,7 +69,7 @@ export default function AboutPage() {
           Türkiye genelinde yüzlerce iş ortağımıza toptan satış yapmaktayız.
         </p>
 
-        {/* SABİT GÖRSEL 2: /heroes/8.jpg */}
+        {/* SABİT GÖRSEL 2: /heroes/8.webp */}
         <ImageBlock
           src={image2}
           alt="NowArt Tekstil kumaş ve ürün görselleri"
@@ -114,7 +114,7 @@ export default function AboutPage() {
           </li>
         </ul>
 
-        {/* SABİT GÖRSEL 3: /heroes/33.jpg */}
+        {/* SABİT GÖRSEL 3: /heroes/33.webp */}
         <ImageBlock src={image3} alt="NowArt Plise Perde Sistemleri" />
 
         <h2 className="text-2xl font-semibold text-gray-900">Misyonumuz</h2>

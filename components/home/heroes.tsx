@@ -6,17 +6,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 // Görselleri import ederek Next.js optimizer kullanıyoruz
-import hero25 from "@/public/heroes/25.jpg";
-import hero27 from "@/public/heroes/27.jpg";
-import hero28 from "@/public/heroes/28.jpg";
-import hero30 from "@/public/heroes/30.jpg";
-import hero32 from "@/public/heroes/32.jpg";
-import hero33 from "@/public/heroes/33.jpg";
-import hero34 from "@/public/heroes/34.jpg";
-import hero19 from "@/public/heroes/19.jpg";
-import hero22 from "@/public/heroes/22.jpg";
-import hero23 from "@/public/heroes/23.jpg";
-import hero24 from "@/public/heroes/24.jpg";
+import hero25 from "@/public/heroes/25.webp";
+import hero27 from "@/public/heroes/27.webp";
+import hero28 from "@/public/heroes/28.webp";
+import hero30 from "@/public/heroes/30.webp";
+import hero32 from "@/public/heroes/32.webp";
+import hero33 from "@/public/heroes/33.webp";
+import hero34 from "@/public/heroes/34.webp";
+import hero19 from "@/public/heroes/19.webp";
+import hero22 from "@/public/heroes/22.webp";
+import hero23 from "@/public/heroes/23.webp";
+import hero24 from "@/public/heroes/24.webp";
 
 const images = [
   hero25,

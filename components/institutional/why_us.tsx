@@ -59,8 +59,8 @@ export default function WhyChooseUsPage() {
   ];
 
   // Kullanmak istediğiniz belirli görsel yollarını belirliyoruz
-  const image1 = "/heroes/10.jpg"; // İlk görsel
-  const image2 = "/heroes/20.jpg"; // İkinci görsel
+  const image1 = "/heroes/10.webp"; // İlk görsel
+  const image2 = "/heroes/20.webp"; // İkinci görsel
 
   // Bir görsel bileşeni oluşturma helper'ı (Önceki koddan)
   const ImageBlock = ({ src, alt }: { src: string; alt: string }) => (
