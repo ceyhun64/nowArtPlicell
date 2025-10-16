@@ -272,7 +272,7 @@ export default function Navbar(): React.ReactElement {
                       </h3>
                       <p className="text-sm text-stone-600 flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-red-500" /> E :
-                        info@modacell.com
+                        info@nowartplicell.com
                       </p>
                       <p className="text-sm text-stone-600 flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-green-600" /> T :
@@ -616,7 +616,7 @@ export default function Navbar(): React.ReactElement {
           </Sheet>
         </div>
       </div>
-  
+
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
