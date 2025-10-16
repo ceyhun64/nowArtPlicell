@@ -289,7 +289,7 @@ export default function Navbar(): React.ReactElement {
               {" "}
               {/* justify-center eklendi */}
               <img
-                src="/logo/logo.jpg"
+                src="/logo/logo.png"
                 alt="Logo"
                 width={80}
                 height={80}
@@ -408,7 +408,7 @@ export default function Navbar(): React.ReactElement {
               className="text-2xl font-serif font-bold text-stone-900 tracking-wide"
             >
               <img
-                src="/logo/logo.jpg"
+                src="/logo/logo.png"
                 alt="Logo"
                 width={80}
                 height={80}

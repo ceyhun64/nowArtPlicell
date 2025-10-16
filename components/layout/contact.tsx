@@ -51,7 +51,7 @@ export default function Contact() {
           </div>
           <div className="flex items-center gap-4">
             <Mail className="w-6 h-6 text-[#92e676]" />
-            <p className="text-gray-700">info@NowArt.com</p>
+            <p className="text-gray-700">info@nowartplicell.com</p>
           </div>
         </div>
       </div>

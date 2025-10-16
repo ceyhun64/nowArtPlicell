@@ -37,7 +37,7 @@ export default function DefaultSearch() {
             className="text-2xl font-serif font-bold text-stone-900 tracking-wide  transition-colors"
           >
             <Image
-              src="/logo/logo.jpg"
+              src="/logo/logo.png"
               alt="Logo"
               width={100}
               height={100}

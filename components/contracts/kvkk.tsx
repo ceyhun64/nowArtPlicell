@@ -43,7 +43,8 @@ export default function KvkkPage() {
               Telefon: <span className="font-normal">0552 555 10 25</span>
             </p>
             <p className="font-medium">
-              E-posta: <span className="font-normal">info@NowArt.com</span>
+              E-posta:{" "}
+              <span className="font-normal">info@nowartplicell.com</span>
             </p>
             <p className="font-medium">
               Web Site: <span className="font-normal">NowArt.com</span>
@@ -202,7 +203,7 @@ export default function KvkkPage() {
 
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />
-            <span>info@NowArt.com</span>
+            <span>info@nowartplicell.com</span>
           </div>
 
           <div className="flex items-center gap-3">

@@ -54,7 +54,7 @@ export default function Heroes(): React.ReactElement {
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + images.length) % images.length);
 
-  const mobileHeight = "h-[250px]";
+  const mobileHeight = "h-[220px]";
   const desktopHeight = "md:h-[700px]";
 
   return (

@@ -68,7 +68,7 @@ export default function PersonalDataConsent() {
 
         <p className="mt-3">
           NowArt ile kişisel verilerimle ilgili taleplerimi{" "}
-          <strong>info@NowArt.com</strong> adresine iletebileceğim ve
+          <strong>info@nowartplicell.com</strong> adresine iletebileceğim ve
           taleplerimin KVKK’ya uygun şekilde değerlendirileceğini kabul
           ediyorum.
         </p>
@@ -97,7 +97,7 @@ export default function PersonalDataConsent() {
           </div>
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />
-            <span>info@NowArt.com</span>
+            <span>info@nowartplicell.com</span>
           </div>
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-indigo-500" />

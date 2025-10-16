@@ -52,7 +52,7 @@ export default function FaqPage() {
           </p>
           <p className="mb-2">
             Herhangi bir sorunla karşılaşırsanız, müşteri hizmetlerimize
-            ulaşmaktan çekinmeyin! 0552 555 10 25 info@NowArt.com
+            ulaşmaktan çekinmeyin! 0552 555 10 25 info@nowartplicell.com
           </p>
         </>
       ),

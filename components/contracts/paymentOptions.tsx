@@ -87,8 +87,9 @@ export default function PaymentOptions() {
         </section>
 
         <p className="mt-3">
-          Herhangi bir sorunuz varsa, bizimle <strong>info@NowArt.com</strong>{" "}
-          adresi üzerinden iletişime geçebilirsiniz.
+          Herhangi bir sorunuz varsa, bizimle{" "}
+          <strong>info@nowartplicell.com</strong> adresi üzerinden iletişime
+          geçebilirsiniz.
         </p>
       </div>
 
@@ -98,7 +99,7 @@ export default function PaymentOptions() {
         <div className="space-y-3 text-gray-700">
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />
-            <span>info@NowArt.com</span>
+            <span>info@nowartplicell.com</span>
           </div>
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-indigo-500" />

@@ -85,14 +85,14 @@ export default function Topbar() {
             href="tel:+905325551025"
             className="hover:text-[#cce7ff] transition-colors"
           >
-            +90 553 378 02 38
+            +90 530 130 30 84
           </a>
           <span className="text-white/70">|</span>
           <a // next/link yerine <a> kullanıldı
             href="mailto:info@gunduzeli.com"
             className="hover:text-[#cce7ff] transition-colors"
           >
-            info@gunduzeli.com
+            info@nowartplicell.com
           </a>
         </div>
       </div>

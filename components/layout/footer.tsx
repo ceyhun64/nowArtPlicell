@@ -140,13 +140,15 @@ const Footer: React.FC = () => {
           <div className="max-w-7xl mx-auto px-6 py-10 md:py-16 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-10">
             {/* Sütun 1 */}
             <div className="space-y-5 py-4 md:py-0 ">
+           
+
               <h2 className="text-3xl font-serif font-bold tracking-tight text-white hover:text-white transition-colors">
                 NowArt Plicell
               </h2>
               <address className="not-italic text-sm leading-relaxed text-gray-100 font-sans">
                 <p>Küçükbakkallı Mah. Küçükbakkallı Cad. No:55/3</p>
                 <p>Osmangazi / BURSA</p>
-                <p>info@nowart.com</p>
+                <p>info@nowartplicell.com</p>
                 <p>+90 552 555 10 25</p>
               </address>
               <div className="flex items-center gap-4">

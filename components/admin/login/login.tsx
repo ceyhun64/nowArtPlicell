@@ -44,7 +44,7 @@ export default function AdminLogin() {
         <div className="flex flex-col items-center mb-6">
           {/* Logo */}
           <Image
-            src="/logo/logo.jpg"
+            src="/logo/logo.png"
             alt="Logo"
             width={80}
             height={80}

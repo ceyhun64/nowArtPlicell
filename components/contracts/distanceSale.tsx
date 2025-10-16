@@ -31,7 +31,7 @@ export default function DistanceSalesContract() {
                 No: 55/3
               </li>
               <li>Telefon: 0552 555 10 25</li>
-              <li>E-posta: info@NowArt.com</li>
+              <li>E-posta: info@nowartplicell.com</li>
               <li>Web Sitesi: NowArt.com</li>
             </ul>
             <p className="mt-2 font-medium">Alıcı Bilgileri:</p>
@@ -179,7 +179,7 @@ export default function DistanceSalesContract() {
 
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />
-            <span>info@NowArt.com</span>
+            <span>info@nowartplicell.com</span>
           </div>
 
           <div className="flex items-center gap-3">

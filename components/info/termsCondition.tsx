@@ -23,7 +23,7 @@ export default function TermsConditionsPage() {
     {
       title: "Sipariş İptali ve Değişikliği",
       description:
-        "Sipariş edilen ürün üzerinde deforme, çizik, leke, yırtılma veya üretimle alakalı herhangi bir sorun tespit edilmesi halinde işlem başlatılabilir. Taleplerinizi info@NowArt.com e-posta adresine veya 0552 555 10 25 numarasına iletebilirsiniz.",
+        "Sipariş edilen ürün üzerinde deforme, çizik, leke, yırtılma veya üretimle alakalı herhangi bir sorun tespit edilmesi halinde işlem başlatılabilir. Taleplerinizi info@nowartplicell.com e-posta adresine veya 0552 555 10 25 numarasına iletebilirsiniz.",
     },
     {
       title: "Teslimat ve Kargo",
@@ -94,7 +94,7 @@ export default function TermsConditionsPage() {
         <div className="space-y-2 text-gray-700">
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />
-            <span> info@NowArt.com</span>
+            <span> info@nowartplicell.com</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
