@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { FileQuestion } from "lucide-react";
+
 import Loading from "../layout/loading";
 
 interface Blog {
@@ -44,7 +46,28 @@ export default function BlogPage() {
 
   if (loading) return <Loading />;
   if (blogs.length === 0)
-    return <p className="text-center mt-20">Henüz blog bulunmamaktadır.</p>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-green-100 to-purple-100 rounded-full blur-3xl opacity-40 animate-pulse" />
+          <div className="relative bg-white border border-gray-200 shadow-sm rounded-2xl p-10">
+            <FileQuestion className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              Henüz blog bulunamadı
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Yeni içerikler çok yakında burada olacak. Takipte kalın!
+            </p>
+            <Link
+              href="/"
+              className="inline-block bg-[#001e59] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#002d80] transition-all shadow-md"
+            >
+              Ana sayfaya dön
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-16 space-y-12">

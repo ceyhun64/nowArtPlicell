@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, User, MapPin, Package, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import Loading from "../layout/loading";
 
 interface User {
   name: string;
@@ -25,8 +25,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
-
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems: Record<string, MenuItem[]> = {
@@ -60,12 +60,26 @@ export default function Sidebar() {
       } catch (err) {
         console.error("Kullanıcı bilgisi alınamadı", err);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchUser();
+
+    // Bilgi güncelleme event’ini dinle
+    const handleUserUpdated = () => {
+      fetchUser();
+    };
+
+    window.addEventListener("user-updated", handleUserUpdated);
 
     if (!isMobile) setIsOpen(true);
     else setIsOpen(false);
+
+    return () => {
+      window.removeEventListener("user-updated", handleUserUpdated);
+    };
   }, [isMobile]);
 
   const handleLogout = async () => {
@@ -87,19 +101,28 @@ export default function Sidebar() {
           onClick={() => setIsOpen(!isOpen)}
         >
           <div>
-            <h2 className="text-lg md:text-xl font-bold text-gray-800">
-              {user ? `${user.name} ${user.surname}` : <Loading />}
-            </h2>
-            {user && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center gap-1 md:gap-2 text-red-500 hover:text-red-700 mt-1 md:mt-2 p-0"
-              >
-                <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="text-sm md:text-base">Çıkış Yap</span>
-              </Button>
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-40 rounded" />
+                <Skeleton className="h-4 w-24 rounded" />
+              </div>
+            ) : (
+              <>
+                <h2 className="text-lg md:text-xl font-bold text-gray-800">
+                  {user ? `${user.name} ${user.surname}` : "Misafir Kullanıcı"}
+                </h2>
+                {user && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 md:gap-2 text-red-500 hover:text-red-700 mt-1 md:mt-2 p-0"
+                  >
+                    <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base">Çıkış Yap</span>
+                  </Button>
+                )}
+              </>
             )}
           </div>
           <motion.div

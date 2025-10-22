@@ -78,7 +78,7 @@ Mesaj: ${formData.message}
           </div>
           <div className="flex items-center gap-4">
             <Phone className="w-6 h-6 text-[#92e676]" />
-            <p className="text-gray-700">+90 552 555 10 25</p>
+            <p className="text-gray-700">+90 530 130 30 84</p>
           </div>
           <div className="flex items-center gap-4">
             <Mail className="w-6 h-6 text-[#92e676]" />

@@ -18,7 +18,7 @@ import { ShoppingCart, ArrowRight, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import CartItem from "./cartItem";
-import Loading from "./loading";
+import { Skeleton } from "@/components/ui/skeleton";
 import LoginModal from "@/components/layout/login";
 
 interface Product {
@@ -146,11 +146,22 @@ const CartDropdown = forwardRef(
     }, 0);
 
     const handleLoginButtonClick = () => {
-      setIsOpen(false); // Önce cart Sheet kapansın
+      setIsOpen(false);
       setTimeout(() => {
-        setLoginModalOpen(true); // Sonra modal aç
-      }, 300); // 300ms delay, animasyon süresine uyumlu
+        setLoginModalOpen(true);
+      }, 300);
     };
+
+    const SkeletonCartItem = () => (
+      <div className="flex gap-3 border rounded-md p-3 animate-pulse">
+        <Skeleton className="w-16 h-16 rounded-md" />
+        <div className="flex flex-col flex-1 gap-2">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-5 w-1/3" />
+        </div>
+      </div>
+    );
 
     return (
       <>
@@ -194,7 +205,11 @@ const CartDropdown = forwardRef(
                   </Button>
                 </div>
               ) : isLoading ? (
-                <Loading />
+                <div className="flex flex-col gap-3 mt-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <SkeletonCartItem key={i} />
+                  ))}
+                </div>
               ) : cartItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center mt-16 space-y-4 text-gray-500">
                   <ShoppingCart className="h-12 w-12 text-gray-400 animate-bounce" />

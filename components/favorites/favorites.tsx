@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./productCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Product {
   id: number;
@@ -56,6 +58,10 @@ export default function Favorites() {
     setFavorites((prev) => prev.filter((f) => f.product.id !== productId));
   };
 
+  const handleLoginButtonClick = () => {
+    window.location.href = "/login"; // Giriş sayfasına yönlendir
+  };
+
   const FavoriteSkeleton = () => (
     <div className="flex flex-col gap-3 rounded-lg border border-gray-200 shadow-md p-3">
       <Skeleton className="w-full h-60 rounded-md" />
@@ -65,31 +71,6 @@ export default function Favorites() {
       </div>
     </div>
   );
-
-  if (loading) {
-    // Loading skeleton veya spinner
-    return (
-      <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <FavoriteSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
-        <div className="p-4 rounded-md bg-indigo-50 text-gray-700">
-          Favorilere erişmek için giriş yapmanız gerekmektedir.
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
@@ -101,9 +82,39 @@ export default function Favorites() {
             <FavoriteSkeleton key={i} />
           ))}
         </div>
+      ) : !isLoggedIn ? (
+        <div className="flex flex-col items-center justify-center mt-16 space-y-4 text-gray-500">
+          <Heart className="h-12 w-12 text-gray-400 animate-bounce" />
+          <p className="text-lg font-semibold">
+            Favorilere erişmek için giriş yapın
+          </p>
+          <p className="text-sm text-gray-400 text-center px-4">
+            Favorilerinizi görmek ve ürünleri kaydetmek için hesabınıza giriş
+            yapmanız gerekiyor.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-2"
+            onClick={handleLoginButtonClick}
+          >
+            Giriş Yap
+          </Button>
+        </div>
       ) : favorites.length === 0 ? (
-        <div className="p-4 rounded-md bg-indigo-50 text-gray-700">
-          Henüz favorilerinize ürün eklemediniz.
+        <div className="flex flex-col items-center justify-center mt-16 space-y-4 text-gray-500">
+          <Heart className="h-12 w-12 text-gray-400 animate-bounce" />
+          <p className="text-lg font-semibold">Henüz favori ürün eklemediniz</p>
+          <p className="text-sm text-gray-400 text-center px-4">
+            Favorilerinize ürün eklemek için ürünleri keşfedin ve kalp ikonuna
+            tıklayın.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-2"
+            onClick={() => (window.location.href = "/products")}
+          >
+            Ürünleri Keşfet
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -115,7 +126,7 @@ export default function Favorites() {
               mainImage={fav.product.mainImage}
               subImage={fav.product.subImage}
               pricePerM2={fav.product.pricePerM2}
-              onRemove={handleRemove} // productId ile kaldıracak
+              onRemove={handleRemove}
             />
           ))}
         </div>

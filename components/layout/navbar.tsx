@@ -315,7 +315,7 @@ export default function Navbar(): React.ReactElement {
                       </p>
                       <p className="text-sm text-stone-600 flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-green-600" /> T :
-                        +90 552 555 10 25
+                        +90 530 130 30 84
                       </p>
                     </div>
                   </div>

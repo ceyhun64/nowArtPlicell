@@ -8,6 +8,7 @@ import type { NextRequest } from "next/server";
 // PATCH: Kullanıcı bilgilerini güncelle
 export async function PATCH(request: NextRequest) {
   try {
+
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

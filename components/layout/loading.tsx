@@ -3,31 +3,38 @@ import React from "react";
 import { Loader } from "lucide-react";
 
 interface LoadingProps {
-  fullScreen?: boolean; // true ise tüm ekranı kaplar
   size?: number; // ikon boyutu (px)
   text?: string; // gösterilecek yazı
 }
 
 export default function Loading({
-  fullScreen = false,
-  size = 16,
+  size = 48,
   text = "Yükleniyor...",
 }: LoadingProps) {
   return (
-    <div
-      className={`flex items-center justify-center ${
-        fullScreen ? "min-h-screen bg-gray-50" : "h-full"
-      }`}
-    >
-      <div className="flex flex-col items-center">
+    <div className="fixed inset-0 bg-gray-50 bg-opacity-80 z-50 flex items-center justify-center">
+      <div className="flex flex-col items-center animate-fadeIn">
         {/* Spinner */}
         <Loader
-          className={`text-green-500 animate-spin`}
-          style={{ width: size * 1, height: size * 1 }}
+          className="text-green-500 animate-spin"
+          style={{ width: size, height: size }}
         />
         {/* Loading yazısı */}
-        <span className="mt-4 text-gray-700 text-lg">{text}</span>
+        <span className="mt-4 text-gray-700 text-lg font-medium">{text}</span>
       </div>
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
