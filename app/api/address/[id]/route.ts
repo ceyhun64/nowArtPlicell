@@ -4,35 +4,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import type { NextRequest } from "next/server";
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
-// 📝 PATCH: Adresi güncelle
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // 👈 dikkat!
 ) {
+  const { id } = await context.params; // 👈 params artık Promise
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
-    const body = (await request.json()) as {
-      title?: string;
-      firstName?: string;
-      lastName?: string;
-      address?: string;
-      district?: string;
-      city?: string;
-      zip?: string;
-      phone?: string;
-      country?: string;
-    };
+    const body = await request.json();
 
     const addressId = Number(id);
     if (isNaN(addressId)) {
@@ -58,17 +41,7 @@ export async function PATCH(
 
     const updatedAddress = await prisma.address.update({
       where: { id: addressId },
-      data: {
-        title: body.title,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        address: body.address,
-        district: body.district,
-        city: body.city,
-        zip: body.zip,
-        phone: body.phone,
-        country: body.country,
-      },
+      data: body,
     });
 
     return NextResponse.json({ address: updatedAddress });
@@ -81,18 +54,18 @@ export async function PATCH(
   }
 }
 
-// ❌ DELETE: Adresi sil
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // 👈 aynı şekilde
 ) {
+  const { id } = await context.params;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
     const addressId = Number(id);
     if (isNaN(addressId)) {
       return NextResponse.json(
@@ -115,9 +88,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.address.delete({
-      where: { id: addressId },
-    });
+    await prisma.address.delete({ where: { id: addressId } });
 
     return NextResponse.json({ message: "Address deleted successfully" });
   } catch (error) {
