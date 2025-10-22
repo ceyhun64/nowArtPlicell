@@ -1,15 +1,12 @@
-"use client"
-import dynamic from "next/dynamic";
+// app/admin/dashboard/page.tsx
+import React from "react";
+import AdminBlogs from "@/components/admin/blogs/blogs";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
-// Client component'i dynamic import ile yükle, ssr kapalı
-const AdminBlogs = dynamic(() => import("@/components/admin/blogs/blogs"), {
-  ssr: false,
-});
-
 export default async function AdminBlogsPage() {
+  // Server-side session kontrolü
   const session = await getServerSession(authOptions);
 
   // Eğer giriş yoksa veya role ADMIN değilse login sayfasına yönlendir
@@ -17,6 +14,9 @@ export default async function AdminBlogsPage() {
     redirect("/admin");
   }
 
-  return <AdminBlogs />;
+  return (
+    <div>
+      <AdminBlogs />
+    </div>
+  );
 }
- 
