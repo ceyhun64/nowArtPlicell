@@ -5,8 +5,11 @@ interface Params {
   id: string;
 }
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
-  const { id } = params; // productId
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<Params> } // 👈 params artık Promise
+) {
+  const { id } = await context.params; // 👈 await ile çöz
   const productId = parseInt(id, 10);
 
   if (isNaN(productId)) {

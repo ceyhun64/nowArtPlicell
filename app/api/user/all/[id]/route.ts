@@ -1,20 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-interface Params {
-  params: {
-    id: string,
-  };
-}
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> } // 👈 params artık Promise
+) {
+  const { id } = await context.params; // 👈 await ile çöz
+  const userId = Number(id);
 
-export async function DELETE(_req: Request, { params }: Params) {
+  if (isNaN(userId)) {
+    return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+  }
+
   try {
-    const userId = Number(params.id);
-
-    if (isNaN(userId)) {
-      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
-    }
-
     const user = await prisma.user.delete({
       where: { id: userId },
     });

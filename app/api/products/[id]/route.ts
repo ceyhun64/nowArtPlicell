@@ -1,27 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import fs from "fs/promises";
 import path from "path";
 
-// --- TypeScript Tipleri ---
-interface ProductData {
-  title: string;
-  mainImage: string;
-  subImage?: string;
-  pricePerM2: number;
-  rating: number;
-  reviewCount?: number;
-  category: string;
-}
-
 // --- GET /api/products/:id ---
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> } // 👈 params artık Promise
 ) {
+  const { id } = await context.params;
   try {
     const product = await prisma.product.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     if (!product) {
@@ -37,35 +27,31 @@ export async function GET(
 
 // --- DELETE /api/products/:id ---
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
-    // 1. Mevcut ürünü al
     const existingProduct = await prisma.product.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     if (!existingProduct) {
       return NextResponse.json({ error: "Ürün bulunamadı" }, { status: 404 });
     }
 
-    // 2. Eski görselleri silme fonksiyonu
     const deleteFile = async (filePath?: string | null) => {
       if (!filePath) return;
       try {
         await fs.unlink(path.join(process.cwd(), "public", filePath));
-      } catch {
-        // Dosya yoksa veya hata olursa görmezden gel
-      }
+      } catch {}
     };
 
     await deleteFile(existingProduct.mainImage);
     await deleteFile(existingProduct.subImage);
 
-    // 3. Veritabanından sil
     const product = await prisma.product.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     return NextResponse.json({ product }, { status: 200 });
@@ -78,10 +64,13 @@ export async function DELETE(
   }
 }
 
+// --- PUT /api/products/:id ---
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
+
   try {
     const formData = await request.formData();
 
@@ -94,29 +83,24 @@ export async function PUT(
     const mainFile = formData.get("file") as Blob | null;
     const subFile = formData.get("subImageFile") as Blob | null;
 
-    // 1. Mevcut ürünü al
     const existingProduct = await prisma.product.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
 
     if (!existingProduct) {
       return NextResponse.json({ error: "Ürün bulunamadı" }, { status: 404 });
     }
 
-    // 2. Eski görselleri sil
     const deleteOldFile = async (filePath?: string | null) => {
       if (!filePath) return;
       try {
         await fs.unlink(path.join(process.cwd(), "public", filePath));
-      } catch {
-        // Hata varsa görmezden gel
-      }
+      } catch {}
     };
 
     let mainImageUrl: string = existingProduct.mainImage;
     let subImageUrl: string | undefined = existingProduct.subImage || undefined;
 
-    // 3. Dosya kaydetme fonksiyonu
     const saveFile = async (
       file: Blob,
       folderName = "products"
@@ -134,11 +118,9 @@ export async function PUT(
       );
       await fs.mkdir(uploadDir, { recursive: true });
 
-      // Dosya adını al
       const filename = `${Date.now()}-${(file as any).name || "file"}`;
       const filePath = path.join(uploadDir, filename);
 
-      // Blob'u buffer'a çevir
       const arrayBuffer = await file.arrayBuffer();
       await fs.writeFile(filePath, Buffer.from(arrayBuffer));
 
@@ -155,9 +137,8 @@ export async function PUT(
       subImageUrl = await saveFile(subFile);
     }
 
-    // 4. Veritabanını güncelle
     const updatedProduct = await prisma.product.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data: {
         title,
         pricePerM2,

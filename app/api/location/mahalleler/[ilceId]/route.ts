@@ -1,11 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(req: Request, context: any) {
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ ilceId: string }> } // 👈 params artık Promise
+) {
   try {
-    const params = await context.params;
-    const ilceId = params.ilceId;
+    const { ilceId } = await context.params; // 👈 await ile çöz
 
-    const res = await fetch(`https://api.turkiyeapi.dev/v1/districts/${ilceId}`);
+    const res = await fetch(
+      `https://api.turkiyeapi.dev/v1/districts/${ilceId}`
+    );
     if (!res.ok) throw new Error("Mahalle verisi alınamadı");
 
     const data = await res.json();
@@ -19,6 +23,9 @@ export async function GET(req: Request, context: any) {
     return NextResponse.json(neighborhoods);
   } catch (error) {
     console.error("Mahalleler alınırken hata:", error);
-    return NextResponse.json({ error: "Mahalleler alınamadı" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Mahalleler alınamadı" },
+      { status: 500 }
+    );
   }
 }

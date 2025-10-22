@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(req: Request, context: any) {
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ ilId: string }> } // 👈 params artık Promise
+) {
   try {
-    // params'ı await et
-    const params = await context.params;
-    const ilId = params.ilId;
+    const { ilId } = await context.params; // 👈 await ile çöz
 
     const res = await fetch(`https://api.turkiyeapi.dev/v1/provinces/${ilId}`);
     if (!res.ok) throw new Error("İlçe verisi alınamadı");

@@ -1,20 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-// Tip tanımları
-interface DeleteParams {
-  params: { id: string };
-}
+// DELETE /api/favorite/[id]
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> } // 👈 params artık Promise
+) {
+  const { id } = await context.params; // 👈 await ile çöz
 
-export async function DELETE(req: Request, { params }: DeleteParams) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || !session.user.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const productId = Number(params.id);
+  const productId = Number(id);
   if (isNaN(productId) || productId <= 0) {
     return NextResponse.json(
       { error: "Invalid or missing productId" },
