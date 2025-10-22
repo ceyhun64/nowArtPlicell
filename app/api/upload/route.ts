@@ -1,6 +1,5 @@
 // /api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 import { v2 as cloudinary } from "cloudinary";
 
 // Cloudinary yapılandırması (.env dosyanda olmalı)
@@ -33,18 +32,11 @@ export async function POST(req: NextRequest) {
     // Dosyayı ArrayBuffer -> Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Sharp ile optimize: WebP ve max 1200px genişlik
-    const optimizedBuffer = await sharp(buffer)
-      .resize({ width: 1200, withoutEnlargement: true })
-      .toFormat("webp", { quality: 80 })
-      .toBuffer();
-
-    // Cloudinary upload (upload_stream)
+    // Cloudinary upload (doğrudan, sharp olmadan)
     const uploadResult = await new Promise<any>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: `products/${folderName}`,
-          format: "webp",
           resource_type: "image",
         },
         (error, result) => {
@@ -52,7 +44,7 @@ export async function POST(req: NextRequest) {
           else resolve(result);
         }
       );
-      stream.end(optimizedBuffer);
+      stream.end(buffer);
     });
 
     return NextResponse.json({ path: uploadResult.secure_url });
