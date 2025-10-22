@@ -21,26 +21,25 @@ async function deleteImage(fileName?: string) {
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // 👈 Promise olarak
 ) {
+  const { id } = await context.params; // 👈 await ile çöz
+
   const session = await getServerSession(authOptions);
   if (!session)
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const id = Number(params.id);
-  if (isNaN(id))
+  const blogId = Number(id);
+  if (isNaN(blogId))
     return NextResponse.json({ message: "Geçersiz ID" }, { status: 400 });
 
   try {
-    const blog = await prisma.blog.findUnique({ where: { id } });
+    const blog = await prisma.blog.findUnique({ where: { id: blogId } });
     if (!blog)
       return NextResponse.json({ message: "Blog bulunamadı" }, { status: 404 });
 
-    // Resmi sil
     await deleteImage(blog.image);
-
-    // Blogu veritabanından sil
-    await prisma.blog.delete({ where: { id } });
+    await prisma.blog.delete({ where: { id: blogId } });
 
     return NextResponse.json({ message: "Blog ve resmi silindi" });
   } catch (err) {
@@ -54,14 +53,16 @@ export async function DELETE(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // 👈 Promise
 ) {
+  const { id } = await context.params;
+
   const session = await getServerSession(authOptions);
   if (!session)
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const id = Number(params.id);
-  if (isNaN(id))
+  const blogId = Number(id);
+  if (isNaN(blogId))
     return NextResponse.json({ message: "Geçersiz ID" }, { status: 400 });
 
   const body = await req.json();
@@ -71,23 +72,17 @@ export async function PUT(
     return NextResponse.json({ message: "Eksik alanlar var" }, { status: 400 });
 
   try {
-    const blog = await prisma.blog.findUnique({ where: { id } });
+    const blog = await prisma.blog.findUnique({ where: { id: blogId } });
     if (!blog)
       return NextResponse.json({ message: "Blog bulunamadı" }, { status: 404 });
 
-    // Eğer resim değiştiyse eskiyi sil
     if (image && blog.image && blog.image !== image) {
       await deleteImage(blog.image);
     }
 
     const updatedBlog = await prisma.blog.update({
-      where: { id },
-      data: {
-        title,
-        content,
-        image,
-        category,
-      },
+      where: { id: blogId },
+      data: { title, content, image, category },
     });
 
     return NextResponse.json({ blog: updatedBlog });
