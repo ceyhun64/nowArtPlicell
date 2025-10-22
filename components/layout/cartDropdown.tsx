@@ -75,7 +75,6 @@ const CartDropdown = forwardRef(
         const data = await res.json();
         setCartItems(data);
       } catch {
-        if (isLoggedIn) toast.error("Sepet yüklenemedi");
       } finally {
         setIsLoading(false);
       }
