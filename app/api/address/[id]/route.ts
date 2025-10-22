@@ -11,7 +11,10 @@ interface RouteParams {
 }
 
 // 📝 PATCH: Adresi güncelle
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
@@ -33,14 +36,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const addressId = Number(id);
     if (isNaN(addressId)) {
-      return NextResponse.json({ error: "Invalid address ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid address ID" },
+        { status: 400 }
+      );
     }
 
     const existingAddress = await prisma.address.findUnique({
       where: { id: addressId },
     });
 
-    if (!existingAddress || existingAddress.userId !== Number(session.user.id)) {
+    if (
+      !existingAddress ||
+      existingAddress.userId !== Number(session.user.id)
+    ) {
       return NextResponse.json(
         { error: "Address not found or unauthorized" },
         { status: 404 }
@@ -73,7 +82,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // ❌ DELETE: Adresi sil
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
@@ -83,14 +95,20 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = params;
     const addressId = Number(id);
     if (isNaN(addressId)) {
-      return NextResponse.json({ error: "Invalid address ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid address ID" },
+        { status: 400 }
+      );
     }
 
     const existingAddress = await prisma.address.findUnique({
       where: { id: addressId },
     });
 
-    if (!existingAddress || existingAddress.userId !== Number(session.user.id)) {
+    if (
+      !existingAddress ||
+      existingAddress.userId !== Number(session.user.id)
+    ) {
       return NextResponse.json(
         { error: "Address not found or unauthorized" },
         { status: 404 }
