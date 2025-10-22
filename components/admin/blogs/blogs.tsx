@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import Sidebar from "@/components/admin/sideBar";
 import AddBlogDialog from "./addBlog";
 import UpdateBlogDialog from "./updateBlog";
@@ -13,29 +13,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import DefaultPagination from "@/components/layout/pagination";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
-import blogsData from "@/seed/blogs.json"; // 🧩 Örnek JSON (blogs.json)
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
-// === Tipler ===
 interface Blog {
-  id: number;
-  title: string;
-  author: string;
-  category: string;
-  date: string;
+  id: number; // primitive number
+  title: string; // primitive string
+  content: string;
   image: string;
+  category: string;
 }
 
-interface NewBlog {
-  id: number;
-  title: string;
-  author: string;
-  category: string;
-  date: string;
-  image: string;
+interface DeleteDialogProps {
+  onConfirm: () => void;
+  trigger: React.ReactNode;
+  title?: string;
+  description?: string;
 }
+
+export const DeleteDialog: React.FC<DeleteDialogProps> = ({
+  onConfirm,
+  trigger,
+  title = "Silme İşlemi",
+  description = "Bu işlemi yapmak istediğine emin misin?",
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-[400px] bg-white text-gray-800 rounded-2xl border border-gray-200 shadow-lg">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold text-[#001e59]">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm text-gray-600">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            İptal
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm();
+              setOpen(false);
+            }}
+          >
+            Sil
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function Blogs(): React.ReactElement {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -43,20 +89,22 @@ export default function Blogs(): React.ReactElement {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [newBlog, setNewBlog] = useState<NewBlog>({
-    id: 0,
-    title: "",
-    author: "",
-    category: "",
-    date: "",
-    image: "",
-  });
 
   const isMobile = useIsMobile();
 
-  // JSON verisini state'e set et
+  // API’den blogları çek
+  const fetchBlogs = async () => {
+    try {
+      const res = await fetch("/api/blog");
+      const data = await res.json();
+      if (res.ok && data.blogs) setBlogs(data.blogs);
+    } catch (err) {
+      console.error("Bloglar alınamadı:", err);
+    }
+  };
+
   useEffect(() => {
-    setBlogs(blogsData);
+    fetchBlogs();
   }, []);
 
   // Filtreleme + Arama
@@ -64,58 +112,58 @@ export default function Blogs(): React.ReactElement {
     .filter((b) =>
       filter === "all"
         ? true
-        : b.category.toLowerCase() === filter.toLowerCase()
+        : (b.category as string).toLowerCase() === filter.toLowerCase()
     )
-    .filter((b) => b.title.toLowerCase().includes(search.toLowerCase()));
+    .filter((b) =>
+      (b.title as string).toLowerCase().includes(search.toLowerCase())
+    );
 
   const paginatedBlogs = filteredBlogs.slice(
     (currentPage - 1) * 15,
     currentPage * 15
   );
 
-  // Yeni blog ekleme
-  const handleAddBlog = () => {
-    const newId = blogs.length > 0 ? blogs[blogs.length - 1].id + 1 : 1;
-
-    const newItem: Blog = {
-      id: newId,
-      title: newBlog.title,
-      author: newBlog.author || "Bilinmiyor",
-      category: newBlog.category || "Genel",
-      date: newBlog.date || new Date().toLocaleDateString("tr-TR"),
-      image: newBlog.image || "/images/sample-blog.jpg",
-    };
-
-    setBlogs((prev) => [...prev, newItem]);
-
-    setNewBlog({
-      id: 0,
-      title: "",
-      author: "",
-      category: "",
-      date: "",
-      image: "",
-    });
-
-    alert("✅ Blog başarıyla eklendi (simülasyon).");
+  // Tek blog silme
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setBlogs((prev) => prev.filter((b) => Number(b.id) !== id));
+        setSelectedIds((prev) => prev.filter((sid) => sid !== id));
+        toast.success("Blog başarıyla silindi");
+      } else {
+        const data = await res.json();
+        toast.error(data.message || "Blog silinemedi ");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Blog silinirken bir hata oluştu ");
+    }
   };
 
-  // Blog silme
-  const handleDelete = (id: number) => {
-    if (!confirm("Bu blog yazısını silmek istiyor musunuz?")) return;
-    setBlogs(blogs.filter((b) => b.id !== id));
-    setSelectedIds(selectedIds.filter((sid) => sid !== id));
-  };
+  // Toplu silme
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
 
-  // Blog güncelleme
-  const handleUpdate = (updated: Blog) => {
-    setBlogs(blogs.map((b) => (b.id === updated.id ? updated : b)));
+    try {
+      await Promise.all(
+        selectedIds.map((id) => fetch(`/api/blog/${id}`, { method: "DELETE" }))
+      );
+      setBlogs((prev) =>
+        prev.filter((b) => !selectedIds.includes(Number(b.id)))
+      );
+      setSelectedIds([]);
+      toast.success(`${selectedIds.length} blog başarıyla silindi `);
+    } catch (err) {
+      console.error(err);
+      toast.error("Seçilen bloglar silinirken bir hata oluşt ");
+    }
   };
 
   // Tümünü seç
   const handleSelectAll = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedIds(paginatedBlogs.map((b) => b.id));
+      setSelectedIds(paginatedBlogs.map((b) => Number(b.id)));
     } else {
       setSelectedIds([]);
     }
@@ -128,22 +176,9 @@ export default function Blogs(): React.ReactElement {
     );
   };
 
-  // Seçilenleri sil
-  const handleDeleteSelected = () => {
-    if (selectedIds.length === 0) return;
-    if (!confirm(`Seçilen ${selectedIds.length} blogu silmek istiyor musunuz?`))
-      return;
-    setBlogs(blogs.filter((b) => !selectedIds.includes(b.id)));
-    setSelectedIds([]);
-    alert("🗑️ Seçilen bloglar silindi (simülasyon).");
-  };
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
-      {/* Sidebar */}
       <Sidebar />
-
-      {/* Main Content */}
       <main className={`flex-1 p-4 md:p-8 ${isMobile ? "" : "md:ml-64"}`}>
         {/* Başlık */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -155,36 +190,44 @@ export default function Blogs(): React.ReactElement {
         {/* Üst Araç Çubuğu */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-            <Button
-              className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
-                selectedIds.length > 0
-                  ? "bg-[#001e59] hover:bg-[#003080] text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              disabled={selectedIds.length === 0}
-              onClick={handleDeleteSelected}
-            >
-              Seçilenleri Sil ({selectedIds.length})
-            </Button>
+            <DeleteDialog
+              onConfirm={handleDeleteSelected}
+              trigger={
+                <Button
+                  className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
+                    selectedIds.length > 0
+                      ? "bg-[#001e59] hover:bg-[#003080] text-white"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  disabled={selectedIds.length === 0}
+                >
+                  Seçilenleri Sil ({selectedIds.length})
+                </Button>
+              }
+              title="Seçilen Blogları Sil"
+              description={`Toplam ${selectedIds.length} blogu silmek istediğine emin misin?`}
+            />
 
             <AddBlogDialog
-              newBlog={newBlog}
-              setNewBlog={setNewBlog}
-              handleAddBlog={handleAddBlog}
-              className="w-full sm:w-auto"
+              onAdd={(newBlog) => setBlogs((prev) => [...prev, newBlog])}
             />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-            <Select onValueChange={(val) => setFilter(val)} defaultValue="all">
+            {/* 🔸 Dinamik Kategori Filtresi (Select) */}
+            <Select onValueChange={(val) => setFilter(val)} value={filter}>
               <SelectTrigger className="w-full sm:w-48 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-[#001e59]/20">
                 <SelectValue placeholder="Kategori seç" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-200 rounded-xl text-gray-900">
-                <SelectItem value="all">Tüm Bloglar</SelectItem>
-                <SelectItem value="Genel">Genel</SelectItem>
-                <SelectItem value="Sanat">Sanat</SelectItem>
-                <SelectItem value="Dekorasyon">Dekorasyon</SelectItem>
+                <SelectItem value="all">Tüm Kategoriler</SelectItem>
+                {Array.from(
+                  new Set(blogs.map((b) => b.category).filter(Boolean))
+                ).map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -220,13 +263,7 @@ export default function Blogs(): React.ReactElement {
                   Başlık
                 </th>
                 <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
-                  Yazar
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden md:table-cell">
                   Kategori
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden lg:table-cell">
-                  Tarih
                 </th>
                 <th className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-center">
                   İşlemler
@@ -237,7 +274,7 @@ export default function Blogs(): React.ReactElement {
               {paginatedBlogs.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={5}
                     className="text-center py-6 text-gray-500 italic"
                   >
                     Blog bulunamadı.
@@ -246,45 +283,57 @@ export default function Blogs(): React.ReactElement {
               ) : (
                 paginatedBlogs.map((blog) => (
                   <motion.tr
-                    key={blog.id}
+                    key={Number(blog.id)}
                     className="hover:bg-gray-50 transition-all duration-150"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
                   >
                     <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
                       <input
                         type="checkbox"
-                        checked={selectedIds.includes(blog.id)}
-                        onChange={() => handleSelectOne(blog.id)}
+                        checked={selectedIds.includes(Number(blog.id))}
+                        onChange={() => handleSelectOne(Number(blog.id))}
                       />
                     </td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
-                      {blog.id}
+                      {Number(blog.id)}
                     </td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 font-medium text-gray-900">
-                      {blog.title}
+                      {blog.title as string}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-700 hidden sm:table-cell">
-                      {blog.author}
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 hidden sm:table-cell">
+                      <Badge variant="outline">
+                        {blog.category || "Kategori yok"}
+                      </Badge>
                     </td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-700 hidden md:table-cell">
-                      {blog.category}
-                    </td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-gray-500 hidden lg:table-cell">
-                      {blog.date}
-                    </td>
+
                     <td className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-center">
                       <div className="flex flex-col sm:flex-row justify-center gap-2">
-                        <UpdateBlogDialog blog={blog} onUpdate={handleUpdate} />
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleDelete(blog.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
-                        >
-                          Sil
-                        </Button>
+                        <UpdateBlogDialog
+                          blog={blog}
+                          onUpdate={(updated) =>
+                            setBlogs((prev) =>
+                              prev.map((b) =>
+                                Number(b.id) === Number(updated.id)
+                                  ? updated
+                                  : b
+                              )
+                            )
+                          }
+                        />
+
+                        <DeleteDialog
+                          onConfirm={() => handleDelete(Number(blog.id))}
+                          trigger={
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
+                            >
+                              Sil
+                            </Button>
+                          }
+                          title="Blogu Sil"
+                          description={`"${blog.title}" adlı blogu silmek istediğine emin misin?`}
+                        />
                       </div>
                     </td>
                   </motion.tr>

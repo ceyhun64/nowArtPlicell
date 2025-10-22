@@ -10,13 +10,15 @@ import {
   LogOut,
   Menu,
   X,
-  FileText, // 🆕 Bloglar ikonu
+  FileText, // Bloglar ikonu
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { signOut } from "next-auth/react"; // <-- import eklendi
+import Image from "next/image";
 
 interface MenuItem {
   id: string;
@@ -30,7 +32,6 @@ export default function AdminSidebar(): React.ReactElement {
   const pathname = usePathname() ?? "";
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  // 🧭 Menü öğeleri
   const menuItems: MenuItem[] = [
     {
       id: "dashboard",
@@ -51,13 +52,7 @@ export default function AdminSidebar(): React.ReactElement {
       href: "/admin/orders",
     },
     { id: "users", label: "Kullanıcılar", icon: Users, href: "/admin/users" },
-    {
-      id: "blogs",
-      label: "Bloglar", // 🆕 Yeni Menü
-      icon: FileText,
-      href: "/admin/blogs",
-    },
- 
+    { id: "blogs", label: "Bloglar", icon: FileText, href: "/admin/blogs" },
   ];
 
   const active =
@@ -65,9 +60,10 @@ export default function AdminSidebar(): React.ReactElement {
       (item) => pathname === item.href || pathname.startsWith(item.href + "/")
     )?.id || "dashboard";
 
-  const handleLogout = () => {
-    alert("Çıkış yapıldı (simülasyon)");
-    router.push("/admin");
+  // 🔑 Dinamik logout
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/admin"); // veya giriş sayfası
   };
 
   const AdminInfo = (
@@ -82,17 +78,18 @@ export default function AdminSidebar(): React.ReactElement {
     </div>
   );
 
-  // 🖥️ Masaüstü görünüm
+  // Masaüstü ve mobil sidebar aynen kalabilir
   const DesktopSidebar = (
     <aside className="fixed left-0 top-0 w-64 h-screen bg-white shadow-lg flex flex-col justify-between border-r border-gray-200">
       <div>
         <div className="px-6 py-6 border-b border-gray-200 flex items-center gap-2">
-          <Box className="text-[#92e676] w-6 h-6" />
-          <Link
-            href="/admin/dashboard"
-            className="text-xl font-bold text-gray-900 tracking-tight"
-          >
-            NewArt<span className="text-[#92e676]">Admin</span>
+          <Link href="/admin/dashboard" className="flex items-center gap-2">
+            {/* Favicon */}
+            <Image src="/favicon.ico" alt="Logo" width={24} height={24} />
+            {/* Başlık */}
+            <span className="text-xl font-bold text-gray-900 tracking-tight">
+              NowArt<span className="text-[#92e676]">Admin</span>
+            </span>
           </Link>
         </div>
 
@@ -133,7 +130,6 @@ export default function AdminSidebar(): React.ReactElement {
     </aside>
   );
 
-  // 📱 Mobil görünüm
   const MobileSidebar = (
     <>
       <Button

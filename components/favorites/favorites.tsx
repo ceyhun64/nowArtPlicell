@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import ProductCard from "./productCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// === Tip Tanımları ===
 interface Product {
   id: number;
   title: string;
@@ -12,8 +11,7 @@ interface Product {
   rating: number;
   reviewCount: number;
   mainImage: string;
-  subImage: string;
-  category: string;
+  subImage?: string;
 }
 
 interface Favorite {
@@ -21,54 +19,43 @@ interface Favorite {
   product: Product;
 }
 
-// === Ana Bileşen ===
 export default function Favorites() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // === Sahte Veri ===
   useEffect(() => {
-    const SAHTE_FAVORILER: Favorite[] = [
-      {
-        id: 1,
-        product: {
-          id: 101,
-          title: "Modern Desenli Halı",
-          pricePerM2: 349.99,
-          rating: 5,
-          reviewCount: 128,
-          mainImage: "/products/product1main.png",
-          subImage: "/products/product1sub1.png",
-          category: "DÜZ SERİ",
-        },
-      },
-      {
-        id: 2,
-        product: {
-          id: 102,
-          title: "Klasik İran Motifli Halı",
-          pricePerM2: 429.9,
-          rating: 4,
-          reviewCount: 97,
-          mainImage: "/products/product2main.png",
-          subImage: "/products/product2sub1.png",
-          category: "BASKILI",
-        },
-      },
-    ];
+    const checkLoginAndFetch = async () => {
+      try {
+        const res = await fetch("/api/account/check");
+        const data = await res.json();
 
-    setTimeout(() => {
-      setFavorites(SAHTE_FAVORILER);
-      setLoading(false);
-    }, 1200);
+        if (res.ok && data.user?.id) {
+          setIsLoggedIn(true);
+
+          // Giriş varsa favorileri çek
+          const favRes = await fetch("/api/favorites");
+          if (!favRes.ok) throw new Error("Favoriler alınamadı");
+          const favData: Favorite[] = await favRes.json();
+          setFavorites(favData);
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (err) {
+        console.error(err);
+        setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkLoginAndFetch();
   }, []);
 
-  // === Favoriden Kaldırma ===
-  const handleRemoveFavorite = (productId: number) => {
-    setFavorites((prev) => prev.filter((fav) => fav.product.id !== productId));
+  const handleRemove = (productId: number) => {
+    setFavorites((prev) => prev.filter((f) => f.product.id !== productId));
   };
 
-  // === Skeleton Bileşeni ===
   const FavoriteSkeleton = () => (
     <div className="flex flex-col gap-3 rounded-lg border border-gray-200 shadow-md p-3">
       <Skeleton className="w-full h-60 rounded-md" />
@@ -76,15 +63,36 @@ export default function Favorites() {
         <Skeleton className="h-4 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
       </div>
-      <div className="flex items-center justify-between mt-2">
-        <Skeleton className="h-4 w-1/3" />
-        <Skeleton className="h-4 w-1/5" />
-      </div>
     </div>
   );
 
+  if (loading) {
+    // Loading skeleton veya spinner
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <FavoriteSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
+        <div className="p-4 rounded-md bg-indigo-50 text-gray-700">
+          Favorilere erişmek için giriş yapmanız gerekmektedir.
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-20 py-16">
+    <div className="max-w-7xl mx-auto px-4 md:px-20 py-16 mb-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Favorilerim</h1>
 
       {loading ? (
@@ -107,8 +115,7 @@ export default function Favorites() {
               mainImage={fav.product.mainImage}
               subImage={fav.product.subImage}
               pricePerM2={fav.product.pricePerM2}
-              rating={fav.product.rating}
-              reviewCount={fav.product.reviewCount}
+              onRemove={handleRemove} // productId ile kaldıracak
             />
           ))}
         </div>

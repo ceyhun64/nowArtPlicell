@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react"; // spinner
 
-// --- Props Tipleri ---
 interface StepPaymentCardProps {
   holderName: string;
   setHolderName: (value: string) => void;
@@ -24,7 +24,7 @@ interface StepPaymentCardProps {
   setExpireYear: (value: string) => void;
   cvc: string;
   setCvc: (value: string) => void;
-  handlePayment: () => void;
+  handlePayment: () => Promise<void>;
   totalPrice: number;
   setStep: (step: number) => void;
 }
@@ -45,8 +45,20 @@ export default function StepPaymentCard({
   totalPrice,
   setStep,
 }: StepPaymentCardProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const isFormValid =
     cardNumber && cvc && holderName && expireMonth && expireYear;
+
+  const onClickPayment = async () => {
+    if (!isFormValid) return;
+    setIsProcessing(true);
+    try {
+      await handlePayment();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Card>
@@ -73,7 +85,7 @@ export default function StepPaymentCard({
           <Input
             id="cardNumber"
             placeholder="XXXX XXXX XXXX XXXX"
-            maxLength={19} // 16 rakam + 3 boşluk
+            maxLength={19}
             value={formattedCardNumber}
             onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ""))}
           />
@@ -100,9 +112,7 @@ export default function StepPaymentCard({
               placeholder="YY"
               maxLength={2}
               value={expireYear}
-              onChange={(e) =>
-                setExpireYear(e.target.value.replace(/\D/g, ""))
-              }
+              onChange={(e) => setExpireYear(e.target.value.replace(/\D/g, ""))}
             />
           </div>
 
@@ -120,11 +130,24 @@ export default function StepPaymentCard({
       </CardContent>
 
       <CardFooter className="flex justify-between w-full">
-        <Button variant="outline" onClick={() => setStep(2)}>
+        <Button
+          variant="outline"
+          onClick={() => setStep(2)}
+          disabled={isProcessing}
+        >
           Geri
         </Button>
-        <Button onClick={handlePayment} disabled={!isFormValid}>
-          Ödemeyi Tamamla {totalPrice.toFixed(2)}TL
+        <Button
+          onClick={onClickPayment}
+          disabled={!isFormValid || isProcessing}
+        >
+          {isProcessing ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" /> İşlem Yapılıyor...
+            </span>
+          ) : (
+            `Ödemeyi Tamamla ${totalPrice.toFixed(2)} TL`
+          )}
         </Button>
       </CardFooter>
     </Card>

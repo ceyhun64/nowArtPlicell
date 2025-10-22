@@ -9,10 +9,12 @@ import { Mail, Phone, MapPin, User } from "lucide-react";
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
+    phone: "",
     email: "",
-    subject: "",
     message: "",
   });
+  const [messageStatus, setMessageStatus] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -20,11 +22,40 @@ export default function Contact() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Mesajınız gönderildi!");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setIsLoading(true);
+    setMessageStatus(null);
+
+    try {
+      const res = await fetch("/api/send-mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipients: ["info@nowartplicell.com"], // sabit alıcı
+          subject: "Web Sitesi İletişim Formu",
+          message: `
+Ad Soyad: ${formData.name}
+Telefon: ${formData.phone}
+Email: ${formData.email}
+Mesaj: ${formData.message}
+          `,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setMessageStatus(data.error || "Bir hata oluştu, tekrar deneyin.");
+      } else {
+        setMessageStatus("Mesajınız başarıyla gönderildi!");
+        setFormData({ name: "", phone: "", email: "", message: "" });
+      }
+    } catch (err) {
+      console.error("Mail gönderim hatası:", err);
+      setMessageStatus("Sunucu hatası, tekrar deneyin.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,7 +72,7 @@ export default function Contact() {
           <div className="flex items-start gap-4">
             <MapPin className="w-6 h-6 text-[#92e676] mt-1" />
             <p className="text-gray-700">
-              Küçükbakkallı Mah. Küçükbakkallı Cad. No:55/3 <br />{" "}
+              Küçükbakkallı Mah. Küçükbakkallı Cad. No:55/3 <br />
               Osmangazi/BURSA
             </p>
           </div>
@@ -75,26 +106,32 @@ export default function Contact() {
               />
             </div>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <Input
-                name="email"
-                type="email"
-                placeholder="E-posta Adresiniz"
-                value={formData.email}
+                name="phone"
+                type="tel"
+                placeholder="Telefon Numaranız"
+                value={formData.phone}
                 onChange={handleChange}
                 required
                 className="pl-10 border border-blue-200"
               />
             </div>
           </div>
-          <Input
-            name="subject"
-            placeholder="Konu"
-            value={formData.subject}
-            onChange={handleChange}
-            required
-            className=" border border-blue-200"
-          />
+
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <Input
+              name="email"
+              type="email"
+              placeholder="E-posta Adresiniz"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="pl-10 border border-blue-200"
+            />
+          </div>
+
           <Textarea
             name="message"
             placeholder="Mesajınız"
@@ -102,14 +139,30 @@ export default function Contact() {
             onChange={handleChange}
             required
             rows={6}
-            className=" border border-blue-200"
+            className="border border-blue-200"
           />
+
           <Button
             type="submit"
-            className="w-full bg-[#92e676] hover:bg-green-400 text-white shadow-md transition-all transform hover:-translate-y-1 hover:shadow-xl"
+            disabled={isLoading}
+            className={`w-full bg-[#92e676] hover:bg-green-400 text-white shadow-md transition-all transform hover:-translate-y-1 hover:shadow-xl ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Gönder
+            {isLoading ? "Gönderiliyor..." : "Gönder"}
           </Button>
+
+          {messageStatus && (
+            <p
+              className={`text-center mt-2 text-sm ${
+                messageStatus.toLowerCase().includes("başarı")
+                  ? "text-green-600"
+                  : "text-red-500"
+              }`}
+            >
+              {messageStatus}
+            </p>
+          )}
         </form>
       </div>
     </div>

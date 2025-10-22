@@ -4,7 +4,6 @@ import * as React from "react";
 import ProductCard from "./productCard";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import seedProducts from "@/seed/products.json";
 
 interface ProductData {
   id: number;
@@ -17,14 +16,27 @@ interface ProductData {
   category: string;
 }
 
-interface MostPreferredProps {
-  products?: ProductData[];
-}
-
-export default function MostPreferred({
-  products = seedProducts as ProductData[],
-}: MostPreferredProps) {
+export default function MostPreferred() {
+  const [products, setProducts] = React.useState<ProductData[]>([]);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // API'den veri çekme
+  React.useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (data.products) {
+          // Rastgele 6 ürün seç
+          const shuffled = data.products.sort(() => 0.5 - Math.random());
+          setProducts(shuffled.slice(0, 8));
+        }
+      } catch (err) {
+        console.error("Ürünleri çekerken hata:", err);
+      }
+    }
+    fetchProducts();
+  }, []);
 
   const scrollRight = () => {
     scrollRef.current?.scrollBy({ left: 350, behavior: "smooth" });
@@ -42,7 +54,6 @@ export default function MostPreferred({
           En Çok Tercih Edilenler
         </h2>
 
-        {/* Oklar (yalnızca masaüstünde görünür) */}
         <div className="hidden md:flex space-x-3">
           <Button
             variant="outline"
@@ -88,14 +99,13 @@ export default function MostPreferred({
         ))}
       </div>
 
-      {/* Alt gösterge çubuğu (isteğe bağlı) */}
+      {/* Alt gösterge çubuğu */}
       <div className="absolute bottom-none md:bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-        {products.slice(0, 5).map((_, idx) => (
+        {products.map((_, idx) => (
           <span key={idx} className="block h-1 w-8 bg-gray-300 rounded-full" />
         ))}
       </div>
 
-      {/* Scrollbar gizleme */}
       <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;

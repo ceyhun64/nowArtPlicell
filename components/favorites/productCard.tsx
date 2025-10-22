@@ -2,17 +2,21 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Heart } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface ProductCardProps {
   id: number;
   mainImage: string;
-  subImage: string; // artık tek alt görsel
+  subImage?: string;
   title: string;
   pricePerM2: number;
+  onRemove: (productId: number) => void; // Favorites sayfası için
+}
+
+interface Review {
+  id: number;
   rating: number;
-  reviewCount: number;
 }
 
 export default function ProductCard({
@@ -21,26 +25,63 @@ export default function ProductCard({
   subImage,
   title,
   pricePerM2,
-  rating,
-  reviewCount,
+  onRemove,
 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
-  const [favorited, setFavorited] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+
+  // Yorumları API'dan çek
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/review/${id}`);
+        if (!res.ok) return;
+        const data: Review[] = await res.json();
+        setReviews(data);
+
+        const avg =
+          data.reduce((acc, r) => acc + r.rating, 0) / (data.length || 1);
+        setAverageRating(Number(avg.toFixed(1)));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchReviews();
+  }, [id]);
 
   const renderStars = () => {
     const stars = [];
-    const maxRating = 5;
-    for (let i = 1; i <= maxRating; i++) {
+    for (let i = 1; i <= 5; i++) {
       stars.push(
         <Star
           key={i}
           className={`h-4 w-4 ${
-            i <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+            i <= Math.round(averageRating)
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-300"
           }`}
         />
       );
     }
     return stars;
+  };
+
+  const removeFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/favorites/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        onRemove(id); // Favorites sayfasından kaldır
+        window.dispatchEvent(
+          new CustomEvent("favoriteChanged", { detail: -1 })
+        ); // Navbar'a haber
+      } else {
+        console.error("Favori silinemedi");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -50,7 +91,6 @@ export default function ProductCard({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Görsel */}
         <div className="relative overflow-hidden">
           <img
             src={hovered && subImage ? subImage : mainImage}
@@ -58,36 +98,27 @@ export default function ProductCard({
             className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
-          {/* Favori ikonu */}
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault(); // Linke tıklamayı engelle
-              setFavorited(!favorited);
-            }}
+            onClick={removeFavorite}
             className="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
           >
-            <Heart
-              className={`h-5 w-5 transition-colors ${
-                favorited ? "text-red-500 fill-red-500" : "text-gray-400"
-              }`}
-            />
+            <Heart className="h-5 w-5 text-red-500 fill-red-500" />
           </button>
         </div>
 
-        {/* Bilgi Alanı */}
         <CardContent className="p-5">
           <h2 className="text-base font-semibold text-stone-800 leading-snug line-clamp-2">
             {title}
           </h2>
 
-          {/* Rating */}
           <div className="mt-2 flex items-center">
             <div className="flex space-x-0.5">{renderStars()}</div>
-            <span className="ml-2 text-sm text-gray-500">({reviewCount})</span>
+            <span className="ml-2 text-sm text-gray-500">
+              ({reviews.length})
+            </span>
           </div>
 
-          {/* Fiyat */}
           <div className="mt-3">
             <p className="text-lg font-semibold text-stone-800">
               {pricePerM2.toFixed(2)} TL

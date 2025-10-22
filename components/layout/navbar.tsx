@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ChevronDown,
   Search,
@@ -33,6 +33,7 @@ import LoginModal from "./login";
 import RegisterModal from "./register";
 import ForgotPasswordModal from "./forgotPassword";
 import Link from "next/link";
+import CartDropdown from "./cartDropdown";
 
 interface MenuItem {
   label: string;
@@ -146,7 +147,58 @@ export default function Navbar(): React.ReactElement {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(
+    null
+  );
 
+  const [favoriteCount, setFavoriteCount] = useState(0);
+
+  const cartDropdownRef = useRef<{ open: () => void }>(null);
+
+  useEffect(() => {
+    // Sayfa yüklendiğinde API’den favori sayısını al
+    const fetchFavorites = async () => {
+      try {
+        const res = await fetch("/api/favorites");
+        if (!res.ok) return;
+        const data = await res.json();
+        setFavoriteCount(data.length);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchFavorites();
+
+    // Event listener ekle
+    const handleFavoriteChange = (e: any) => {
+      setFavoriteCount((prev) => prev + e.detail);
+    };
+
+    window.addEventListener("favoriteChanged", handleFavoriteChange);
+
+    return () => {
+      window.removeEventListener("favoriteChanged", handleFavoriteChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Component mount olduğunda API'yi çağır
+    const checkUser = async () => {
+      try {
+        const res = await fetch("/api/account/check");
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Kullanıcı kontrolü hatası:", error);
+        setUser(null);
+      }
+    };
+    checkUser();
+  }, []);
   // Menü verileri
   const kurumsalItems: MenuItem[] = [
     { label: "Hakkımızda", href: "/institutional/about" },
@@ -159,23 +211,10 @@ export default function Navbar(): React.ReactElement {
   // Görseldeki Ürün Kategorileri (Artık href de içerebilir)
   const productCategories: MenuItem[] = [
     // NOT: Buradaki label'lar artık 'Products' bileşenindeki categoryNames'deki değerlerle EŞLEŞMELİ.
-    { label: "DÜZ SERİ", href: "products?category=duz-seri" }, // slug: duz-seri
-    { label: "DİMOUT", href: "/products?category=dimout" }, // slug: dimout
-    { label: "ÇİFT SİSTEM TÜL", href: "/products?category=cift-sistem-tul" }, // slug: cift-sistem-tul
-    { label: "BLACKOUT", href: "/products?category=blackout" }, // slug: blackout
-    { label: "JAKAR", href: "/products?category=jakar" }, // slug: jakar
-    // {
-    //   label: "%100 KARARTMALI PERDELER",
-    //   href: "/products?category=yuzde-yuz-karartmali",
-    // }, // slug: yuzde-yuz-karartmali
-    // {
-    //   label: "%70 KARARTMALI PERDELER",
-    //   href: "/products?category=yuzde-yetmis-karartmali",
-    // }, // slug: yuzde-yetmis-karartmali
-    { label: "TEKLİ TÜL", href: "/products?category=tekli-tul" }, // slug: tekli-tul
-    { label: "BASKILI", href: "/products?category=baskili" }, // slug: baskili
-    { label: "HONEYCOMB", href: "/products?category=honeycomb" }, // slug: honeycomb
-    { label: "PERDE AKSESUAR", href: "/products?category=aksesuar" }, // slug: aksesuar
+    { label: "PLICELL PERDE", href: "/products?category=plicell" }, // slug: blackout
+    { label: "ZEBRA PERDE", href: "products?category=zebra" }, // slug: duz-seri
+    { label: "STOR PERDE", href: "/products?category=stor" }, // slug: dimout
+    { label: "AHŞAP JALUZİ PERDE", href: "/products?category=ahsap-jaluzi" }, // slug: cift-sistem-tul
   ];
 
   const mobileMenuItems: MenuItem[] = [
@@ -317,87 +356,13 @@ export default function Navbar(): React.ReactElement {
                   className="relative text-stone-700 hover:bg-gray-100 hover:text-red-500 transition-transform hover:scale-110"
                 >
                   <Heart className="h-5 w-5" />
-                  <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center p-0.5 leading-none">
-                    0
+                  <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center">
+                    {favoriteCount}
                   </span>
                 </Button>
               </Link>
               {/* Sepet */}
-              <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-stone-700 hover:bg-gray-100 transition-transform hover:scale-110"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center p-0.5 leading-none">
-                      0
-                    </span>
-                  </Button>
-                </SheetTrigger>
-
-                {/* Sepet İçeriği */}
-                <SheetContent
-                  side="right"
-                  className="w-full sm:w-96 flex flex-col justify-between p-0"
-                >
-                  <SheetHeader className="p-6 pb-2 border-b">
-                    <SheetTitle className="text-xl font-semibold">
-                      Sepetiniz (0)
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="flex-grow overflow-y-auto px-6 py-10 flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      Sepetinizde ürün bulunmamaktadır.
-                    </div>
-                  </div>
-                  <div className="border-t p-6 space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-base font-medium">
-                        <span>Ara Toplam</span>
-                        <span>0,00 TL</span>
-                      </div>
-                      <div className="flex justify-between text-lg font-bold">
-                        <span>Genel Toplam</span>
-                        <span>0,00 TL</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 pt-2">
-                      <input
-                        type="checkbox"
-                        id="terms"
-                        className="form-checkbox h-4 w-4 text-black border-gray-300 rounded focus:ring-black"
-                      />
-                      <label
-                        htmlFor="terms"
-                        className="text-sm cursor-pointer select-none"
-                      >
-                        <span className="hover:text-black transition-colors">
-                          Şartlar ve koşulları
-                        </span>{" "}
-                        kabul ediyorum.
-                      </label>
-                    </div>
-                    <div className="flex space-x-3 pt-2">
-                      <Link href={"/cart"}>
-                        <Button
-                          variant="outline"
-                          className="flex-1 text-black border-black hover:bg-gray-50"
-                        >
-                          Sepete Git
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="default"
-                        className="flex-1 bg-[#001e59] text-white hover:bg-slate-800"
-                      >
-                        Ödemeye Geç
-                      </Button>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+              <CartDropdown />
             </div>
           </div>
           {/* ===================== Masaüstü Görünüm ===================== */}
@@ -494,13 +459,24 @@ export default function Navbar(): React.ReactElement {
                 </Button>
               </Link>
 
-              <Button
-                variant="ghost"
-                onClick={() => setIsLoginOpen(true)}
-                className="text-stone-700 hover:text-blue-700 text-sm font-medium transition-colors"
-              >
-                Giriş Yap
-              </Button>
+              {user ? (
+                <Link href="/profile">
+                  <Button
+                    variant="ghost"
+                    className="text-stone-700 hover:text-blue-700 text-sm font-medium transition-colors"
+                  >
+                    Hesabım
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsLoginOpen(true)}
+                  className="text-stone-700 hover:text-blue-700 text-sm font-medium transition-colors"
+                >
+                  Giriş Yap
+                </Button>
+              )}
               <Link href="/favorites">
                 <Button
                   variant="ghost"
@@ -509,27 +485,13 @@ export default function Navbar(): React.ReactElement {
                 >
                   <Heart className="h-5 w-5" />
                   <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center">
-                    0
+                    {favoriteCount}
                   </span>
                 </Button>
               </Link>
 
               {/* Sepet */}
-              <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-stone-700 hover:bg-gray-100 transition-transform hover:scale-110"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center">
-                      0
-                    </span>
-                  </Button>
-                </SheetTrigger>
-                {/* Sepet içeriği yukarıdakiyle aynı */}
-              </Sheet>
+              <CartDropdown ref={cartDropdownRef} showCount={true} />
             </div>
           </div>
         </div>
@@ -593,27 +555,30 @@ export default function Navbar(): React.ReactElement {
             <span className="text-xs mt-1">Arama</span>
           </a>
 
-          {/* Üye Girişi */}
-          <button
-            onClick={() => setIsLoginOpen(true)}
-            className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]"
-          >
-            <User className="h-5 w-5" />
-            <span className="text-xs mt-1">Giriş</span>
-          </button>
+          {/* Üye Girişi / Hesabım */}
+          {user ? (
+            <Link
+              href="/profile"
+              className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]"
+            >
+              <User className="h-5 w-5" />
+              <span className="text-xs mt-1">Hesabım</span>
+            </Link>
+          ) : (
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]"
+            >
+              <User className="h-5 w-5" />
+              <span className="text-xs mt-1">Giriş</span>
+            </button>
+          )}
 
           {/* Sepet */}
-          <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-            <SheetTrigger asChild>
-              <button className="relative flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="text-xs mt-1">Sepet</span>
-                <span className="absolute -top-1 -right-2 h-4 w-4 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center">
-                  0
-                </span>
-              </button>
-            </SheetTrigger>
-          </Sheet>
+          <div className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59] mb-2">
+            <CartDropdown showCount={false} />
+            <span className="text-xs ">Sepet</span>
+          </div>
         </div>
       </div>
 
@@ -628,7 +593,12 @@ export default function Navbar(): React.ReactElement {
           setIsLoginOpen(false);
           setIsForgotPasswordOpen(true);
         }}
+        onLoginSuccess={(user) => {
+          setUser(user); // Navbar'daki state güncellenir
+          setIsLoginOpen(false);
+        }}
       />
+
       <ForgotPasswordModal
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}

@@ -188,6 +188,7 @@ const Footer: React.FC = () => {
               <span className="font-medium text-white">NowArt Plicell</span>.
               Tüm hakları saklıdır.
             </p>
+         
           </div>
         </div>
       </footer>

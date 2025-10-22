@@ -12,10 +12,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface User {
+interface UserData {
   name: string;
   surname: string;
-  phone?: string;
+  phone?: string | null;
   email: string;
 }
 
@@ -29,7 +29,7 @@ interface FormData {
 
 export default function KisiselBilgilerim() {
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -40,38 +40,67 @@ export default function KisiselBilgilerim() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // --- Sahte Kullanıcı Verisi ---
+  // --- Kullanıcı verisini API'den çek ---
   useEffect(() => {
-    const FAKE_USER: User = {
-      name: "Ahmet",
-      surname: "Yılmaz",
-      phone: "+905551112233",
-      email: "ahmet.yilmaz@example.com",
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user", { method: "GET" });
+        if (!res.ok) throw new Error("Kullanıcı bilgileri alınamadı");
+        const data = await res.json();
+
+        const userData = data.user;
+        setUser(userData);
+        setFormData({
+          firstName: userData.name || "",
+          lastName: userData.surname || "",
+          phone: userData.phone?.replace("+90", "") || "",
+          email: userData.email || "",
+          countryCode: "90",
+        });
+      } catch (error) {
+        console.error(error);
+        toast.error("Kullanıcı bilgileri yüklenemedi.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const timer = setTimeout(() => {
-      setUser(FAKE_USER);
-      setFormData({
-        firstName: FAKE_USER.name,
-        lastName: FAKE_USER.surname,
-        phone: FAKE_USER.phone?.replace("+90", "") || "",
-        email: FAKE_USER.email,
-        countryCode: "90",
-      });
-      setLoading(false);
-    }, 700);
-
-    return () => clearTimeout(timer);
+    fetchUser();
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  // --- Bilgileri Güncelle ---
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone
+            ? `+${formData.countryCode}${formData.phone}`
+            : null,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Güncelleme başarısız oldu");
+        return;
+      }
+
       toast.success("Bilgiler başarıyla güncellendi!");
+      setUser(data.user);
+    } catch (error) {
+      console.error(error);
+      toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
       setSaving(false);
-    }, 1200);
+    }
   };
 
   // --- Skeleton Ekranı ---
@@ -81,13 +110,10 @@ export default function KisiselBilgilerim() {
         <Sidebar />
         <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16">
           <div className="w-full max-w-2xl space-y-6">
-            {/* Başlık Skeleton */}
             <div className="space-y-2">
-              <Skeleton className="h-8 w-56" /> {/* Başlık iskeleti */}
-              <Skeleton className="h-4 w-80" /> {/* Alt açıklama iskeleti */}
+              <Skeleton className="h-8 w-56" />
+              <Skeleton className="h-4 w-80" />
             </div>
-
-            {/* Form Card Skeleton */}
             <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
               <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[...Array(4)].map((_, i) => (
@@ -120,7 +146,6 @@ export default function KisiselBilgilerim() {
 
       <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16">
         <div className="w-full max-w-2xl space-y-6">
-          {/* Başlık */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -135,7 +160,6 @@ export default function KisiselBilgilerim() {
             </p>
           </motion.div>
 
-          {/* Form */}
           <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
             <CardContent className="p-8">
               <form

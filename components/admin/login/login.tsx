@@ -9,32 +9,57 @@ import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // yükleniyor durumu
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setLoginMessage("");
 
-    // Dummy giriş kontrolü (API yok)
-    if (email === "admin@nowart.com" && password === "123456") {
-      setLoginMessage("✅ Giriş başarılı! Yönlendiriliyorsunuz...");
-      setTimeout(() => router.push("/admin/dashboard"), 1500);
-    } else {
-      setLoginMessage("❌ Hatalı email veya şifre!");
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (res?.error) {
+        setLoginMessage("❌ Hatalı email veya şifre!");
+      } else if (res?.ok) {
+        // Kullanıcı rolünü kontrol etmek için session alıyoruz
+        const sessionRes = await fetch("/api/auth/session");
+        const sessionData = await sessionRes.json();
+
+        if (sessionData?.user?.role !== "ADMIN") {
+          setLoginMessage("❌ Bu alan sadece adminler için!");
+          return;
+        }
+
+        setLoginMessage("✅ Giriş başarılı! Yönlendiriliyorsunuz...");
+        setTimeout(() => router.push("/admin/dashboard"), 1000);
+      } else {
+        setLoginMessage("❌ Bilinmeyen bir hata oluştu.");
+      }
+    } catch (error) {
+      console.error(error);
+      setLoginMessage("❌ Giriş sırasında bir hata oluştu.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
-      {/* Arka plan efekti */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-700/40 via-purple-700/30 to-transparent blur-3xl opacity-40" />
 
-      {/* Login kartı */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,7 +67,6 @@ export default function AdminLogin() {
         className="w-full max-w-md backdrop-blur-xl bg-white border border-white/10 rounded-2xl shadow-2xl p-8"
       >
         <div className="flex flex-col items-center mb-6">
-          {/* Logo */}
           <Image
             src="/logo/logo.png"
             alt="Logo"
@@ -50,7 +74,6 @@ export default function AdminLogin() {
             height={80}
             className="mb-3"
           />
-
           <h1 className="text-4xl font-extrabold text-[#001e59] tracking-tight">
             Admin Panel
           </h1>
@@ -62,7 +85,6 @@ export default function AdminLogin() {
         <Separator className="my-6 bg-white/20" />
 
         <form onSubmit={handleLogin} className="space-y-6">
-          {/* Email */}
           <div>
             <Label
               htmlFor="email"
@@ -81,7 +103,6 @@ export default function AdminLogin() {
             />
           </div>
 
-          {/* Şifre */}
           <div>
             <Label
               htmlFor="password"
@@ -111,8 +132,9 @@ export default function AdminLogin() {
           <Button
             type="submit"
             className="w-full bg-[#92e676] hover:bg-green-500 text-white font-semibold py-2 rounded-lg transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-indigo-500/20"
+            disabled={isLoading} // yükleniyorken devre dışı bırak
           >
-            Giriş Yap
+            {isLoading ? "Yükleniyor..." : "Giriş Yap"}
           </Button>
         </form>
 

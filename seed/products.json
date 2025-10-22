@@ -7,7 +7,7 @@
     "reviewCount": 128,
     "mainImage": "/products/product1main.png",
     "subImage": "/products/product1sub1.png",
-    "category": "duz-seri"
+    "category": "plicell"
   },
   {
     "id": 2,
@@ -17,7 +17,7 @@
     "reviewCount": 97,
     "mainImage": "/products/product2main.png",
     "subImage": "/products/product2sub1.png",
-    "category": "baskili"
+    "category": "zebra"
   },
   {
     "id": 3,
@@ -27,7 +27,7 @@
     "reviewCount": 56,
     "mainImage": "/products/product3main.png",
     "subImage": "/products/product3sub1.png",
-    "category": "duz-seri"
+    "category": "plicell"
   },
   {
     "id": 4,
@@ -37,7 +37,7 @@
     "reviewCount": 213,
     "mainImage": "/products/product4main.png",
     "subImage": "/products/product4sub1.png",
-    "category": "jakar"
+    "category": "stor"
   },
   {
     "id": 5,
@@ -47,7 +47,7 @@
     "reviewCount": 41,
     "mainImage": "/products/product5main.png",
     "subImage": "/products/product5sub1.png",
-    "category": "cift-sistem-tul"
+    "category": "ahsap-jaluzi"
   },
   {
     "id": 6,
@@ -57,7 +57,7 @@
     "reviewCount": 320,
     "mainImage": "/products/product6main.png",
     "subImage": "/products/product6sub1.png",
-    "category": "tekli-tul"
+    "category": "ahsap-jaluzi"
   },
   {
     "id": 7,
@@ -67,7 +67,7 @@
     "reviewCount": 320,
     "mainImage": "/products/product7main.png",
     "subImage": "/products/product7sub1.png",
-    "category": "tekli-tul"
+    "category": "ahsap-jaluzi"
   },
   {
     "id": 8,
@@ -77,6 +77,6 @@
     "reviewCount": 320,
     "mainImage": "/products/product8main.png",
     "subImage": "/products/product8sub1.png",
-    "category": "tekli-tul"
+    "category": "ahsap-jaluzi"
   }
 ]

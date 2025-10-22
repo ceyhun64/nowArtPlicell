@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Heart, X } from "lucide-react";
 import { toast } from "sonner";
-import seedProducts from "@/seed/products.json";
-import { useIsMobile } from "@/hooks/use-mobile";
 import Breadcrumb from "@/components/layout/breadCrumb";
 import {
   Select,
@@ -19,9 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import DescriptionandReview from "./descriptionAndReview";
 import MeasureModal from "./measureModal";
+import CartDropdown, { CartItemType } from "../layout/cartDropdown"; // ref ile import
+import Loading from "../layout/loading";
 
 interface ProductData {
   id: number;
@@ -30,8 +30,9 @@ interface ProductData {
   subImage: string;
   pricePerM2: number;
   rating: number;
-  reviewCount: number;
+  reviewCount?: number;
   category: string;
+  device?: string;
 }
 
 const profiles = [
@@ -45,79 +46,213 @@ const profiles = [
 ];
 
 export default function ProductDetail() {
-  const { id } = useParams();
-  const productId = Number(id);
-  const isMobile = useIsMobile();
+  const params = useParams() as { id?: string };
+  const productId = Number(params.id);
 
-  const product = (seedProducts as ProductData[]).find(
-    (p) => p.id === productId
-  );
+  const cartDropdownRef = useRef<{ open: () => void }>(null);
 
+  // ✅ Tüm state hook'ları en üstte
+  const [product, setProduct] = useState<ProductData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [acceptedMeasurement, setAcceptedMeasurement] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(profiles[0].name);
   const [quantity, setQuantity] = useState(1);
+  const [selectedDevice, setSelectedDevice] = useState("vidali");
   const [en, setEn] = useState(0);
   const [boy, setBoy] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
   const [showMeasureModal, setShowMeasureModal] = useState(false);
   const [openMainImage, setOpenMainImage] = useState(false);
   const [selectedMainImage, setSelectedMainImage] = useState<string | null>(
     null
   );
-
-  if (!product) {
-    return (
-      <div className="flex items-center justify-center h-screen text-xl font-semibold text-gray-600">
-        Ürün bulunamadı.
-      </div>
-    );
-  }
-
-  // ✅ m² hesaplama (cm → m²)
-  const calculatedM2 = useMemo(
-    () => ((en * boy) / 10000).toFixed(2),
-    [en, boy]
-  );
-
-  // ✅ Toplam fiyat hesaplama
-  const totalPrice = useMemo(() => {
-    const m2 = parseFloat(calculatedM2);
-    if (isNaN(m2) || m2 <= 0) return 0;
-    return (m2 * product.pricePerM2 * quantity).toFixed(2);
-  }, [calculatedM2, product.pricePerM2, quantity]);
-
-  const handleAddToCart = () =>
-    toast.success(`Ürün sepete eklendi! Toplam: ₺${totalPrice}`);
-  const handleFavoriteToggle = () => {
-    setIsFavorite((prev) => !prev);
-    toast.success(
-      isFavorite ? "Favorilerden kaldırıldı." : "Favorilere eklendi!"
-    );
-  };
-  const handleQuantityChange = (delta: number) =>
-    setQuantity((prev) => Math.max(1, prev + delta));
-
-  // ✅ Yeni state'ler (profil görsel modalı için)
   const [openProfileImage, setOpenProfileImage] = useState(false);
   const [selectedProfileImage, setSelectedProfileImage] = useState<
     string | null
   >(null);
+  const [categoryProducts, setCategoryProducts] = useState<ProductData[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  if (!product) {
-    return (
-      <div className="flex items-center justify-center h-screen text-xl font-semibold text-gray-600">
-        Ürün bulunamadı.
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!product) return;
 
-  // ✅ Profil tıklanınca modal açma
+    const fetchFavorite = async () => {
+      try {
+        const res = await fetch("/api/favorites");
+        if (!res.ok) return;
+        const data: { productId: number }[] = await res.json();
+        const fav = data.find((f) => Number(f.productId) === product.id);
+        setIsFavorite(!!fav);
+      } catch (err) {
+        console.error("Favori durumu çekilemedi", err);
+      } finally {
+        setLoadingFavorite(false);
+      }
+    };
+
+    fetchFavorite();
+  }, [product]);
+
+  // ✅ API'den ürünü çek
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products/${productId}`);
+        if (!res.ok) throw new Error("Ürün bulunamadı");
+        const data = await res.json();
+        setProduct(data.product);
+      } catch (error) {
+        console.error(error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  useEffect(() => {
+    if (!product) return;
+
+    const fetchCategoryProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (res.ok && data.products) {
+          // Aynı kategorideki ürünleri filtrele
+          const filtered = data.products.filter(
+            (p: ProductData) =>
+              p.category.trim().toLowerCase() ===
+              product.category.trim().toLowerCase()
+          );
+          setCategoryProducts(filtered);
+        }
+      } catch (error) {
+        console.error("Kategori ürünleri çekilemedi:", error);
+      }
+    };
+
+    fetchCategoryProducts();
+  }, [product]);
+
+  // ✅ m² hesaplama
+  const calculatedM2 = useMemo(() => {
+    const m2 = (en * boy) / 10000;
+    if (isNaN(m2) || m2 <= 0) return 1;
+    return m2 < 1 ? 1 : m2;
+  }, [en, boy]);
+
+  const totalPrice = useMemo(() => {
+    if (!product) return 0;
+    return calculatedM2 * product.pricePerM2 * quantity;
+  }, [calculatedM2, product, quantity]);
+
+  // ✅ Login kontrolü
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await fetch("/api/account/check");
+        if (!res.ok) return setIsLoggedIn(false);
+        const data = await res.json();
+        setIsLoggedIn(!!data.user?.id);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+    checkLogin();
+  }, []);
+
+  // Sepete ekleme
+  const handleAddToCart = async () => {
+    if (!isLoggedIn) {
+      toast.warning("Sepete eklemek için giriş yapmalısınız."); // opsiyonel
+      return;
+    }
+
+    if (!acceptedMeasurement) {
+      toast.error("Lütfen ölçülerinizi onaylayın.");
+      return;
+    }
+    if (!product) return;
+
+    try {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity,
+          note,
+          profile: selectedProfile,
+          width: en,
+          height: boy,
+          device: selectedDevice,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Ürün sepete eklendi! Toplam: ₺${totalPrice.toFixed(2)}`);
+        cartDropdownRef.current?.open();
+      } else {
+        toast.error(data.error || "Sepete eklenemedi");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Sepete ekleme sırasında bir hata oluştu.");
+    }
+  };
+
+  // Favori işlemi
+  const handleFavoriteToggle = async () => {
+    if (!isLoggedIn) return;
+
+    if (!product) return;
+    try {
+      if (!isFavorite) {
+        const res = await fetch("/api/favorites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: product.id }),
+        });
+        if (res.ok) setIsFavorite(true);
+      } else {
+        const res = await fetch(`/api/favorites/${product.id}`, {
+          method: "DELETE",
+        });
+        if (res.ok) setIsFavorite(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleQuantityChange = (delta: number) =>
+    setQuantity((prev) => Math.max(1, prev + delta));
+
   const handleProfileClick = (profileSrc: string) => {
     setSelectedProfileImage(profileSrc);
     setOpenProfileImage(true);
   };
 
+  // ✅ Loading ve 404
+  if (loading) {
+    return (
+    <Loading />
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl font-semibold text-gray-600">
+        Ürün bulunamadı.
+      </div>
+    );
+  }
   return (
     <div className="bg-gradient-to-b from-white to-gray-50 min-h-screen mt-4 md:mt-8">
       <div className="container mx-auto px-4 md:px-10 ">
@@ -259,48 +394,42 @@ export default function ProductDetail() {
             <Separator />
 
             {/* 🎨 Renk */}
+            {/* 🎨 Renk */}
             <section>
               <h2 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
                 Renk
               </h2>
               <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                {(seedProducts as ProductData[])
-                  .filter(
-                    (p) =>
-                      p.category.trim().toLowerCase() ===
-                      product.category.trim().toLowerCase()
-                  )
-                  .slice(0, 10)
-                  .map((p) => {
-                    const isActive = p.id === product.id;
-                    return (
-                      <Card
-                        key={p.id}
-                        onClick={() =>
-                          !isActive &&
-                          (window.location.href = `/products/${p.id}`)
-                        }
-                        className={`cursor-pointer border rounded-xl flex justify-center items-center transition-all p-1
-              ${
-                isActive
-                  ? "border-[#001e59] shadow-md"
-                  : "border-gray-200 hover:border-gray-400 hover:scale-105"
-              }
-            `}
-                      >
-                        <div className="w-23 h-23 md:w-36 md:h-36 flex justify-center items-center ">
-                          <Image
-                            src={p.mainImage}
-                            alt={p.title}
-                            width={100}
-                            height={100}
-                            className="object-contain w-full h-full rounded-xl p-1.5"
-                            unoptimized
-                          />
-                        </div>
-                      </Card>
-                    );
-                  })}
+                {categoryProducts.slice(0, 10).map((p) => {
+                  const isActive = p.id === product.id;
+                  return (
+                    <Card
+                      key={p.id}
+                      onClick={() =>
+                        !isActive &&
+                        (window.location.href = `/products/${p.id}`)
+                      }
+                      className={`cursor-pointer border rounded-xl flex justify-center items-center transition-all p-1
+            ${
+              isActive
+                ? "border-[#001e59] shadow-md"
+                : "border-gray-200 hover:border-gray-400 hover:scale-105"
+            }
+          `}
+                    >
+                      <div className="w-23 h-23 md:w-36 md:h-36 flex justify-center items-center">
+                        <Image
+                          src={p.mainImage}
+                          alt={p.title}
+                          width={100}
+                          height={100}
+                          className="object-contain w-full h-full rounded-xl p-1.5"
+                          unoptimized
+                        />
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             </section>
 
@@ -385,7 +514,10 @@ export default function ProductDetail() {
               <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">
                 Aparat Seçiniz
               </h3>
-              <Select defaultValue="vidali">
+              <Select
+                value={selectedDevice}
+                onValueChange={(value) => setSelectedDevice(value)}
+              >
                 <SelectTrigger className="h-12 rounded-xl border-gray-300 shadow-sm hover:border-gray-400 transition">
                   <SelectValue placeholder="Aparat Seçiniz" />
                 </SelectTrigger>
@@ -471,6 +603,8 @@ export default function ProductDetail() {
               <Input
                 id="note"
                 type="text"
+                value={note ?? ""}
+                onChange={(e) => setNote(e.target.value)}
                 placeholder="Örn: Cam ölçüsü, montaj notu vb."
                 className="h-10 rounded-lg border-gray-300 focus:ring-2 focus:ring-[#001e59]/40"
               />
@@ -550,6 +684,7 @@ export default function ProductDetail() {
                 size="icon"
                 onClick={handleFavoriteToggle}
                 className="h-12 w-12 rounded-xl border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-all"
+                disabled={loadingFavorite} // loading sırasında tıklanmasın
               >
                 <Heart
                   size={24}
@@ -564,7 +699,10 @@ export default function ProductDetail() {
 
         <Separator className="my-14" />
 
-        <DescriptionandReview productTitle={product.title} />
+        <DescriptionandReview
+          productId={product.id} // productId'yi ekledik
+          productTitle={product.title}
+        />
       </div>
     </div>
   );

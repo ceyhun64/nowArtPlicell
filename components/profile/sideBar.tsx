@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, User, MapPin, Package, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Loading from "../layout/loading";
 
 interface User {
   name: string;
@@ -23,10 +23,10 @@ interface MenuItem {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const isMobile = useIsMobile(); // 🔹 custom hook
+  const isMobile = useIsMobile();
 
-  // Accordion başlangıçta kapalı
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems: Record<string, MenuItem[]> = {
@@ -52,19 +52,30 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    // Kullanıcı bilgilerini simüle et
-    setUser({ name: "Ahmet", surname: "Yılmaz" });
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/account/check");
+        const data = await res.json();
+        setUser(data.user || null);
+      } catch (err) {
+        console.error("Kullanıcı bilgisi alınamadı", err);
+        setUser(null);
+      }
+    };
+    fetchUser();
 
-    // 🔹 Ekran türüne göre accordion başlangıç durumu
-    if (!isMobile) {
-      setIsOpen(true); // sadece masaüstünde açık başlasın
-    } else {
-      setIsOpen(false); // mobilde kapalı
-    }
+    if (!isMobile) setIsOpen(true);
+    else setIsOpen(false);
   }, [isMobile]);
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: "/account/login" });
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      router.push("/");
+    } catch (err) {
+      console.error("Çıkış yapılamadı", err);
+    }
   };
 
   return (
@@ -77,7 +88,7 @@ export default function Sidebar() {
         >
           <div>
             <h2 className="text-lg md:text-xl font-bold text-gray-800">
-              {user ? `${user.name} ${user.surname}` : "Yükleniyor..."}
+              {user ? `${user.name} ${user.surname}` : <Loading />}
             </h2>
             {user && (
               <Button

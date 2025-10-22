@@ -1,4 +1,4 @@
-// OrderDetailDialog.tsx
+"use client";
 
 import React from "react";
 import {
@@ -9,55 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Wallet, Package, Truck, ArrowRight } from "lucide-react";
+import { FormattedOrder, OrderItem, Address } from "@/types/order";
 
-// === TİP TANIMLARI (Orders.tsx ile birebir uyumlu) =========================
-
-interface OrderItem {
-  name: string;
-  quantity: number;
-  unitPrice: string;
-  totalPrice: string;
-  mainImage: string;
-}
-
-interface Address {
-  type: "shipping" | "billing";
-  street: string;
-  city: string;
-  country: string;
-}
-
-interface FormattedOrder {
-  id: number;
-  customer: string;
-  email: string;
-  products: string[];
-  totalPrice: string;
-  paidPrice: string;
-  paymentMethod: string;
-  transactionId: string;
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
-  date: string;
-  createdAt: string;
-  address: Address | undefined;
-  items: OrderItem[];
-}
-
-interface OrderDetailDialogProps {
+interface Props {
   order: FormattedOrder | null;
   setSelectedOrder: React.Dispatch<React.SetStateAction<FormattedOrder | null>>;
   onUpdateStatus: (
     orderId: number,
     currentStatus: FormattedOrder["status"]
-  ) => Promise<void>;
+  ) => void;
   getStatusInTurkish: (status: string) => string;
   getStatusBadge: (status: string) => React.ReactNode;
   getNextStatus: (
     currentStatus: FormattedOrder["status"]
-  ) => FormattedOrder["status"] | null; // 🔹 Burayı güncelledik
+  ) => FormattedOrder["status"] | null;
 }
-
-// === BİLEŞEN ================================================================
 
 export default function OrderDetailDialog({
   order,
@@ -66,148 +32,160 @@ export default function OrderDetailDialog({
   getStatusInTurkish,
   getStatusBadge,
   getNextStatus,
-}: OrderDetailDialogProps): React.JSX.Element | null {
+}: Props) {
   if (!order) return null;
 
   const nextStatus = getNextStatus(order.status);
-  const canUpdateStatus = !!nextStatus;
+
+  const shippingAddress = order.addresses.find((a) => a.type === "shipping");
+  const billingAddress = order.addresses.find((a) => a.type === "billing");
 
   return (
-    <DialogContent className="bg-white text-gray-900 max-w-[95vw] sm:max-w-[425px] md:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg shadow-lg">
+    <DialogContent className="bg-white text-gray-900 max-w-[95vw] sm:max-w-[425px] md:max-w-[800px] max-h-[90vh] overflow-y-auto p-6 rounded-xl shadow-xl">
       <DialogHeader>
-        <DialogTitle className="text-xl sm:text-2xl text-gray-800">
+        <DialogTitle className="text-2xl font-semibold text-gray-800">
           Sipariş #{order.id} Detayı
         </DialogTitle>
-        <DialogDescription className="text-gray-500 text-sm break-all">
-          {order.customer} - {order.email}
+        <DialogDescription className="text-gray-500 text-sm truncate">
+          {order.user.name} {order.user.surname} &bull; {order.user.email}
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 text-sm">
-        {/* --- ÖDEME & DURUM --- */}
-        <div className="md:col-span-2">
-          <h3 className="text-base font-semibold mb-3 border-b border-gray-200 pb-1 flex items-center gap-2 text-gray-700">
-            <Wallet className="w-4 h-4" /> Ödeme ve Durum
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">Durum:</strong>
-              {getStatusBadge(order.status)}
-            </div>
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">Oluşturma Tarihi:</strong>
-              <span>{order.createdAt}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">Ödenen Tutar:</strong>
-              <span className="font-bold text-green-600">
-                {order.paidPrice}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">Toplam Sepet Değeri:</strong>
-              <span>{order.totalPrice}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">Ödeme Yöntemi:</strong>
-              <span>{order.paymentMethod}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <strong className="text-gray-500">İşlem ID:</strong>
-              <span className="truncate max-w-[50%] text-right">
-                {order.transactionId}
-              </span>
-            </div>
+      {/* Ödeme ve Durum */}
+      <div className="my-5 space-y-3">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+          <Wallet className="w-5 h-5" /> Ödeme & Durum
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div className="flex justify-between">
+            <span>Durum:</span>
+            {getStatusBadge(order.status)}
           </div>
-
-          {canUpdateStatus && (
-            <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end">
-              <Button
-                onClick={() => onUpdateStatus(order.id, order.status)}
-                className="bg-purple-600 hover:bg-purple-700 flex items-center gap-1 w-full sm:w-auto text-sm text-white"
-              >
-                <ArrowRight className="w-4 h-4" />
-                Durumu Güncelle: {getStatusInTurkish(nextStatus!)}
-              </Button>
-            </div>
-          )}
-          {!canUpdateStatus && order.status !== "cancelled" && (
-            <p className="mt-4 pt-3 border-t border-gray-200 text-right text-gray-500 text-xs">
-              Bu siparişin durumu (**{getStatusInTurkish(order.status)}**) daha
-              fazla otomatik ilerletilemez.
-            </p>
-          )}
-          {order.status === "cancelled" && (
-            <p className="mt-4 pt-3 border-t border-gray-200 text-right text-red-500 text-xs">
-              Bu sipariş iptal edilmiştir ve durumu değiştirilemez.
-            </p>
-          )}
+          <div className="flex justify-between">
+            <span>Oluşturma:</span>
+            {new Date(order.createdAt).toLocaleString("tr-TR")}
+          </div>
+          <div className="flex justify-between">
+            <span>Toplam Tutar:</span>
+            {order.totalPrice.toLocaleString("tr-TR")} ₺
+          </div>
+          <div className="flex justify-between">
+            <span>Ödenen Tutar:</span>
+            {order.paidPrice.toLocaleString("tr-TR")} ₺
+          </div>
+          <div className="flex justify-between">
+            <span>Ödeme Yöntemi:</span>
+            {order.paymentMethod}
+          </div>
+          <div className="flex justify-between">
+            <span>İşlem ID:</span>
+            {order.transactionId || "-"}
+          </div>
         </div>
 
-        <hr className="col-span-2 border-gray-200 my-2" />
+        {nextStatus && (
+          <div className="flex justify-end mt-3">
+            <Button
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              onClick={() => onUpdateStatus(order.id, order.status)}
+            >
+              <ArrowRight className="w-4 h-4" />{" "}
+              {getStatusInTurkish(nextStatus)}'a Geç
+            </Button>
+          </div>
+        )}
+      </div>
 
-        {/* --- ÜRÜNLER --- */}
-        <div className="md:col-span-2">
-          <h3 className="text-base font-semibold mb-3 border-b border-gray-200 pb-1 flex items-center gap-2 text-gray-700">
-            <Package className="w-4 h-4" /> Sipariş Ürünleri (
-            {order.items.length} adet)
-          </h3>
-          <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-            {order.items.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg bg-gray-50"
-              >
-                <img
-                  src={item.mainImage}
-                  alt={item.name}
-                  className="w-10 h-10 object-cover rounded-md"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{item.name}</p>
+      <hr className="my-4 border-gray-200" />
+
+      {/* Ürünler */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+          <Package className="w-5 h-5" /> Sipariş Ürünleri ({order.items.length}
+          )
+        </h3>
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+          {order.items.map((item, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50 hover:shadow-md transition-shadow"
+            >
+              <img
+                src={item.product.mainImage}
+                alt={item.product.title}
+                className="w-14 h-14 object-cover rounded-md"
+              />
+              <div className="flex-1 min-w-0 text-sm space-y-0.5">
+                <p className="font-medium truncate">{item.product.title}</p>
+                <p className="text-gray-500 text-xs">
+                  Kategori: {item.product.category}
+                </p>
+                <p className="text-gray-500 text-xs">
+                  Birim: {item.unitPrice.toLocaleString("tr-TR")} ₺
+                </p>
+                <p className="text-gray-500 text-xs">
+                  Toplam: {item.totalPrice.toLocaleString("tr-TR")} ₺
+                </p>
+                {item.profile && (
                   <p className="text-gray-500 text-xs">
-                    Birim Fiyat: {item.unitPrice}
+                    Profil: {item.profile}
                   </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-sm">x{item.quantity}</p>
-                  <p className="text-xs text-gray-600">{item.totalPrice}</p>
-                </div>
+                )}
+                {item.width && item.height && (
+                  <p className="text-gray-500 text-xs">
+                    Boyut: {item.width}x{item.height} cm
+                  </p>
+                )}
+                {item.m2 && (
+                  <p className="text-gray-500 text-xs">m²: {item.m2}</p>
+                )}
+                {item.device && (
+                  <p className="text-gray-500 text-xs">Cihaz: {item.device}</p>
+                )}
+                {item.note && (
+                  <p className="text-gray-500 text-xs">Not: {item.note}</p>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <hr className="col-span-2 border-gray-200 my-2" />
-
-        {/* --- ADRES --- */}
-        <div className="md:col-span-2">
-          <h3 className="text-base font-semibold mb-3 border-b border-gray-200 pb-1 flex items-center gap-2 text-gray-700">
-            <Truck className="w-4 h-4" /> Kargo Adresi
-          </h3>
-          {order.address ? (
-            <div className="bg-gray-50 p-3 rounded-lg text-xs sm:text-sm space-y-1 border border-gray-200">
-              <p>
-                <strong>Adres Tipi:</strong> {order.address.type}
-              </p>
-              <p>
-                <strong>Adres:</strong> {order.address.street}
-              </p>
-              <p>
-                <strong>Şehir / Ülke:</strong> {order.address.city} /{" "}
-                {order.address.country}
-              </p>
             </div>
-          ) : (
-            <p className="text-red-500 text-xs">Kargo adresi bulunamadı.</p>
-          )}
+          ))}
         </div>
       </div>
 
-      <div className="flex justify-end pt-4">
+      <hr className="my-4 border-gray-200" />
+
+      {/* Adresler */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {["shipping", "billing"].map((type) => {
+          const addr = order.addresses.find((a) => a.type === type);
+          const title = type === "shipping" ? "Kargo Adresi" : "Fatura Adresi";
+          return (
+            <div key={type}>
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+                <Truck className="w-5 h-5" /> {title}
+              </h3>
+              {addr ? (
+                <div className="p-3 bg-gray-50 border rounded-lg text-sm space-y-1">
+                  <p>Adres Tipi: {addr.type}</p>
+                  <p>Adres: {addr.address}</p>
+                  <p>
+                    Şehir / Ülke: {addr.city} / {addr.country}
+                  </p>
+                  {addr.district && <p>İlçe: {addr.district}</p>}
+                  {addr.zip && <p>ZIP: {addr.zip}</p>}
+                  {addr.phone && <p>Telefon: {addr.phone}</p>}
+                </div>
+              ) : (
+                <p className="text-red-500 text-sm">Adres bulunamadı</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex justify-end mt-5">
         <Button
           onClick={() => setSelectedOrder(null)}
-          className="bg-gray-300 hover:bg-gray-400 text-gray-900 text-sm"
+          className="bg-gray-300 hover:bg-gray-400 text-gray-900"
         >
           Kapat
         </Button>

@@ -14,10 +14,17 @@ import {
   ShoppingCart,
   Users,
   FileText,
+  Loader,
+  CheckCircle,
+  Truck,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/layout/loading";
 
 interface User {
   id: number;
@@ -26,32 +33,23 @@ interface User {
   email: string;
 }
 
-interface Address {
-  type: string;
-  address: string;
-  district: string;
-  city: string;
-  country: string;
-  zip: string;
-  phone: string;
-}
-
 interface OrderItem {
   id: number;
   quantity: number;
   totalPrice: number;
   product: {
-    name: string;
+    title: string;
   };
 }
 
-interface Order {
+interface FormattedOrder {
   id: number;
-  totalPrice: number;
+  paidPrice: number;
   currency?: string;
-  user?: User;
-  items?: OrderItem[];
-  addresses?: Address[];
+  user: User;
+  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+  createdAt: string;
+  items: OrderItem[];
 }
 
 interface KPI {
@@ -66,117 +64,169 @@ interface KPI {
 export default function AdminDashboard() {
   const isMobile = useIsMobile();
   const [kpiData, setKpiData] = useState<KPI[]>([]);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [recentOrders, setRecentOrders] = useState<FormattedOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // ---- STATUS Yardımcı Fonksiyonları ----
+  const getStatusInTurkish = (status: FormattedOrder["status"]) => {
+    switch (status) {
+      case "pending":
+        return "Ödeme Bekleniyor";
+      case "paid":
+        return "Ödeme Başarılı";
+      case "shipped":
+        return "Kargoya Verildi";
+      case "delivered":
+        return "Teslim Edildi";
+      case "cancelled":
+        return "İptal Edildi";
+      default:
+        return "Bilinmiyor";
+    }
+  };
+
+  const getStatusBadge = (status: FormattedOrder["status"]) => {
+    const label = getStatusInTurkish(status);
+    switch (label) {
+      case "Ödeme Bekleniyor":
+        return (
+          <Badge className="bg-yellow-500 flex items-center gap-1">
+            <Loader className="w-3 h-3 animate-spin" />
+            {label}
+          </Badge>
+        );
+      case "Ödeme Başarılı":
+        return (
+          <Badge className="bg-blue-600 flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            {label}
+          </Badge>
+        );
+      case "Kargoya Verildi":
+        return (
+          <Badge className="bg-amber-600 flex items-center gap-1">
+            <Truck className="w-3 h-3" />
+            {label}
+          </Badge>
+        );
+      case "Teslim Edildi":
+        return (
+          <Badge className="bg-green-600 flex items-center gap-1">
+            <Package className="w-3 h-3" />
+            {label}
+          </Badge>
+        );
+      case "İptal Edildi":
+        return (
+          <Badge className="bg-red-700 flex items-center gap-1">
+            <XCircle className="w-3 h-3" />
+            {label}
+          </Badge>
+        );
+      default:
+        return <Badge>{label}</Badge>;
+    }
+  };
+
+  // ---- API'den KPI ve Siparişleri Çek ----
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Tüm API çağrılarını paralel yap
+      const [productRes, orderRes, userRes, blogRes] = await Promise.all([
+        fetch("/api/products"),
+        fetch("/api/order"),
+        fetch("/api/user"),
+        fetch("/api/blog"),
+      ]);
+
+      const [productData, orderData, userData, blogData] = await Promise.all([
+        productRes.json(),
+        orderRes.json(),
+        userRes.json(),
+        blogRes.json(),
+      ]);
+
+      // KPI sayıları
+      const productsCount =
+        productData?.status === "success"
+          ? productData.products?.length || 0
+          : 0;
+      const ordersCount =
+        orderData?.status === "success" ? orderData.orders?.length || 0 : 0;
+      const usersCount =
+        userData?.status === "success" ? userData.users?.length || 0 : 0;
+      const blogsCount =
+        blogData?.status === "success" ? blogData.blogs?.length || 0 : 0;
+
+      // KPI verilerini ayarla
+      setKpiData([
+        {
+          id: "products",
+          title: "Ürünler",
+          stat: productsCount,
+          description: "Ürünleri görüntüle ve yönet",
+          icon: <Package size={24} className="text-blue-500" />,
+          href: "/admin/products",
+        },
+        {
+          id: "orders",
+          title: "Siparişler",
+          stat: ordersCount,
+          description: "Siparişleri takip et ve yönet",
+          icon: <ShoppingCart size={24} className="text-emerald-500" />,
+          href: "/admin/orders",
+        },
+        {
+          id: "users",
+          title: "Kullanıcılar",
+          stat: usersCount,
+          description: "Kullanıcıları yönet",
+          icon: <Users size={24} className="text-violet-500" />,
+          href: "/admin/users",
+        },
+        {
+          id: "blogs",
+          title: "Bloglar",
+          stat: blogsCount,
+          description: "Blog listesini görüntüle",
+          icon: <FileText size={24} className="text-yellow-500" />,
+          href: "/admin/blogs",
+        },
+      ]);
+
+      // En son 5 sipariş
+      const latestOrders =
+        orderData?.status === "success"
+          ? orderData.orders
+              .sort(
+                (a: FormattedOrder, b: FormattedOrder) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
+              .slice(0, 5)
+          : [];
+
+      setRecentOrders(latestOrders);
+    } catch (err) {
+      console.error("API hata:", err);
+      setKpiData([]);
+      setRecentOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const dummyKPI: KPI[] = [
-      {
-        id: "products",
-        title: "Ürünler",
-        stat: 128,
-        description: "Ürünleri görüntüle ve yönet",
-        icon: <Package size={24} className="text-blue-500" />,
-        href: "/admin/products",
-      },
-      {
-        id: "orders",
-        title: "Siparişler",
-        stat: 42,
-        description: "Siparişleri takip et ve yönet",
-        icon: <ShoppingCart size={24} className="text-emerald-500" />,
-        href: "/admin/orders",
-      },
-      {
-        id: "users",
-        title: "Kullanıcılar",
-        stat: 98,
-        description: "Kullanıcıları yönet",
-        icon: <Users size={24} className="text-violet-500" />,
-        href: "/admin/users",
-      },
-      {
-        id: "blogs",
-        title: "Bloglar",
-        stat: 312,
-        description: "Blog listesini görüntüle",
-        icon: <FileText size={24} className="text-yellow-500" />,
-        href: "/admin/blogs",
-      },
-    ];
-
-    const dummyOrders: Order[] = [
-      {
-        id: 1012,
-        totalPrice: 2499,
-        currency: "TRY",
-        user: {
-          id: 1,
-          name: "Ahmet",
-          surname: "Yılmaz",
-          email: "ahmet@example.com",
-        },
-        addresses: [
-          {
-            type: "Teslimat",
-            address: "Cumhuriyet Mah. 123. Sok. No:5",
-            district: "Beşiktaş",
-            city: "İstanbul",
-            country: "Türkiye",
-            zip: "34349",
-            phone: "05321234567",
-          },
-        ],
-        items: [
-          {
-            id: 1,
-            quantity: 2,
-            totalPrice: 1200,
-            product: { name: "Lüks Halı Modeli" },
-          },
-          {
-            id: 2,
-            quantity: 1,
-            totalPrice: 1299,
-            product: { name: "Modern Kilim" },
-          },
-        ],
-      },
-      {
-        id: 1009,
-        totalPrice: 1899,
-        currency: "TRY",
-        user: {
-          id: 2,
-          name: "Elif",
-          surname: "Demir",
-          email: "elif@example.com",
-        },
-        addresses: [
-          {
-            type: "Teslimat",
-            address: "Atatürk Cad. No:20",
-            district: "Bornova",
-            city: "İzmir",
-            country: "Türkiye",
-            zip: "35040",
-            phone: "05421234567",
-          },
-        ],
-        items: [
-          {
-            id: 3,
-            quantity: 3,
-            totalPrice: 1899,
-            product: { name: "Dijital Baskı Halı" },
-          },
-        ],
-      },
-    ];
-
-    setKpiData(dummyKPI);
-    setRecentOrders(dummyOrders);
+    fetchDashboardData();
   }, []);
 
+  // ---- LOADING DURUMU ----
+  if (loading) {
+    return <Loading />;
+  }
+
+  // ---- DASHBOARD UI ----
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-900">
       <Sidebar />
@@ -206,11 +256,9 @@ export default function AdminDashboard() {
                     <CardTitle className="text-gray-900 text-lg">
                       {card.title}
                     </CardTitle>
-                    {card.stat !== "" && (
-                      <CardDescription className="text-gray-900 text-2xl font-bold">
-                        {card.stat}
-                      </CardDescription>
-                    )}
+                    <CardDescription className="text-gray-900 text-2xl font-bold">
+                      {card.stat}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -223,85 +271,90 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Son Siparişler */}
-        <div className="grid gap-4">
-          <Card className="bg-white border border-gray-200 rounded-2xl shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl text-gray-900">
-                Son Siparişler
-              </CardTitle>
-              <Separator className="mt-2 bg-gray-200" />
-            </CardHeader>
-            <CardContent>
-              {recentOrders.length > 0 ? (
-                <ul className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <li
-                      key={order.id}
-                      className="bg-gray-100 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all"
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-gray-900">
-                          Sipariş #{order.id}
-                        </span>
-                        <span className="text-emerald-500 font-bold">
-                          {order.currency || "TRY"} {order.totalPrice}
-                        </span>
-                      </div>
-
-                      <div className="text-gray-700 mb-2 space-y-1">
-                        <p>
-                          <span className="font-semibold">Müşteri:</span>{" "}
-                          {order.user?.name} {order.user?.surname} (
-                          {order.user?.email})
-                        </p>
-                        <p>
-                          <span className="font-semibold">Telefon:</span>{" "}
-                          {order.addresses?.[0]?.phone || "-"}
-                        </p>
-                      </div>
-
-                      <div className="text-gray-500 mb-3">
-                        {order.addresses?.map((addr, idx) => (
-                          <p key={idx} className="text-sm">
-                            <span className="font-semibold">
-                              {addr.type} Adres:
-                            </span>{" "}
-                            {addr.address}, {addr.district}, {addr.city},{" "}
-                            {addr.country} - {addr.zip}
-                          </p>
-                        ))}
-                      </div>
-
-                      <div className="text-gray-700">
-                        <span className="font-semibold">Ürünler:</span>
-                        <ul className="ml-4 mt-1 space-y-1">
-                          {order.items?.map((item) => (
-                            <li
-                              key={item.id}
-                              className="flex justify-between text-sm"
+        {/* Son Siparişler Tablosu */}
+        <Card className="bg-white border border-gray-200 rounded-2xl shadow-md">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-900">
+              Son Siparişler
+            </CardTitle>
+            <Separator className="mt-2 bg-gray-200" />
+          </CardHeader>
+          <CardContent>
+            {recentOrders.length === 0 ? (
+              <p className="text-center text-gray-500 py-6">
+                Henüz sipariş bulunmamaktadır.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left">
+                  <thead className="bg-gray-100 text-[#001e59]">
+                    <tr>
+                      <th className="px-4 py-3">ID</th>
+                      <th className="px-4 py-3">Müşteri</th>
+                      <th className="px-4 py-3 hidden sm:table-cell">Email</th>
+                      <th className="px-4 py-3">Ürünler</th>
+                      <th className="px-4 py-3 hidden md:table-cell">Tutar</th>
+                      <th className="px-4 py-3 hidden lg:table-cell">Durum</th>
+                      <th className="px-4 py-3 hidden md:table-cell">Tarih</th>
+                      <th className="px-4 py-3">Detay</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr
+                        key={order.id}
+                        className="border-b hover:bg-gray-50 transition-all"
+                      >
+                        <td className="px-4 py-3">{order.id}</td>
+                        <td className="px-4 py-3 font-medium">
+                          {order.user.name} {order.user.surname}
+                        </td>
+                        <td className="px-4 py-3 hidden sm:table-cell">
+                          {order.user.email}
+                        </td>
+                        <td className="px-4 py-3 max-w-xs truncate">
+                          {order.items.map((i) => i.product.title).join(", ")}
+                        </td>
+                        <td className="px-4 py-3 hidden md:table-cell text-emerald-600 font-semibold">
+                          {order.paidPrice.toLocaleString("tr-TR")} ₺
+                        </td>
+                        <td className="px-4 py-3 hidden lg:table-cell">
+                          {getStatusBadge(order.status)}
+                        </td>
+                        <td className="px-4 py-3 hidden md:table-cell text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "tr-TR"
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Link href={`/admin/orders?orderId=${order.id}`}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-[#001e59] border-[#001e59] hover:bg-gray-100"
                             >
-                              <span>
-                                {item.product?.name} x{item.quantity}
-                              </span>
-                              <span>
-                                {item.totalPrice} {order.currency || "TRY"}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-center py-6">
-                  Henüz sipariş bulunmamaktadır.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                              Gör
+                            </Button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {recentOrders.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <Link href="/admin/orders" passHref>
+                  <Button className="bg-[#001e59] hover:bg-[#002b87] text-white">
+                    Tüm Siparişleri Gör
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

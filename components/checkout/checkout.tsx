@@ -1,130 +1,81 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-// Yeni Bileşenleri Import Edin
 import PaymentStepper from "@/components/checkout/paymentStepper";
 import StepAddress from "@/components/checkout/stepAddress";
 import StepCargo from "@/components/checkout/stepCargo";
 import StepPaymentCard from "@/components/checkout/stepPayment";
-import BasketSummaryCard from "@/components/checkout/cartSummary"; // Sepet özet bileşeni
+import BasketSummaryCard from "@/components/checkout/cartSummary";
 import Loading from "@/components/layout/loading";
+import { AddressFormData } from "@/components/profile/addressForm";
 
-// Kargo Seçenekleri (Sabit tutuldu)
 const cargoOptions = [
   { id: "standart", name: "Standart Kargo", fee: 12.0 },
   { id: "express", name: "Hızlı Kargo", fee: 22.0 },
 ];
 
-// Yeni Adres Formu için başlangıç state'i
-const initialAddressForm = {
-  title: "",
-  firstName: "",
-  lastName: "",
-  address: "",
-  district: "",
-  city: "",
-  zip: "",
-  phone: "",
-};
-
-// --- Tipler ---
 interface Address {
-  id: string;
+  id: number;
   title: string;
   firstName: string;
   lastName: string;
   address: string;
   district: string;
   city: string;
-  zip: string;
-  phone: string;
+  neighborhood?: string | null;
+  zip?: string;
+  phone?: string;
+  country?: string;
 }
 
 interface User {
-  id: string;
+  id: number;
+  name: string;
+  surname: string;
   email: string;
-  createdAt: string;
-  addresses: Address[];
+  role?: string;
+  phone?: string;
+  addresses?: Address[];
 }
 
 interface Product {
-  id: string;
-  name: string;
-  price: number;
+  id: number;
+  title: string;
+  pricePerM2: number;
+  mainImage: string;
   oldPrice?: number;
   category: string;
-  mainImage: string;
 }
 
 interface CartItem {
-  id: string;
+  id: number;
   product: Product;
   quantity: number;
-  strollerCover?: boolean;
-  hatToyOption?: string;
-  customName?: string;
+  note?: string | null;
+  profile?: string;
+  width?: number;
+  height?: number;
+  device?: string;
 }
 
-// --- ANA BİLEŞEN ---
+interface UserUser {
+  user: User;
+}
+
 export default function PaymentPage() {
   const router = useRouter();
-
-  // Mock kullanıcı ve sepet verisi
-  const [user, setUser] = useState<User>({
-    id: "1",
-    email: "user@example.com",
-    createdAt: new Date().toISOString(),
-    addresses: [
-      {
-        id: "1",
-        title: "Ev",
-        firstName: "Ali",
-        lastName: "Veli",
-        address: "Örnek Mah. No:12",
-        district: "Beşiktaş",
-        city: "İstanbul",
-        zip: "34353",
-        phone: "+905551112233",
-      },
-    ],
-  });
-
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "p1",
-      product: {
-        id: "prod1",
-        name: "Bebek Arabası",
-        price: 499,
-        category: "baby-stroller",
-        mainImage: "/placeholder.png",
-      },
-      quantity: 1,
-      strollerCover: true,
-      hatToyOption: "none",
-    },
-    {
-      id: "p2",
-      product: {
-        id: "prod2",
-        name: "Oyuncak Seti",
-        price: 149,
-        category: "toys",
-        mainImage: "/placeholder.png",
-      },
-      quantity: 2,
-      hatToyOption: "ruffle",
-    },
-  ]);
-
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [step, setStep] = useState<number>(1);
-  const [selectedAddress, setSelectedAddress] = useState<string>(user.addresses[0].id);
-  const [selectedCargo, setSelectedCargo] = useState<string>(cargoOptions[0].id);
+  // --- State tipi ---
+  const [user, setUser] = useState<UserUser | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const [step, setStep] = useState(1);
+  const [selectedCargo, setSelectedCargo] = useState<string>(
+    cargoOptions[0].id
+  );
 
   // Kart bilgileri
   const [cardNumber, setCardNumber] = useState("");
@@ -132,24 +83,73 @@ export default function PaymentPage() {
   const [expireYear, setExpireYear] = useState("");
   const [cvc, setCvc] = useState("");
   const [holderName, setHolderName] = useState("");
+  // PaymentPage içinde
+  const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
 
-  // Yeni adres ekleme
+  // user ve addresses yüklendiğinde ilk adresi seçili yap
+  useEffect(() => {
+    if (user?.user?.addresses?.length) {
+      setSelectedAddress(user.user.addresses[0].id);
+    }
+  }, [user]);
+
+  // Yeni adres ekleme (isteğe bağlı)
+  const initialAddressForm: AddressFormData = {
+    title: "",
+    firstName: "",
+    lastName: "",
+    address: "",
+    district: "",
+    city: "",
+    neighborhood: "",
+    zip: "",
+    phone: "",
+    country: "Türkiye",
+  };
+  const [newAddressForm, setNewAddressForm] =
+    useState<AddressFormData>(initialAddressForm);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
-  const [newAddressForm, setNewAddressForm] = useState(initialAddressForm);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
+
+  // --- Kullanıcı ve sepet verilerini çek ---
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [userRes, cartRes] = await Promise.all([
+          fetch("/api/user"),
+          fetch("/api/cart"),
+        ]);
+
+        if (!userRes.ok || !cartRes.ok) throw new Error("Veri yüklenemedi");
+
+        const userDataRaw: any = await userRes.json();
+        console.log("userDataRaw:", userDataRaw);
+        const cartData: CartItem[] = await cartRes.json();
+
+        setUser(userDataRaw); // artık user.user değil, direkt user
+
+        setCartItems(cartData);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "Veri yüklenemedi");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log(user);
 
   // --- Hesaplamalar ---
   const subTotal = useMemo(() => {
-    const STROLLER_COVER_PRICE = 149;
-    const HAT_TOY_PRICE = 149;
-
     return cartItems.reduce((acc, item) => {
-      const basePrice = item.product?.price ?? 0;
-      const strollerCoverPrice = item.strollerCover ? STROLLER_COVER_PRICE : 0;
-      const hatToyPrice =
-        item.hatToyOption && item.hatToyOption !== "none" ? HAT_TOY_PRICE : 0;
-
-      return acc + (basePrice + strollerCoverPrice + hatToyPrice) * (item.quantity ?? 1);
+      const area =
+        item.width && item.height ? (item.width * item.height) / 10000 : 1;
+      const itemPrice = item.product.pricePerM2 * area;
+      return acc + itemPrice * item.quantity;
     }, 0);
   }, [cartItems]);
 
@@ -158,36 +158,183 @@ export default function PaymentPage() {
     return cargo ? cargo.fee : 0;
   }, [selectedCargo]);
 
-  const totalPrice = useMemo(() => subTotal + selectedCargoFee, [subTotal, selectedCargoFee]);
+  const totalPrice = useMemo(
+    () => subTotal + selectedCargoFee,
+    [subTotal, selectedCargoFee]
+  );
 
-  // --- Yükleme ve Hata Kontrolü ---
   if (loading) return <Loading />;
-  if (error) return <div className="text-red-500 text-center mt-8">{error}</div>;
+  if (error)
+    return <div className="text-red-500 text-center mt-8">{error}</div>;
 
-  // --- Render ---
+  const handleSaveAddress = async () => {
+    try {
+      setIsSavingAddress(true);
+      const res = await fetch("/api/address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAddressForm),
+      });
+
+      if (!res.ok) throw new Error("Adres kaydedilemedi");
+
+      const data = await res.json();
+      // Kullanıcı adreslerini güncelle (opsiyonel)
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              addresses: [data.address, ...(prev.user.addresses ?? [])], // prev.user yerine prev
+            }
+          : prev
+      );
+
+      setIsAddingNewAddress(false);
+      setNewAddressForm(initialAddressForm);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+
+  // --- Ödeme işlemi ---
+  const handlePayment = async () => {
+    if (!user || !user.user.id) {
+      return alert("Geçersiz kullanıcı ID. Lütfen giriş yapınız.");
+    }
+
+    const userId = Number(user.user.id);
+    if (isNaN(userId) || userId <= 0) {
+      return alert("Geçersiz kullanıcı ID");
+    }
+
+    const shippingAddr = user.user.addresses?.find(
+      (a) => a.id === selectedAddress
+    );
+    if (!shippingAddr) {
+      return alert("Adres bulunamadı");
+    }
+
+    const buyer = {
+      id: userId.toString(),
+      buyerName: shippingAddr.firstName || "Adınız",
+      buyerSurname: shippingAddr.lastName || "Soyadınız",
+      email: user.user.email ?? "",
+      identityNumber: "11111111111",
+      registrationDate: new Date().toISOString(),
+      lastLoginDate: new Date().toISOString(),
+      phone: shippingAddr.phone ?? "",
+      city: shippingAddr.city ?? "",
+      country: shippingAddr.country ?? "Türkiye",
+      zipCode: shippingAddr.zip ?? "",
+      ip: "127.0.0.1",
+    };
+
+    const shippingAddress = {
+      contactName: `${shippingAddr.firstName ?? ""} ${
+        shippingAddr.lastName ?? ""
+      }`.trim(),
+      city: shippingAddr.city ?? "",
+      country: shippingAddr.country ?? "Türkiye",
+      address: shippingAddr.address ?? "",
+      zipCode: shippingAddr.zip ?? "",
+    };
+
+    const billingAddress = { ...shippingAddress };
+
+    const basketItemsFormatted = cartItems.map((item) => {
+      const area =
+        item.width && item.height ? (item.width * item.height) / 10000 : 1;
+      const unitPrice = item.product.pricePerM2 * area;
+      return {
+        id: item.product.id.toString(),
+        name: item.product.title,
+        category1: item.product.category,
+        itemType: "PHYSICAL",
+        price: unitPrice.toFixed(2),
+        unitPrice: item.product.pricePerM2.toFixed(2),
+        quantity: item.quantity,
+        productId: item.product.id,
+        totalPrice: unitPrice.toFixed(2),
+        note: item.note,
+        profile: item.profile,
+        width: item.width,
+        height: item.height,
+        m2: area,
+        device: item.device,
+      };
+    });
+
+    const paymentCardFormatted = {
+      cardHolderName: holderName,
+      cardNumber,
+      expireMonth,
+      expireYear,
+      cvc,
+    };
+
+    const orderPayload = {
+      userId,
+      basketItems: basketItemsFormatted,
+      shippingAddress,
+      billingAddress,
+      totalPrice,
+      paidPrice: totalPrice,
+      currency: "TRY",
+      paymentMethod: "iyzipay",
+      paymentCard: paymentCardFormatted,
+      buyer,
+    };
+
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!res.ok) {
+        return router.push("/checkout/unsuccess");
+      }
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+        // ✅ Ödeme başarılı, sepetteki ürünleri temizle
+        await fetch("/api/cart", { method: "DELETE" });
+
+        router.push("/checkout/success");
+      } else {
+        router.push("/checkout/unsuccess");
+      }
+    } catch (err) {
+      console.error("handlePayment fetch hatası:", err);
+      router.push("/checkout/unsuccess");
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-7xl">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">Ödeme İşlemleri</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">
+        Ödeme İşlemleri
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sol Sütun */}
         <div className="lg:col-span-2 space-y-6">
           <PaymentStepper currentStep={step} />
-
-          {step === 1 && (
+          {step === 1 && user && (
+            // StepAddress
             <StepAddress
-              user={user}
+              addresses={user.user.addresses ?? []}
               selectedAddress={selectedAddress}
-              setSelectedAddress={setSelectedAddress}
-              setStep={setStep}
+              onSelectAddress={setSelectedAddress} // state güncellenecek
+              onNext={() => setStep(2)}
+              newAddressForm={newAddressForm}
+              setNewAddressForm={setNewAddressForm}
+              onSaveAddress={handleSaveAddress}
               isAddingNewAddress={isAddingNewAddress}
               setIsAddingNewAddress={setIsAddingNewAddress}
-              newAddressForm={newAddressForm}
-              handleAddressFormChange={(e) => {
-                const { id, value } = e.target;
-                setNewAddressForm((prev) => ({ ...prev, [id]: value }));
-              }}
-              handleAddNewAddress={() => {}}
               isSavingAddress={isSavingAddress}
             />
           )}
@@ -200,8 +347,7 @@ export default function PaymentPage() {
               setStep={setStep}
             />
           )}
-
-          {step === 3 && (
+          {step === 3 && user && (
             <StepPaymentCard
               holderName={holderName}
               setHolderName={setHolderName}
@@ -214,14 +360,13 @@ export default function PaymentPage() {
               setExpireYear={setExpireYear}
               cvc={cvc}
               setCvc={setCvc}
-              handlePayment={() => alert("Ödeme simülasyonu")}
               totalPrice={totalPrice}
               setStep={setStep}
+              handlePayment={handlePayment}
             />
           )}
         </div>
 
-        {/* Sağ Sütun: Sepet Özeti */}
         <div className="lg:col-span-1">
           <BasketSummaryCard
             basketItemsData={cartItems}

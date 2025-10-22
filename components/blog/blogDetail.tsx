@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation"; // Next.js hook
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Blog {
@@ -12,43 +12,21 @@ interface Blog {
   image: string;
 }
 
-const mockBlogs: Blog[] = [
-  {
-    id: 1,
-    title: "Plise Perde Almadan Önce Bunları Kesinlikle Bilmelisin!",
-    date: "19 Şubat 2025",
-    content: `
-Eski perdeleriniz yer kaplamasından ve görüntüsünden sıkıldıysanız NowArt plise perde modelleri ile daha geniş alanlara sahip olabilir...
-    
-Sürgülü Açılır Perdeler Neden Bu Kadar Rağbet Görüyor?
-    
-Katlamalı ve sürgülü mekanik sistemleriyle NowArt perdeler inanılmaz pratikliğiyle kullanım bakımından çok rahatlık sağlıyor...
-    
-Plise Perde Alacaksanız Kesin Bilmeniz Gerekenler!
-    
-Kafanızda bin bir türlü soru sipariş öncesi ve sonrası için başınıza gelebilecek durumlar...
-`,
-    image: "/blog/blog1.jpg",
-  },
-  {
-    id: 2,
-    title: "Ev Dekorasyonunda Perdelerin Önemi",
-    date: "10 Şubat 2025",
-    content: `
-Doğru perde seçimi ile yaşam alanlarınızı hem fonksiyonel hem de estetik olarak tamamlayabilirsiniz...
-    
-Renk ve Malzeme Uyumu
-    
-Doğru malzeme seçimi, mekanın ışık alımı ve dekorasyon tarzı ile birebir uyumlu olmalıdır...
-`,
-    image: "/blog/blog1.jpg",
-  },
-];
-
 export default function BlogDetailPage() {
-  const params = useParams();
-  const blogId = Number(params.id);
-  const blog = mockBlogs.find((b) => b.id === blogId);
+  const searchParams = useSearchParams();
+
+  // searchParams null olabileceği için güvenli kontrol
+  const blogParam = searchParams?.get("blog") ?? null;
+  
+  let blog: Blog | null = null;
+  if (blogParam) {
+    try {
+      blog = JSON.parse(blogParam);
+    } catch (err) {
+      console.error("Blog param parse edilemedi:", err);
+      blog = null;
+    }
+  }
 
   if (!blog) return <p className="text-center mt-20">Blog bulunamadı.</p>;
 
@@ -63,7 +41,7 @@ export default function BlogDetailPage() {
         <img
           src={blog.image}
           alt={blog.title}
-          className="w-full h-64 object-cover rounded-t-xl"
+          className="w-full h-64 md:h-128 object-cover rounded-t-xl"
         />
         <CardContent className="prose max-w-none text-gray-700 mt-4">
           {blog.content.split("\n").map((line, i) => (

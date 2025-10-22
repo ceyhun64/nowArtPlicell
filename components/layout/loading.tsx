@@ -1,16 +1,32 @@
 "use client";
 import React from "react";
-import { Loader2 } from "lucide-react"; // shadcn/ui iconlarıyla birlikte gelir
-import { cn } from "@/lib/utils"; // Eğer shadcn/ui util varsa, className birleştirmek için
+import { Loader } from "lucide-react";
 
-export default function Loading() {
+interface LoadingProps {
+  fullScreen?: boolean; // true ise tüm ekranı kaplar
+  size?: number; // ikon boyutu (px)
+  text?: string; // gösterilecek yazı
+}
+
+export default function Loading({
+  fullScreen = false,
+  size = 16,
+  text = "Yükleniyor...",
+}: LoadingProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div
+      className={`flex items-center justify-center ${
+        fullScreen ? "min-h-screen bg-gray-50" : "h-full"
+      }`}
+    >
       <div className="flex flex-col items-center">
         {/* Spinner */}
-        <Loader2 className="w-16 h-16 text-green-500 animate-spin" />
+        <Loader
+          className={`text-green-500 animate-spin`}
+          style={{ width: size * 1, height: size * 1 }}
+        />
         {/* Loading yazısı */}
-        <span className="mt-4 text-gray-700 text-lg">Loading...</span>
+        <span className="mt-4 text-gray-700 text-lg">{text}</span>
       </div>
     </div>
   );

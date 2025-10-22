@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -17,116 +17,109 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import AdresForm, { AddressFormData } from "@/components/profile/addressForm";
+import Loading from "../layout/loading";
 
-// --- Tipler ---
 interface Address {
-  id: string | number;
+  id: number;
   title: string;
   firstName: string;
   lastName: string;
   address: string;
   district: string;
   city: string;
-  zip: string;
+  neighborhood?: string | null; // <--- burayı string | null | undefined yap
+  zip?: string;
   phone?: string;
-
+  country?: string;
 }
-
-interface User {
-  addresses?: Address[];
-}
-
-interface NewAddressForm extends Omit<Address, "id"> {}
 
 interface StepAddressProps {
-  user: User | null;
-  selectedAddress: string;
-  setSelectedAddress: (id: string) => void;
-  setStep: (step: number) => void;
+  addresses: Address[];
+  selectedAddress: number | null;
+  onSelectAddress: (id: number) => void;
+  onNext: () => void;
+  newAddressForm: AddressFormData;
+  setNewAddressForm: React.Dispatch<React.SetStateAction<AddressFormData>>;
+  onSaveAddress: () => void;
   isAddingNewAddress: boolean;
-  setIsAddingNewAddress: (value: boolean) => void;
-  newAddressForm: NewAddressForm;
-  handleAddressFormChange: (
-    e:
-      | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-      | { target: { id: string, value: string } }
-  ) => void;
-  handleAddNewAddress: (e: FormEvent<HTMLFormElement>) => void;
+  setIsAddingNewAddress: (v: boolean) => void;
   isSavingAddress: boolean;
 }
 
 export default function StepAddress({
-  user,
+  addresses,
   selectedAddress,
-  setSelectedAddress,
-  setStep,
+  onSelectAddress,
+  onNext,
+  newAddressForm,
+  setNewAddressForm,
+  onSaveAddress,
   isAddingNewAddress,
   setIsAddingNewAddress,
-  newAddressForm,
-  handleAddressFormChange,
-  handleAddNewAddress,
   isSavingAddress,
 }: StepAddressProps) {
-  const selectedAddressObject = user?.addresses?.find(
-    (a) => a.id.toString() === selectedAddress
-  );
+  const selected = addresses?.find((a) => a.id === selectedAddress);
 
+  if (!addresses || !Array.isArray(addresses)) {
+    return <Loading />;
+  }
+
+  
+  console.log("addresses", addresses);
   return (
     <Card>
       <CardHeader>
         <CardTitle>Adres Seçimi</CardTitle>
         <CardDescription>
-          Kaydedilmiş adreslerinizden birini seçin veya yeni bir adres ekleyin.
+          Kaydedilmiş adreslerden birini seçin veya yeni bir adres ekleyin.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Kaydedilmiş Adresler */}
-        {user && user.addresses && user.addresses.length > 0 ? (
+        {/* Kaydedilmiş adresler */}
+        {addresses.length > 0 ? (
           <div className="space-y-2">
-            <Label htmlFor="address-select">Kaydedilmiş Adreslerim</Label>
+            <Label htmlFor="address-select">Adreslerim</Label>
             <Select
-              value={selectedAddress || ""}
+              value={selectedAddress?.toString() || ""}
               onValueChange={(val) => {
-                setSelectedAddress(val);
+                onSelectAddress(Number(val));
                 setIsAddingNewAddress(false);
               }}
             >
               <SelectTrigger id="address-select">
                 <SelectValue
                   placeholder={
-                    selectedAddressObject
-                      ? `${selectedAddressObject.title} - ${selectedAddressObject.city}`
+                    selected
+                      ? `${selected.title} - ${selected.city}`
                       : "Adres Seçin"
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {user.addresses.map((addr) => (
+                {addresses.map((addr) => (
                   <SelectItem key={addr.id} value={addr.id.toString()}>
-                    {addr.title} - {addr.address.substring(0, 30)}...,{" "}
-                    {addr.city}
+                    {addr.title} - {addr.city}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">Kayıtlı adresiniz yok.</p>
+          <p className="text-gray-500 text-sm">Kayıtlı adres yok.</p>
         )}
 
         <Separator />
 
-        {/* Yeni Adres Ekle / Geri */}
+        {/* Yeni adres ekleme butonları */}
         {!isAddingNewAddress ? (
           <Button
             variant="outline"
             className="w-full"
             onClick={() => {
               setIsAddingNewAddress(true);
-              setSelectedAddress("");
+              onSelectAddress(0);
             }}
           >
             + Yeni Adres Ekle
@@ -141,119 +134,22 @@ export default function StepAddress({
           </Button>
         )}
 
-        {/* Yeni Adres Formu */}
+        {/* Yeni adres formu */}
         {isAddingNewAddress && (
-          <form
-            onSubmit={handleAddNewAddress}
-            className="space-y-4 p-4 border rounded-md bg-gray-50"
-          >
-            <CardTitle className="text-lg">Yeni Adres Bilgileri</CardTitle>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Adres Başlığı (Örn: Ev, İş)</Label>
-                <Input
-                  id="title"
-                  value={newAddressForm.title}
-                  onChange={handleAddressFormChange}
-                  placeholder="Evim"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="firstName">Ad (*)</Label>
-                <Input
-                  id="firstName"
-                  value={newAddressForm.firstName}
-                  onChange={handleAddressFormChange}
-                  placeholder="Ad"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Soyad (*)</Label>
-                <Input
-                  id="lastName"
-                  value={newAddressForm.lastName}
-                  onChange={handleAddressFormChange}
-                  placeholder="Soyad"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Adres Detayları (*)</Label>
-              <Textarea
-                id="address"
-                value={newAddressForm.address}
-                onChange={handleAddressFormChange}
-                placeholder="Sokak, No, Kat, Daire..."
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">Şehir (*)</Label>
-                <Input
-                  id="city"
-                  value={newAddressForm.city}
-                  onChange={handleAddressFormChange}
-                  placeholder="Şehir"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="district">İlçe (*)</Label>
-                <Input
-                  id="district"
-                  value={newAddressForm.district}
-                  onChange={handleAddressFormChange}
-                  placeholder="İlçe"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zip">Posta Kodu</Label>
-                <Input
-                  id="zip"
-                  value={newAddressForm.zip}
-                  onChange={handleAddressFormChange}
-                  placeholder="34700"
-                />
-              </div>
-
-              {/* Telefon */}
-              <div className="space-y-1">
-                <Label htmlFor="phone">Telefon</Label>
-                <div className="flex rounded-md border border-gray-300 overflow-hidden">
-               
-
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Telefon numarası"
-                    className="flex-[3_1_0] border-none rounded-none focus-visible:ring-0 min-w-0 px-3"
-                    value={newAddressForm.phone}
-                    onChange={handleAddressFormChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-        
-
-            <Button type="submit" className="w-full" disabled={isSavingAddress}>
-              {isSavingAddress ? "Kaydediliyor..." : "Kaydet ve Seç"}
-            </Button>
-          </form>
+          <div className="p-4 border rounded-md bg-gray-50">
+            <AdresForm
+              formData={newAddressForm}
+              setFormData={setNewAddressForm}
+              onSave={onSaveAddress}
+            />
+          </div>
         )}
       </CardContent>
 
       <CardFooter className="justify-end">
         <Button
-          onClick={() => setStep(2)}
-          disabled={!selectedAddress || isAddingNewAddress}
+          onClick={onNext}
+          disabled={!selectedAddress || isAddingNewAddress || isSavingAddress}
         >
           Kargo Seçimine Geç
         </Button>

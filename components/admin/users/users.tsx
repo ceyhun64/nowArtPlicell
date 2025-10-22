@@ -12,14 +12,22 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Loading from "@/components/layout/loading";
 
 interface Address {
   id: number;
   title: string;
   address: string;
   city: string;
+  district: string;
+  neighborhood?: string;
+  firstName: string;
+  lastName: string;
+  zip: string;
+  country: string;
 }
 
 interface User {
@@ -31,6 +39,54 @@ interface User {
   addresses?: Address[];
 }
 
+// 🔹 Silme dialogu reusable
+interface DeleteDialogProps {
+  onConfirm: () => void;
+  trigger: React.ReactNode;
+  title?: string;
+  description?: string;
+}
+
+const DeleteDialog: React.FC<DeleteDialogProps> = ({
+  onConfirm,
+  trigger,
+  title = "Silme İşlemi",
+  description = "Bu işlemi yapmak istediğine emin misin?",
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-[400px] bg-white text-gray-800 rounded-2xl border border-gray-200 shadow-lg">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold text-[#001e59]">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm text-gray-600">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            İptal
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm();
+              setOpen(false);
+            }}
+          >
+            Sil
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function Users(): React.JSX.Element {
   const isMobile = useIsMobile();
   const [users, setUsers] = useState<User[]>([]);
@@ -40,80 +96,25 @@ export default function Users(): React.JSX.Element {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // 🔹 Örnek kullanıcılar
+  // 🔹 API’den kullanıcıları çek
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/user/all");
+      if (!res.ok) throw new Error("Kullanıcılar alınamadı");
+      const data = await res.json();
+      setUsers(data.users);
+    } catch (err) {
+      console.error(err);
+      alert("Kullanıcılar alınırken bir hata oluştu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const sampleUsers: User[] = [
-      {
-        id: 1,
-        name: "Ahmet",
-        surname: "Yılmaz",
-        email: "ahmet@example.com",
-        phone: "05551234567",
-        addresses: [
-          {
-            id: 1,
-            title: "Ev",
-            address: "Cumhuriyet Cd. No:5",
-            city: "İstanbul",
-          },
-          { id: 2, title: "İş", address: "Atatürk Cd. No:12", city: "Ankara" },
-        ],
-      },
-      {
-        id: 2,
-        name: "Ayşe",
-        surname: "Demir",
-        email: "ayse@example.com",
-        phone: "05559876543",
-        addresses: [
-          { id: 1, title: "Ev", address: "Bahçelievler Mah.", city: "İzmir" },
-        ],
-      },
-    ];
-    setUsers(sampleUsers);
-    setTimeout(() => setLoading(false), 300);
+    fetchUsers();
   }, []);
-
-  if (loading)
-    return (
-      <div className="text-gray-700 p-4 flex justify-center items-center min-h-screen">
-        Yükleniyor...
-      </div>
-    );
-
-  // 🔍 Filtreleme
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.surname.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // 📄 Sayfalama
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * 15,
-    currentPage * 15
-  );
-
-  // ❌ Tek kullanıcı silme
-  const handleDelete = (id: number) => {
-    if (!confirm("Bu kullanıcıyı silmek istediğine emin misin?")) return;
-    setUsers(users.filter((u) => u.id !== id));
-    setSelectedIds(selectedIds.filter((sid) => sid !== id));
-  };
-
-  // ❌ Seçilenleri sil
-  const handleDeleteSelected = () => {
-    if (selectedIds.length === 0) return;
-    if (
-      !confirm(
-        `Seçilen ${selectedIds.length} kullanıcıyı silmek istediğine emin misin?`
-      )
-    )
-      return;
-    setUsers(users.filter((u) => !selectedIds.includes(u.id)));
-    setSelectedIds([]);
-  };
 
   // ✅ Checkbox işlemleri
   const handleSelectAll = (e: ChangeEvent<HTMLInputElement>) => {
@@ -132,39 +133,62 @@ export default function Users(): React.JSX.Element {
     }
   };
 
+  // 🔍 Filtreleme
+  const filteredUsers = users.filter(
+    (u) =>
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.surname.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // 📄 Sayfalama
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * 15,
+    currentPage * 15
+  );
+
+  if (loading) return <Loading />;
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-900">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <main
         className={`flex-1 p-4 md:p-8 transition-all ${
           isMobile ? "" : "md:ml-64"
         }`}
       >
-        {/* Başlık */}
+        {/* Başlık ve Araç Çubuğu */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#001e59] ms-12">
             Kullanıcılar
           </h1>
-        </div>
 
-        {/* Araç Çubuğu */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-            <Button
-              variant="default"
-              className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
-                selectedIds.length > 0
-                  ? "bg-red-500 hover:bg-red-600 text-white cursor-pointer"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              disabled={selectedIds.length === 0}
-              onClick={handleDeleteSelected}
-            >
-              Seçilenleri Sil ({selectedIds.length})
-            </Button>
+            {/* Seçilenleri silme dialog */}
+            <DeleteDialog
+              onConfirm={() => {
+                selectedIds.forEach((id) =>
+                  setUsers((prev) => prev.filter((u) => u.id !== id))
+                );
+                setSelectedIds([]);
+              }}
+              trigger={
+                <Button
+                  variant="default"
+                  className={`w-full sm:w-auto rounded-xl shadow-sm transition-all ${
+                    selectedIds.length > 0
+                      ? "bg-red-500 hover:bg-red-600 text-white cursor-pointer"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  disabled={selectedIds.length === 0}
+                >
+                  Seçilenleri Sil ({selectedIds.length})
+                </Button>
+              }
+              title={`Seçilen ${selectedIds.length} kullanıcı silinecek!`}
+              description="Bu kullanıcıları silmek istediğine emin misin?"
+            />
 
             <Input
               type="text"
@@ -176,8 +200,8 @@ export default function Users(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Kullanıcı Tablosu */}
-        <div className="overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-md">
+        {/* Masaüstü tablo */}
+        <div className="hidden lg:block overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-md">
           <table className="min-w-full text-left text-gray-800">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
@@ -235,6 +259,7 @@ export default function Users(): React.JSX.Element {
                         type="checkbox"
                         checked={selectedIds.includes(user.id)}
                         onChange={() => handleSelectOne(user.id)}
+                        className="w-4 h-4 accent-[#001e59]"
                       />
                     </td>
                     <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200">
@@ -258,52 +283,187 @@ export default function Users(): React.JSX.Element {
                           <Button
                             size="sm"
                             variant="default"
-                            className="bg-[#001e59] hover:bg-[#003080] text-white rounded-lg shadow-sm"
+                            className="bg-[#001e59] hover:bg-[#003080] text-white rounded-lg shadow-sm transition-transform hover:scale-105"
                             onClick={() => setSelectedUser(user)}
                           >
                             Adresleri Gör
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-white text-gray-800 border border-gray-200 rounded-2xl shadow-lg">
+                        <DialogContent className="bg-white text-gray-800 border border-gray-200 rounded-2xl shadow-lg max-w-lg">
                           <DialogHeader>
-                            <DialogTitle className="text-lg font-semibold text-[#001e59]">
+                            <DialogTitle className="text-lg font-bold text-[#001e59]">
                               {user.name} {user.surname} - Adresleri
                             </DialogTitle>
                             <DialogDescription className="text-gray-500">
-                              Kullanıcıya kayıtlı adresler
+                              Kullanıcıya kayıtlı tüm adresler
                             </DialogDescription>
                           </DialogHeader>
-                          <ul className="mt-4 space-y-3">
-                            {user.addresses?.map((addr) => (
-                              <li
-                                key={addr.id}
-                                className="p-3 bg-gray-100 border border-gray-200 rounded-xl"
-                              >
-                                <p className="text-gray-700">
-                                  <strong>{addr.title}:</strong> {addr.address},{" "}
-                                  {addr.city}
-                                </p>
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="mt-4 space-y-4">
+                            {user.addresses && user.addresses.length > 0 ? (
+                              user.addresses.map((addr) => {
+                                const addressParts = [
+                                  addr.title || addr.firstName || "Adres",
+                                  addr.address,
+                                  addr.city,
+                                  addr.district,
+                                  addr.zip,
+                                  addr.country,
+                                ].filter(Boolean);
+                                return (
+                                  <div
+                                    key={addr.id}
+                                    className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                                  >
+                                    <h4 className="font-semibold text-gray-800 mb-1">
+                                      {addr.title || addr.firstName || "Adres"}
+                                    </h4>
+                                    <p className="text-gray-600 text-sm">
+                                      {addressParts.slice(1).join(", ")}
+                                    </p>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="text-center text-gray-400 italic py-6">
+                                Bu kullanıcıya kayıtlı adres bulunamadı.
+                              </div>
+                            )}
+                          </div>
                         </DialogContent>
                       </Dialog>
                     </td>
                     <td className="px-2 sm:px-3 py-2 sm:py-3 border-b border-gray-200 text-center">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleDelete(user.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
-                      >
-                        Sil
-                      </Button>
+                      <DeleteDialog
+                        onConfirm={() =>
+                          setUsers(users.filter((u) => u.id !== user.id))
+                        }
+                        trigger={
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
+                          >
+                            Sil
+                          </Button>
+                        }
+                        title={`${user.name} ${user.surname} silinecek!`}
+                        description="Bu kullanıcıyı silmek istediğine emin misin?"
+                      />
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobil card görünümü */}
+        <div className="lg:hidden flex flex-col gap-4 mt-4">
+          {paginatedUsers.length === 0 ? (
+            <div className="text-center py-6 text-gray-500 italic">
+              Kullanıcı bulunamadı.
+            </div>
+          ) : (
+            paginatedUsers.map((user) => (
+              <div
+                key={user.id}
+                className="bg-white border border-gray-200 rounded-2xl shadow-md p-4 flex flex-col gap-2"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(user.id)}
+                      onChange={() => handleSelectOne(user.id)}
+                      className="w-4 h-4 accent-[#001e59]"
+                    />
+                    <h3 className="font-bold text-gray-800">
+                      {user.name} {user.surname}
+                    </h3>
+                  </div>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-[#001e59] hover:bg-[#003080] text-white rounded-lg shadow-sm transition-transform hover:scale-105"
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        Adresleri Gör
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white text-gray-800 border border-gray-200 rounded-2xl shadow-lg max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-lg font-bold text-[#001e59]">
+                          {user.name} {user.surname} - Adresleri
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-500">
+                          Kullanıcıya kayıtlı tüm adresler
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-4 space-y-4">
+                        {user.addresses && user.addresses.length > 0 ? (
+                          user.addresses.map((addr) => {
+                            const addressParts = [
+                              addr.title || addr.firstName || "Adres",
+                              addr.address,
+                              addr.city,
+                              addr.district,
+                              addr.zip,
+                              addr.country,
+                            ].filter(Boolean);
+
+                            return (
+                              <div
+                                key={addr.id}
+                                className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                              >
+                                <h4 className="font-semibold text-gray-800 mb-1">
+                                  {addr.title || addr.firstName || "Adres"}
+                                </h4>
+                                <p className="text-gray-600 text-sm">
+                                  {addressParts.slice(1).join(", ")}
+                                </p>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="text-center text-gray-400 italic py-6">
+                            Bu kullanıcıya kayıtlı adres bulunamadı.
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="text-gray-600 text-sm">
+                  <p>Email: {user.email}</p>
+                  <p>Telefon: {user.phone || "-"}</p>
+                </div>
+
+                <div className="flex justify-end mt-2">
+                  <DeleteDialog
+                    onConfirm={() =>
+                      setUsers(users.filter((u) => u.id !== user.id))
+                    }
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm"
+                      >
+                        Sil
+                      </Button>
+                    }
+                    title={`${user.name} ${user.surname} silinecek!`}
+                    description="Bu kullanıcıyı silmek istediğine emin misin?"
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Sayfalama */}

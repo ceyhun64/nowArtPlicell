@@ -10,60 +10,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Trash2, PlusCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import AdresForm from "./addressForm";
 
 interface Address {
-  id: string;
+  id: number;
   title: string;
   firstName: string;
   lastName: string;
   address: string;
   district: string;
   city: string;
+  neighborhood?: string; // Eklenen alan, opsiyonel bırakılabilir
   zip?: string;
   phone?: string;
+  country?: string;
 }
 
-interface AddressFormProps {
-  formData: AddressFormData;
-  setFormData: React.Dispatch<React.SetStateAction<AddressFormData>>;
-  onSave: () => void;
-}
+// AddressFormProps ve AddressFormData interface'leri zaten AdresForm bileşeninden geliyor.
+// Ancak AdresForm bileşenindeki AddressFormData tanımı ile aynı olmalı.
 
 interface AddressFormData {
   title: string;
   firstName: string;
   lastName: string;
   address: string;
-  district: string;
   city: string;
-  zip: string;
-  phone: string;
+  district: string;
+  neighborhood: string;
+  zip?: string; // Formda yok, opsiyonel yapıldı
+  phone?: string; // Formda yok, opsiyonel yapıldı
+  country?: string; // Formda yok, opsiyonel yapıldı
 }
-
-const SAHTE_ADRESLER: Address[] = [
-  {
-    id: "1",
-    title: "Ev",
-    firstName: "Ahmet",
-    lastName: "Yılmaz",
-    address: "Atatürk Caddesi No:12",
-    district: "Kadıköy",
-    city: "İstanbul",
-    zip: "34710",
-    phone: "0555 111 2233",
-  },
-  {
-    id: "2",
-    title: "İş",
-    firstName: "Ahmet",
-    lastName: "Yılmaz",
-    address: "Maslak Mah. Ofis Sokak No:5",
-    district: "Sarıyer",
-    city: "İstanbul",
-    zip: "34398",
-    phone: "0555 222 3344",
-  },
-];
 
 export default function Adreslerim() {
   const [adresler, setAdresler] = useState<Address[]>([]);
@@ -72,107 +49,192 @@ export default function Adreslerim() {
   const [duzenlenenAdres, setDuzenlenenAdres] = useState<Address | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [ekleFormData, setEkleFormData] = useState<AddressFormData>({
+  // Formdan kaldırılan alanlar için boş string yerine boşluklar (varsayılan değerler)
+  const initialFormData: AddressFormData = {
     title: "",
     firstName: "",
     lastName: "",
     address: "",
     district: "",
     city: "",
+    neighborhood: "",
     zip: "",
     phone: "",
-  });
-
-  const [duzenleFormData, setDuzenleFormData] = useState<AddressFormData>({
-    title: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    district: "",
-    city: "",
-    zip: "",
-    phone: "",
-  });
-
-  // Sahte veriyi yükle
-  useEffect(() => {
-    setTimeout(() => {
-      setAdresler(SAHTE_ADRESLER);
-      setLoading(false);
-    }, 700);
-  }, []);
-
-  const handleSil = (id: string) => {
-    setAdresler((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Adres başarıyla silindi.");
+    country: "Türkiye", // Varsayılan ülke
   };
 
-  const handleEkleKaydet = () => {
+  const [ekleFormData, setEkleFormData] =
+    useState<AddressFormData>(initialFormData);
+
+  const [duzenleFormData, setDuzenleFormData] =
+    useState<AddressFormData>(initialFormData);
+
+  // 🔹 Adresleri Yükle
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const res = await fetch("/api/address", { method: "GET" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Adresler yüklenemedi.");
+        // Gelen veride neighborhood yoksa boş string ataması eklendi.
+        const addressesWithNeighborhood: Address[] = (data.addresses || []).map(
+          (a: Address) => ({
+            ...a,
+            neighborhood: a.neighborhood || "",
+            zip: a.zip || "",
+            phone: a.phone || "",
+            country: a.country || "Türkiye",
+          })
+        );
+        setAdresler(addressesWithNeighborhood);
+      } catch (error) {
+        console.error(error);
+        toast.error("Adresler yüklenirken bir hata oluştu.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
+  // 🔹 Adres Silme (Kodda değişiklik yok)
+  const handleSil = async (id: number) => {
+    try {
+      const res = await fetch(`/api/address/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Adres silinemedi.");
+      setAdresler((prev) => prev.filter((a) => a.id !== id));
+      toast.success("Adres başarıyla silindi.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Adres silinirken bir hata oluştu.");
+    }
+  };
+
+  // 🔹 Yeni Adres Ekle (Zorunlu alanlar kontrolü güncellendi)
+  const handleEkleKaydet = async () => {
+    // Formdaki zorunlu alanlar: title, firstName, lastName, address, city, district, neighborhood
     if (
+      !ekleFormData.title ||
       !ekleFormData.firstName ||
       !ekleFormData.lastName ||
       !ekleFormData.address ||
       !ekleFormData.district ||
-      !ekleFormData.city
+      !ekleFormData.city ||
+      !ekleFormData.neighborhood // Mahalle eklendi
     ) {
       toast.error("Lütfen tüm zorunlu alanları (*) doldurun.");
       return;
     }
 
-    const yeniAdres: Address = {
-      ...ekleFormData,
-      id: (Math.random() * 10000).toFixed(0),
-    };
-    setAdresler((prev) => [...prev, yeniAdres]);
-    toast.success("Adres başarıyla eklendi.");
-    setYeniAdresForm(false);
-    setEkleFormData({
-      title: "",
-      firstName: "",
-      lastName: "",
-      address: "",
-      district: "",
-      city: "",
-      zip: "",
-      phone: "",
-    });
+    try {
+      const res = await fetch("/api/address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ekleFormData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Adres eklenemedi.");
+
+      // Yeni eklenen adresin de neighborhood, zip, phone, country alanları olmalı
+      const newAddress: Address = {
+        ...data.address,
+        neighborhood: data.address.neighborhood || "",
+        zip: data.address.zip || "",
+        phone: data.address.phone || "",
+        country: data.address.country || "Türkiye",
+      };
+
+      setAdresler((prev) => [newAddress, ...prev]);
+      toast.success("Adres başarıyla eklendi.");
+      setYeniAdresForm(false);
+      setEkleFormData(initialFormData); // Formu temizle
+    } catch (error) {
+      console.error(error);
+      toast.error("Adres eklenirken bir hata oluştu.");
+    }
   };
 
+  // 🔹 Adres Düzenleme
   const handleDuzenle = (adres: Address) => {
     setDuzenlenenAdres(adres);
+    setDuzenleFormData({
+      title: adres.title,
+      firstName: adres.firstName,
+      lastName: adres.lastName,
+      address: adres.address,
+      district: adres.district,
+      city: adres.city,
+      neighborhood: adres.neighborhood || "", // Varsayılan değer atandı
+      zip: adres.zip || "", // Varsayılan değer atandı
+      phone: adres.phone || "", // Varsayılan değer atandı
+      country: adres.country || "Türkiye", // Varsayılan değer atandı
+    });
     setDuzenleForm(true);
+    setYeniAdresForm(false); // Yeni adres formunu kapat
   };
 
-  const handleDuzenleKaydet = () => {
+  // 🔹 Adres Düzenleme Kaydet (Kodda değişiklik yok)
+  const handleDuzenleKaydet = async () => {
     if (!duzenlenenAdres) return;
-    setAdresler((prev) =>
-      prev.map((a) =>
-        a.id === duzenlenenAdres.id ? { ...duzenleFormData, id: a.id } : a
-      )
-    );
-    toast.success("Adres başarıyla güncellendi.");
-    setDuzenleForm(false);
-    setDuzenlenenAdres(null);
+
+    // Düzenleme formunda da zorunlu alan kontrolü yapılabilir.
+    if (
+      !duzenleFormData.title ||
+      !duzenleFormData.firstName ||
+      !duzenleFormData.lastName ||
+      !duzenleFormData.address ||
+      !duzenleFormData.district ||
+      !duzenleFormData.city ||
+      !duzenleFormData.neighborhood
+    ) {
+      toast.error("Lütfen tüm zorunlu alanları (*) doldurun.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/address/${duzenlenenAdres.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(duzenleFormData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Adres güncellenemedi.");
+
+      const updatedAddress: Address = {
+        ...data.address,
+        neighborhood: data.address.neighborhood || "",
+        zip: data.address.zip || "",
+        phone: data.address.phone || "",
+        country: data.address.country || "Türkiye",
+      };
+
+      setAdresler((prev) =>
+        prev.map((a) => (a.id === duzenlenenAdres.id ? updatedAddress : a))
+      );
+      toast.success("Adres başarıyla güncellendi.");
+      setDuzenleForm(false);
+      setDuzenlenenAdres(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("Adres güncellenirken bir hata oluştu.");
+    }
   };
 
-  // ✅ Skeleton Yükleme Ekranı
+  // 🔸 Skeleton Yükleme (Kodda değişiklik yok)
   if (loading) {
     return (
       <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
         <Sidebar />
         <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16">
           <div className="w-full max-w-2xl space-y-6">
-            {/* Başlık Skeleton */}
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-72" />
-            </div>
-
-            {/* Adres Kartları Skeleton */}
             {[...Array(2)].map((_, i) => (
               <Card
                 key={i}
-                className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white"
+                className="shadow-xl border border-gray-200 rounded-2xl bg-white"
               >
                 <CardContent className="p-6 space-y-3">
                   <Skeleton className="h-5 w-24" />
@@ -193,18 +255,17 @@ export default function Adreslerim() {
     );
   }
 
-  // Normal render
+  // 🔸 Normal render (Adres listeleme kısmı güncellendi)
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
       <Sidebar />
-      <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16 bg-cover bg-center relative">
-        <div className="w-full max-w-2xl space-y-6 relative z-10">
+      <div className="flex flex-1 justify-center items-start px-3 py-16 md:px-8 md:pt-16 bg-cover bg-center">
+        <div className="w-full max-w-2xl space-y-6">
           {/* Başlık */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center md:text-left"
           >
             <h2 className="text-3xl font-bold text-gray-800">Adreslerim</h2>
             <p className="text-gray-800">
@@ -212,7 +273,7 @@ export default function Adreslerim() {
             </p>
           </motion.div>
 
-          {/* Yeni Adres / Düzenle */}
+          {/* Yeni Adres Butonu */}
           <div className="flex justify-end">
             <Button
               variant="outline"
@@ -220,6 +281,7 @@ export default function Adreslerim() {
               onClick={() => {
                 setYeniAdresForm((prev) => !prev);
                 setDuzenleForm(false);
+                setEkleFormData(initialFormData); // Formu temizle
               }}
             >
               {yeniAdresForm ? (
@@ -240,7 +302,7 @@ export default function Adreslerim() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
+                <Card className="shadow-xl border border-gray-200 bg-white rounded-2xl">
                   <CardContent className="p-8">
                     <h3 className="text-lg font-semibold mb-4">Yeni Adres</h3>
                     <AdresForm
@@ -259,10 +321,10 @@ export default function Adreslerim() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                <Card className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
+                <Card className="shadow-xl border border-gray-200 bg-white rounded-2xl">
                   <CardContent className="p-8">
                     <h3 className="text-lg font-semibold mb-4">
-                      Adresi Düzenle
+                      Adresi Düzenle: {duzenlenenAdres.title}
                     </h3>
                     <AdresForm
                       formData={duzenleFormData}
@@ -282,7 +344,7 @@ export default function Adreslerim() {
                 adresler.map((a) => (
                   <Card
                     key={a.id}
-                    className="shadow-xl border border-gray-200 rounded-2xl overflow-hidden bg-white"
+                    className="shadow-xl border border-gray-200 bg-white rounded-2xl"
                   >
                     <CardContent className="p-6">
                       <div className="flex flex-col justify-between">
@@ -297,10 +359,14 @@ export default function Adreslerim() {
                             {a.address}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
+                            {a.neighborhood && a.neighborhood + ", "}
                             {a.district} — {a.city} {a.zip}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
                             {a.phone}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {a.country}
                           </p>
                         </div>
                         <div className="mt-4 flex justify-end gap-2">
@@ -334,120 +400,5 @@ export default function Adreslerim() {
         </div>
       </div>
     </div>
-  );
-}
-
-// ====== FORM BİLEŞENİ ======
-function AdresForm({ formData, setFormData, onSave }: AddressFormProps) {
-  return (
-    <form
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSave();
-      }}
-    >
-      <div className="space-y-1 md:col-span-2">
-        <Label htmlFor="title">
-          <span className="text-red-500">*</span> Adres Başlığı
-        </Label>
-        <Input
-          id="title"
-          placeholder="(Ev, İş, vb...)"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="firstName">
-          <span className="text-red-500">*</span> Ad
-        </Label>
-        <Input
-          id="firstName"
-          value={formData.firstName}
-          onChange={(e) =>
-            setFormData({ ...formData, firstName: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="lastName">
-          <span className="text-red-500">*</span> Soyad
-        </Label>
-        <Input
-          id="lastName"
-          value={formData.lastName}
-          onChange={(e) =>
-            setFormData({ ...formData, lastName: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="space-y-1 md:col-span-2">
-        <Label htmlFor="address">
-          <span className="text-red-500">*</span> Adres
-        </Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) =>
-            setFormData({ ...formData, address: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="district">
-          <span className="text-red-500">*</span> İlçe
-        </Label>
-        <Input
-          id="district"
-          value={formData.district}
-          onChange={(e) =>
-            setFormData({ ...formData, district: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="city">
-          <span className="text-red-500">*</span> Şehir
-        </Label>
-        <Input
-          id="city"
-          value={formData.city}
-          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="zip">Posta Kodu</Label>
-        <Input
-          id="zip"
-          value={formData.zip}
-          onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="phone">Telefon</Label>
-        <Input
-          id="phone"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-        />
-      </div>
-
-      <div className="md:col-span-2 flex justify-start mt-6">
-        <Button
-          type="submit"
-          className="flex items-center gap-2 w-48 bg-green-700 hover:bg-green-800 rounded-md"
-        >
-          <Save size={16} /> Kaydet
-        </Button>
-      </div>
-    </form>
   );
 }

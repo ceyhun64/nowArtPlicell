@@ -15,8 +15,8 @@ import {
   StretchHorizontal,
   StretchVertical,
 } from "lucide-react";
-// seedProducts'ın doğru yoldan import edildiğini varsayıyoruz.
-import seedProducts from "@/seed/products.json";
+// seedProducts importu kaldırıldı.
+// import seedProducts from "@/seed/products.json";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -33,7 +33,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
+import Loading from "../layout/loading";
 
+// === Ürün Veri Tipi (API'den gelen veriye uyacak şekilde güncellendi) ===
 interface ProductData {
   id: number;
   title: string;
@@ -41,7 +43,7 @@ interface ProductData {
   rating: number;
   reviewCount: number;
   mainImage: string;
-  subImage: string;
+  subImage: string; // subImage opsiyonel olabilir
   category: string;
   subcategory?: string;
 }
@@ -49,29 +51,27 @@ interface ProductData {
 // === Kategori İsimleri ===
 const categoryNames: Record<string, string> = {
   "tum-urunler": "TÜM ÜRÜNLER",
-  "duz-seri": "DÜZ SERİ",
-  baskili: "BASKILI",
-  "cift-sistem-tul": "ÇİFT SİSTEM TÜL",
-  "tekli-tul": "TEKLİ TÜL",
-  jakar: "JAKAR",
-  honeycomb: "HONEYCOMB",
-  blackout: "BLACKOUT",
-  dimout: "DIMOUT",
-  "yuzde-yuz-karartmali": "%100 KARARTMALI PERDELER",
-  "yuzde-yetmis-karartmali": "%70 KARARTMALI PERDELER",
-  aksesuar: "PERDE AKSESUAR",
+  plicell: "PLİCELL",
+  zebra: "ZEBRA",
+  stor: "STOR",
+  "ahsap-jaluzi": "AHŞAP JALUZİ",
 };
 
-// Orijinal mantığı içeren ana bileşen. Artık doğrudan dışa aktarılmıyor.
-// Bu bileşen, istemci tarafı hook'ları içerir.
+
+// Orijinal mantığı içeren ana bileşen.
 const ProductsContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const categoryFromUrl = searchParams.get("category");
-  const subFromUrl = searchParams.get("sub");
+  const categoryFromUrl = searchParams?.get("category") || null;
+  const subFromUrl = searchParams?.get("sub") || null;
+  
+  // === DİNAMİK ÜRÜN STATE'LERİ ===
+  const [products, setProducts] = useState<ProductData[]>([]); // API'den çekilen tüm ürünler
+  const [isLoading, setIsLoading] = useState(true); // Yüklenme durumu
+  // ==============================
 
-  // === State ===
+  // === DİĞER STATE'LER ===
   const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [sort, setSort] = useState<"az" | "za" | "priceLow" | "priceHigh">(
@@ -83,7 +83,26 @@ const ProductsContent: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
-  // === Kategori & Sub Normalizasyonu ===
+  // === ÜRÜN VERİSİNİ API'DEN ÇEKME (Dinamiğe geçiş) ===
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products");
+        if (!response.ok) {
+          throw new Error("Ürünler API'den çekilemedi.");
+        }
+        const data = await response.json();
+        setProducts(data.products || []);
+      } catch (error) {
+        console.error("Ürün çekme hatası:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []); // Component yüklendiğinde bir kez çalışır.
+
+  // === URL'den Kategori & Sub Normalizasyonu ===
   useEffect(() => {
     const normalize = (value: string | null) =>
       value ? value.toLowerCase().replace(/\s+/g, "-") : null;
@@ -101,6 +120,7 @@ const ProductsContent: React.FC = () => {
 
   // === Kategori Seçimi ===
   const handleSelectCategory = (category: string, sub?: string | null) => {
+    // ... (URL yönlendirme mantığı aynı kalır)
     const normalizedCategory = category.toLowerCase().replace(/\s+/g, "-");
     const normalizedSub = sub ? sub.toLowerCase().replace(/\s+/g, "-") : null;
 
@@ -119,23 +139,24 @@ const ProductsContent: React.FC = () => {
     }
   };
 
-  // === Filtrelenmiş Ürünler ===
+  // === Filtrelenmiş Ürünler (Artık 'products' state'ini kullanıyor) ===
   const filteredProducts = useMemo(() => {
-    if (!isReady) return [];
+    if (isLoading || !isReady) return [];
 
-    if (selectedCategory === "tum-urunler") return seedProducts;
+    if (selectedCategory === "tum-urunler") return products;
 
-    return (seedProducts as ProductData[]).filter((p: ProductData) => {
+    return products.filter((p: ProductData) => {
       const categoryMatch =
         p.category.toLowerCase().replace(/\s+/g, "-") === selectedCategory;
+      // Subcategory opsiyonel olduğu için, subcategory yoksa tüm ürünleri göster.
       const subMatch = selectedSub
         ? p.subcategory?.toLowerCase().replace(/\s+/g, "-") === selectedSub
         : true;
       return categoryMatch && subMatch;
     });
-  }, [selectedCategory, selectedSub, isReady]);
+  }, [selectedCategory, selectedSub, isReady, products, isLoading]);
 
-  // === Sıralama ===
+  // === Sıralama (filteredProducts'ı kullanmaya devam eder) ===
   const sortedProducts = useMemo(() => {
     const sorted = [...filteredProducts];
     switch (sort) {
@@ -155,16 +176,14 @@ const ProductsContent: React.FC = () => {
     return sorted;
   }, [filteredProducts, sort]);
 
-  if (!isReady) {
-    // Bu yükleme durumunu Suspense'in fallback'ine taşıdık,
-    // ancak `isReady` state'i hala gerekli olabilir.
+  if (isLoading || !isReady) {
+    // Yüklenme durumunu burada göster
     return (
-      <div className="flex justify-center items-center py-20 text-gray-500">
-        Ürünler yükleniyor...
-      </div>
+     <Loading/>
     );
   }
 
+  // ... (Geri kalan render mantığı aynı kalır)
   return (
     <div className="flex flex-col md:flex-row md:space-x-8 px-4 md:px-20 py-8 bg-gray-50 font-serif mx-auto">
       {/* Sol Filtre (Desktop) */}
@@ -365,14 +384,10 @@ const ProductsContent: React.FC = () => {
   );
 };
 
-// Bu bileşen, sayfanızda (örneğin app/products/page.tsx) import etmeniz gereken yeni varsayılan dışa aktarımdır.
-// ProductsContent bileşenini <Suspense> içinde sarmalayarak Vercel/Next.js hatasını çözer.
+// ... (Products bileşeni aynı kalır)
 const Products: React.FC = () => {
-  // Suspense için basit bir yüklenme göstergesi (fallback)
   const loadingFallback = (
-    <div className="flex justify-center items-center py-20 text-gray-500">
-      Sayfa yükleniyor...
-    </div>
+   <Loading/>
   );
 
   return (

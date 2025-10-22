@@ -4,30 +4,13 @@ import React from "react";
 import { Trash2, Plus, Minus, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  oldPrice?: number;
-  category: string;
-  mainImage: string;
-}
-
-interface CartItemType {
-  id: number;
-  product: Product;
-  quantity: number;
-  strollerCover?: boolean;
-  hatToyOption?: string;
-  customName?: string;
-}
+import { CartItemType } from "./cart";
 
 interface CartItemProps {
   item: CartItemType;
-  onIncrease: (id: number) => void;
-  onDecrease: (id: number) => void;
-  onRemove: (id: number) => void;
+  onIncrease: () => void;
+  onDecrease: () => void;
+  onRemove: () => void;
 }
 
 export default function CartItem({
@@ -36,30 +19,16 @@ export default function CartItem({
   onDecrease,
   onRemove,
 }: CartItemProps) {
-  const { product, quantity } = item;
-
-  const basePrice = product.price || 0;
-  const oldPrice = product.oldPrice || 0;
-  const strollerCoverPrice = item.strollerCover ? 149 : 0;
-  const hatToyPrice =
-    item.hatToyOption && item.hatToyOption !== "none" ? 149 : 0;
-
-  const finalPrice = (basePrice + strollerCoverPrice + hatToyPrice) * quantity;
-  const finalOldPrice =
-    (oldPrice + strollerCoverPrice + hatToyPrice) * quantity;
-
-  const hasOptions =
-    (item.customName && item.customName !== "none") ||
-    item.strollerCover ||
-    (item.hatToyOption && item.hatToyOption !== "none");
+  const { product, quantity, note, profile, device, width, height, m2 } = item;
+  const finalPrice = (product.pricePerM2 || 0) * (m2 || 1) * quantity;
 
   return (
-    <div className="flex flex-col sm:flex-row w-full gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+    <div className="flex w-full gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex-row items-center">
       {/* Product Image */}
-      <div className="relative w-full sm:w-32 h-40 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden">
+      <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
         <Image
           src={product.mainImage}
-          alt={product.name}
+          alt={product.title}
           fill
           className="object-cover"
           unoptimized
@@ -68,67 +37,62 @@ export default function CartItem({
 
       {/* Product Info */}
       <div className="flex flex-col flex-1 justify-between">
-        {/* Title + Delete */}
+        {/* Header */}
         <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-base sm:text-lg text-gray-900 leading-tight">
-            {product.name}
+          <h3 className="font-medium text-sm sm:text-base text-gray-900 truncate">
+            {product.title}
           </h3>
           <button
-            onClick={() => onRemove(item.id)}
-            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            onClick={onRemove}
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
           >
-            <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
+            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        {/* Options */}
-        {hasOptions && (
-          <div className="text-xs sm:text-sm text-gray-600 mt-2 space-y-0.5">
-            {item.customName && <p>Custom Name: {item.customName}</p>}
-            {item.strollerCover && <p>Stroller Cover (+TL149)</p>}
-            {item.hatToyOption && item.hatToyOption !== "none" && (
-              <p>Hat & Toy: {item.hatToyOption} (+TL149)</p>
-            )}
-          </div>
-        )}
+        {/* Product Details */}
+        <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+          {note && <p className="truncate">Not: {note}</p>}
+          {profile && <p className="truncate">Profil: {profile}</p>}
+          {device && <p className="truncate">Aparat: {device}</p>}
+          {width && height && (
+            <p className="truncate">
+              Ölçü: {width}cm x {height}cm (m²: {m2})
+            </p>
+          )}
+        </div>
 
         {/* Quantity + Price */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4 sm:gap-6">
+        <div className="flex justify-end items-center mt-2 gap-2">
           {/* Quantity Controls */}
-          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-fit">
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
             <button
-              onClick={() => onDecrease(item.id)}
+              onClick={onDecrease}
               disabled={quantity <= 1}
-              className="p-2 sm:p-3 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
+              className="p-2 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-40"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3 w-3" />
             </button>
-            <span className="w-10 text-center font-medium text-gray-900 text-sm sm:text-base">
+            <span className="w-8 text-center font-medium text-gray-900 text-sm">
               {quantity}
             </span>
             <button
-              onClick={() => onIncrease(item.id)}
-              className="p-2 sm:p-3 text-gray-500 hover:text-gray-700 transition-colors"
+              onClick={onIncrease}
+              className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
             </button>
           </div>
 
           {/* Price & Edit */}
-          <div className="flex flex-col items-center sm:items-end text-right">
-            {oldPrice > 0 && (
-              <span className="text-gray-400 line-through text-xs sm:text-sm">
-                TL{finalOldPrice.toFixed(2)}
-              </span>
-            )}
-            <span className="font-bold text-gray-900 text-sm sm:text-base md:text-lg">
-              TL{finalPrice.toFixed(2)}
+          <div className="flex flex-col items-end text-right text-xs sm:text-sm">
+            <span className="font-bold text-gray-900 text-sm sm:text-base">
+              ₺{finalPrice.toFixed(2)}
             </span>
-
             <Link href={`/products/${product.id}`}>
-              <button className="flex items-center text-xs sm:text-sm text-gray-500 hover:text-gray-800 mt-1 transition-colors">
+              <button className="flex items-center text-xs text-gray-500 hover:text-gray-800 mt-1 transition-colors">
                 <span className="mr-1">Düzenle</span>
-                <Edit className="h-4 w-4" />
+                <Edit className="h-3 w-3" />
               </button>
             </Link>
           </div>
