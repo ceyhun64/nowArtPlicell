@@ -1,3 +1,4 @@
+"use client"
 import dynamic from "next/dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
