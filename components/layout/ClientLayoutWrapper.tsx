@@ -11,7 +11,7 @@ export default function ClientLayoutWrapper({
   const pathname = usePathname();
 
   // Admin sayfalarında sidebar görünmesin
-  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminPage = pathname?.startsWith("/admin") ?? false;
 
   return (
     <>
