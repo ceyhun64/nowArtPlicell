@@ -20,7 +20,6 @@ import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import DescriptionandReview from "./descriptionAndReview";
 import MeasureModal from "./measureModal";
-import CartDropdown, { CartItemType } from "../layout/cartDropdown"; // ref ile import
 import Loading from "../layout/loading";
 
 interface ProductData {
@@ -49,8 +48,9 @@ export default function ProductDetail() {
   const params = useParams() as { id?: string };
   const productId = Number(params.id);
 
-  const cartDropdownRef = useRef<{ open: () => void }>(null);
-
+  const cartDropdownRef = useRef<{ open: () => void; refreshCart: () => void }>(
+    null
+  );
   // ✅ Tüm state hook'ları en üstte
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -197,7 +197,13 @@ export default function ProductDetail() {
       const data = await res.json();
       if (res.ok) {
         toast.success(`Ürün sepete eklendi! Toplam: ₺${totalPrice.toFixed(2)}`);
+        // Örneğin, sepete ekleme başarılı olduktan sonra:
+        if (window) {
+          // Sepetin güncellenmesi gerektiğini bildiren global bir olay oluşturun ve tetikleyin
+          window.dispatchEvent(new CustomEvent("cartUpdated"));
+        }
         cartDropdownRef.current?.open();
+        (cartDropdownRef.current as any)?.refreshCart();
       } else {
         toast.error(data.error || "Sepete eklenemedi");
       }
@@ -241,9 +247,7 @@ export default function ProductDetail() {
 
   // ✅ Loading ve 404
   if (loading) {
-    return (
-    <Loading />
-    );
+    return <Loading />;
   }
 
   if (!product) {

@@ -80,6 +80,14 @@ const CartDropdown = forwardRef(
       }
     };
 
+    useImperativeHandle(ref, () => ({
+      open: () => setIsOpen(true),
+      // ✅ Sepeti güncelleyen yeni metodu ekliyoruz
+      refreshCart: () => {
+        if (isLoggedIn) fetchCart();
+      },
+    }));
+
     useEffect(() => {
       (async () => {
         await checkLogin();
@@ -89,15 +97,40 @@ const CartDropdown = forwardRef(
     useEffect(() => {
       if (isLoggedIn) fetchCart();
     }, [isLoggedIn]);
+    // CartDropdown.tsx içinde
 
+    // ... diğer useEffect'ler (isLoggedIn ve isOpen için olanlar kalsın) ...
+
+    useEffect(() => {
+      const handleCartUpdate = () => {
+        // Sepet güncellendi olayını aldığımızda sepeti tekrar çekiyoruz.
+        // Ancak sadece kullanıcı giriş yapmışsa çekmeliyiz.
+        if (isLoggedIn) {
+          fetchCart();
+          // Opsiyonel: Eğer sepet kapalıysa, sadece sayacı günceller.
+          // Eğer açıksa zaten yukarıdaki isOpen/isLoggedIn useEffect'i de tetikleyebilir.
+          // Yine de burada bir kez daha çağırmak mantıklı.
+        }
+      };
+
+      // Global olayı dinle
+      window.addEventListener("cartUpdated", handleCartUpdate);
+
+      // Component kaldırıldığında dinlemeyi bırak
+      return () => {
+        window.removeEventListener("cartUpdated", handleCartUpdate);
+      };
+    }, [isLoggedIn, fetchCart]); // isLoggedIn değişirse veya fetchCart değişirse (değişmez ama React kuralı için) yeniden dinlemeye başla
+
+    // NOT: fetchCart fonksiyonunu bu useEffect'in bağımlılık dizisine (dependency array) eklemek için,
+    // CartDropdown içinde fetchCart fonksiyonunu useCallback ile sarmalamanız en iyisidir.
+    // Mevcut haliyle fetchCart useEffect dışında tanımlandığı için hata vermeyecektir,
+    // ancak en temiz React yolu:
+
+    // const fetchCart = useCallback(async () => { /* ... mevcut fetchCart içeriği ... */ }, []);
     useEffect(() => {
       if (isOpen && isLoggedIn) fetchCart();
     }, [isOpen, isLoggedIn]);
-
-    useImperativeHandle(ref, () => ({
-      open: () => setIsOpen(true),
-    }));
-
     const handleQuantityChange = async (id: number, delta: number) => {
       const item = cartItems.find((c) => c.id === id);
       if (!item) return;

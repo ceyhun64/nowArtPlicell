@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
-import ScrollToTopButton from "@/components/layout/scrollToTop"; // Yeni buton
-
+import ScrollToTopButton from "@/components/layout/scrollToTop";
+import { CartProvider } from "@/contexts/cartContext";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -38,21 +38,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Sayfa içeriği ve koşullu sidebar */}
-        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-        <ScrollToTopButton />
+        {/* 🔹 CartProvider tüm uygulamayı sarmalı */}
+        <CartProvider>
+          {/* Ana layout yapısı */}
+          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
 
-        <Toaster
-          richColors
-          position="bottom-right"
-          toastOptions={{
-            style: { zIndex: 9999 },
-          }}
-        />
+          {/* Diğer global bileşenler */}
+          <ScrollToTopButton />
+
+          <Toaster
+            richColors
+            position="bottom-right"
+            toastOptions={{
+              style: { zIndex: 9999 },
+            }}
+          />
+        </CartProvider>
       </body>
     </html>
   );
