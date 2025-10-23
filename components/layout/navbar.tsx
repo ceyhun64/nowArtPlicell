@@ -300,6 +300,7 @@ export default function Navbar(): React.ReactElement {
                         <Button
                           variant="outline"
                           className="w-full justify-start text-base border-gray-300 text-stone-700 hover:bg-gray-100"
+                          aria-label="Arama yap"
                         >
                           <Search className="h-5 w-5 mr-2" /> Arama
                         </Button>
@@ -459,6 +460,7 @@ export default function Navbar(): React.ReactElement {
                   variant="ghost"
                   size="icon"
                   className="hover:bg-gray-100 text-stone-700 transition-transform hover:scale-110"
+                  aria-label="Arama yap"
                 >
                   <Search className="h-5 w-5" />
                 </Button>
@@ -559,6 +561,7 @@ export default function Navbar(): React.ReactElement {
           <a
             href="/search"
             className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]"
+            aria-label="Arama yap"
           >
             <Search className="h-5 w-5" />
             <span className="text-xs mt-1">Arama</span>
