@@ -121,11 +121,11 @@
   }
 }
 
-Button {
+button {
   @apply cursor-pointer;
 }
 
-Link {
+link {
   @apply cursor-pointer;
 }
 

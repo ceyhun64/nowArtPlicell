@@ -62,7 +62,7 @@ export default function ProductCard({
           <button
             type="button"
             onClick={(e) => {
-              e.preventDefault(); 
+              e.preventDefault();
               setFavorited(!favorited);
             }}
             className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 bg-white/80 rounded-full p-1.5 sm:p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
@@ -89,9 +89,10 @@ export default function ProductCard({
           </div>
 
           <div className="mt-2 sm:mt-3">
-            <p className="text-sm sm:text-lg font-semibold text-red-500">
+            <p className="text-sm sm:text-lg font-semibold text-red-700">
               {pricePerM2.toFixed(2)} TL
             </p>
+
             <p className="text-xs sm:text-sm text-gray-500">Metrekare Fiyatı</p>
           </div>
         </CardContent>

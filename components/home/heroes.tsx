@@ -84,8 +84,9 @@ export default function Heroes(): React.ReactElement {
                   width={1400}
                   height={600}
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  priority={index === 0} // İlk görsel öncelikli
-                  placeholder="blur" // Blur efekti
+                  priority={index === 0}
+                  fetchPriority={index === 0 ? "high" : "auto"} // 👈 ekledik
+                  placeholder="blur"
                 />
 
                 {/* Gradient overlay */}
@@ -102,6 +103,7 @@ export default function Heroes(): React.ReactElement {
              bg-white bg-opacity-60 hover:bg-opacity-90 text-gray-800 
              rounded-full p-2 md:p-3 shadow-lg transition z-20 
              scale-90 md:scale-100"
+          aria-label="Önceki slide"
         >
           <ChevronLeft size={20} className="md:hidden" />
           <ChevronLeft size={28} className="hidden md:block" />
@@ -114,6 +116,8 @@ export default function Heroes(): React.ReactElement {
              bg-white bg-opacity-60 hover:bg-opacity-90 text-gray-800 
              rounded-full p-2 md:p-3 shadow-lg transition z-20 
              scale-90 md:scale-100"
+               aria-label="Sonraki slide"
+
         >
           <ChevronRight size={20} className="md:hidden" />
           <ChevronRight size={28} className="hidden md:block" />

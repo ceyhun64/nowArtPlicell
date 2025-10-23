@@ -191,7 +191,7 @@ const Footer: React.FC = () => {
             {/* iyzico logo */}
             <div className="flex items-center justify-center">
               <img
-                src="/iyzico/logo_band_colored@3x.png"
+                src="/iyzico/logo_band_colored@3x.webp"
                 alt="iyzico ile güvenli ödeme"
                 className="h-6 md:h-8 object-contain"
                 loading="lazy"

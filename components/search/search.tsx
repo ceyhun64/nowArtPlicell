@@ -37,7 +37,7 @@ export default function DefaultSearch() {
             className="text-2xl font-serif font-bold text-stone-900 tracking-wide  transition-colors"
           >
             <Image
-              src="/logo/logo.png"
+              src="/logo/logo2.webp"
               alt="Logo"
               width={100}
               height={100}
@@ -64,6 +64,7 @@ export default function DefaultSearch() {
               <button
                 onClick={() => setQuery("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 transition"
+                aria-label="Aramayı temizle"
               >
                 <Trash className="w-4 h-4" />
               </button>
@@ -74,6 +75,8 @@ export default function DefaultSearch() {
           <button
             onClick={() => router.back()}
             className="p-2 rounded hover:bg-gray-200 transition"
+              aria-label="Arama sayfasını kapat"
+
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>

@@ -35,13 +35,13 @@ interface ProductData {
 }
 
 const profiles = [
-  { name: "ANTRASİT", src: "/profiles/antrasit.jpg" },
-  { name: "BEYAZ", src: "/profiles/beyaz.jpg" },
-  { name: "BRONZ", src: "/profiles/bronz.jpg" },
-  { name: "GRİ", src: "/profiles/gri.jpg" },
-  { name: "KAHVE", src: "/profiles/kahve.jpg" },
-  { name: "KREM", src: "/profiles/krem.jpg" },
-  { name: "SİYAH", src: "/profiles/siyah.jpg" },
+  { name: "ANTRASİT", src: "/profiles/antrasit.webp" },
+  { name: "BEYAZ", src: "/profiles/beyaz.webp" },
+  { name: "BRONZ", src: "/profiles/bronz.webp" },
+  { name: "GRİ", src: "/profiles/gri.webp" },
+  { name: "KAHVE", src: "/profiles/kahve.webp" },
+  { name: "KREM", src: "/profiles/krem.webp" },
+  { name: "SİYAH", src: "/profiles/siyah.webp" },
 ];
 
 export default function ProductDetail() {

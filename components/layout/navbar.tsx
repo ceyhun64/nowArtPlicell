@@ -328,7 +328,7 @@ export default function Navbar(): React.ReactElement {
               {" "}
               {/* justify-center eklendi */}
               <img
-                src="/logo/logo.png"
+                src="/logo/logo2.webp"
                 alt="Logo"
                 width={80}
                 className="mb-3"
@@ -344,6 +344,7 @@ export default function Navbar(): React.ReactElement {
                   variant="ghost"
                   size="icon"
                   className="hover:bg-gray-100 text-stone-700 transition-transform hover:scale-110"
+                  aria-label="Arama yap"
                 >
                   <Search className="h-5 w-5" />
                 </Button>
@@ -353,6 +354,7 @@ export default function Navbar(): React.ReactElement {
                   variant="ghost"
                   size="icon"
                   className="relative text-stone-700 hover:bg-gray-100 hover:text-red-500 transition-transform hover:scale-110"
+                  aria-label="Favorilere ekle"
                 >
                   <Heart className="h-5 w-5" />
                   <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-[#92e676] text-green-900 text-xs flex items-center justify-center">
@@ -372,7 +374,7 @@ export default function Navbar(): React.ReactElement {
               className="text-2xl font-serif font-bold text-stone-900 tracking-wide"
             >
               <img
-                src="/logo/logo.png"
+                src="/logo/logo2.webp"
                 alt="Logo"
                 width={80}
                 className="mb-3"

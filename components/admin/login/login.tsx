@@ -68,7 +68,7 @@ export default function AdminLogin() {
       >
         <div className="flex flex-col items-center mb-6">
           <Image
-            src="/logo/logo.png"
+            src="/logo/logo2.webp"
             alt="Logo"
             width={411}
             height={294}

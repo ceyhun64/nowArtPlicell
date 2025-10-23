@@ -5,6 +5,7 @@ import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 import ScrollToTopButton from "@/components/layout/scrollToTop";
 import { CartProvider } from "@/contexts/cartContext";
 import { Toaster } from "sonner";
+import Head from "next/head"; // 👈 ekledik
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,17 +40,27 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
+      <Head>
+        {/* 🔹 Kritik performans optimizasyonları */}
+        <link rel="preconnect" href="https://www.nowartplicell.com" />
+        <link rel="preload" as="style" href="/css/6ded801ecd631cf3.css" />
+        <link rel="preload" as="style" href="/css/de70bee13400563f.css" />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/media/ba015fad6dcf6784-s.woff2"
+          crossOrigin="anonymous"
+        />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* 🔹 CartProvider tüm uygulamayı sarmalı */}
         <CartProvider>
-          {/* Ana layout yapısı */}
-          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-
-          {/* Diğer global bileşenler */}
+          <ClientLayoutWrapper>
+            <main>{children}</main>
+          </ClientLayoutWrapper>
           <ScrollToTopButton />
-
           <Toaster
             richColors
             position="bottom-right"

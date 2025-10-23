@@ -22,7 +22,7 @@ const MeasureModal: React.FC<MeasureModalProps> = ({
   const [current, setCurrent] = useState(0);
   const [accepted, setAccepted] = useState(false);
 
-  const images = ["/measure/measure1.jpg", "/measure/measure1.png"];
+  const images = ["/measure/measure1.webp", "/measure/measure2.webp"];
 
   const nextImage = () => setCurrent((prev) => (prev + 1) % images.length);
   const prevImage = () =>
