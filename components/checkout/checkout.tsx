@@ -366,8 +366,16 @@ export default function PaymentPage() {
             />
           )}
         </div>
-
+      
         <div className="lg:col-span-1">
+            <div className="flex justify-center">
+          <img
+            src="/iyzico/iyzico_ile_ode_colored_horizontal.png"
+            alt="iyzico ile güvenli ödeme"
+            className="h-10 md:h-12 object-contain mb-4"
+            loading="lazy"
+          />
+        </div>
           <BasketSummaryCard
             basketItemsData={cartItems}
             subTotal={subTotal}

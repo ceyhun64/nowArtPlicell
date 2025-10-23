@@ -180,12 +180,23 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Alt Bar */}
+          {/* Alt Bar */}
           <div className="border-t border-white/20 py-6 px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-100">
-            <p className="text-xs tracking-wide font-sans">
+            <p className="text-xs tracking-wide font-sans text-center md:text-left">
               © {currentYear}{" "}
               <span className="font-medium text-white">NowArt Plicell</span>.
               Tüm hakları saklıdır.
             </p>
+
+            {/* iyzico logo */}
+            <div className="flex items-center justify-center">
+              <img
+                src="/iyzico/logo_band_colored@3x.png"
+                alt="iyzico ile güvenli ödeme"
+                className="h-6 md:h-8 object-contain"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
       </footer>
