@@ -9,7 +9,6 @@ import Link from "next/link";
 import hero25 from "@/public/heroes/25.webp";
 import hero27 from "@/public/heroes/27.webp";
 import hero28 from "@/public/heroes/28.webp";
-import hero30 from "@/public/heroes/30.webp";
 import hero32 from "@/public/heroes/32.webp";
 import hero33 from "@/public/heroes/33.webp";
 import hero34 from "@/public/heroes/34.webp";
@@ -22,7 +21,6 @@ const images = [
   hero25,
   hero27,
   hero28,
-  hero30,
   hero32,
   hero33,
   hero34,
