@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import CartItem from "./cartItem";
 import CartSummary from "./cartSummary";
 import Loading from "../layout/loading";
+import LoginModal from "@/components/layout/login"; // 🔹 login modal import
+import { Button } from "../ui/button";
+import { ShoppingBag } from "lucide-react";
 
 interface Product {
   id: number;
@@ -30,48 +33,43 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // 🔹 modal state
 
-  // 🔹 Login kontrolü
-  const checkLogin = async () => {
-    try {
-      const res = await fetch("/api/account/check", {
-        credentials: "include", // ⚡ burayı ekle
-      });
-      if (!res.ok) return setIsLoggedIn(false);
-      const data = await res.json();
-      if (data?.user?.id) setIsLoggedIn(true);
-      else setIsLoggedIn(false);
-    } catch {
-      setIsLoggedIn(false);
-    }
-  };
-
-  // 🔹 Sepeti backend’den çek
+  // 🔹 Sepeti backend’den çek (Geliştirilmiş Versiyon)
   const fetchCart = async () => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/cart", {
-        credentials: "include", // ⚡ burayı ekle
+        credentials: "include", // NextAuth çerezini gönderir.
       });
-      if (!res.ok) throw new Error();
+
+      if (res.status === 401) {
+        // 🚨 Sunucudan 401 hatası gelirse, kullanıcı giriş yapmamış demektir.
+        setIsLoggedIn(false);
+        setCartItems([]);
+        return; // İşlemi durdur
+      }
+
+      if (!res.ok) {
+        // 500 (Sunucu hatası) veya diğer hatalar
+        throw new Error("Sepet verisi alınamadı");
+      }
+
+      // Başarılı (200 OK) ise
+      setIsLoggedIn(true); // Geleneksel olarak zaten başarılı istek geldiği için kullanıcı yetkilidir.
       const data = await res.json();
       setCartItems(data);
-    } catch {
+    } catch (error) {
+      console.error("Sepet çekme hatası:", error);
+      toast.error("Sepet yüklenirken bir hata oluştu.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    (async () => {
-      await checkLogin();
-    })();
+    fetchCart(); // Direkt sepeti çekmeyi dene
   }, []);
-
-  useEffect(() => {
-    if (isLoggedIn) fetchCart();
-    else setIsLoading(false);
-  }, [isLoggedIn]);
 
   // 🔹 Quantity artır / azalt
   const handleQuantityChange = async (id: number, delta: number) => {
@@ -123,7 +121,10 @@ export default function Cart() {
       toast.error("Ürün kaldırılamadı");
     }
   };
-
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    fetchCart(); // giriş yaptıktan sonra sepeti tekrar çek
+  };
   const subtotal = cartItems.reduce((acc, item) => {
     const price = item.product.pricePerM2 || 0;
     const quantity = item.quantity || 1;
@@ -134,13 +135,23 @@ export default function Cart() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="container mx-auto px-3 md:px-16 py-10">
+    <div className="container mx-auto px-3 md:px-16 py-16 mb-12">
       <h1 className="text-2xl md:text-3xl font-semibold mb-6">Sepetim</h1>
 
       {!isLoggedIn ? (
-        <p className="text-gray-500 text-center mt-10">
-          Sepetinizi görmek için giriş yapın.
-        </p>
+        <div className="flex flex-col items-center justify-center mt-16 space-y-4 text-gray-500">
+          <ShoppingBag className="h-12 w-12 text-gray-400 animate-bounce" />
+          <p className="text-lg font-semibold">
+            Sepetinizi görmek için giriş yapın
+          </p>
+          <Button
+            variant="outline"
+            className="mt-2"
+            onClick={() => setIsLoginModalOpen(true)} // 🔹 modal açılıyor
+          >
+            Giriş Yap
+          </Button>
+        </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex-1 space-y-6">
@@ -162,6 +173,15 @@ export default function Cart() {
           {cartItems.length > 0 && <CartSummary subtotal={subtotal} />}
         </div>
       )}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onRegisterClick={() => (window.location.href = "/register")}
+        onForgotPasswordClick={() =>
+          (window.location.href = "/forgot-password")
+        }
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }

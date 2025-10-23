@@ -5,6 +5,7 @@ import ProductCard from "./productCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LoginModal from "@/components/layout/login";
 
 interface Product {
   id: number;
@@ -25,33 +26,31 @@ export default function Favorites() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // 🔹 Modal state
 
   useEffect(() => {
+    // Bu kısmı sadeleştirin ve NextAuth'un standart oturum kontrol API'sini kullanın
     const checkLoginAndFetch = async () => {
       try {
-        // Session kontrolü (NextAuth cookie ile)
-        const res = await fetch("/api/account/check", {
+        const favRes = await fetch("/api/favorites", {
           method: "GET",
-          credentials: "include", // 🟢 cookie gönder
+          credentials: "include", // Bu, cookie'nin gönderilmesini sağlar.
         });
-        const data = await res.json();
 
-        if (res.ok && data.user?.id) {
+        if (favRes.status === 401) {
+          // API 401 döndürürse, kullanıcı giriş yapmamış demektir.
+          setIsLoggedIn(false);
+        } else if (favRes.ok) {
+          // 200 OK ise ve veri geldiyse
           setIsLoggedIn(true);
-
-          // Favorileri çek
-          const favRes = await fetch("/api/favorites", {
-            method: "GET",
-            credentials: "include", // 🟢 cookie gönder
-          });
-
-          if (!favRes.ok) throw new Error("Favoriler alınamadı");
           const favData: Favorite[] = await favRes.json();
           setFavorites(favData);
         } else {
-          setIsLoggedIn(false);
+          // 401 dışındaki diğer hatalar (500, 404 vb.)
+          throw new Error(`Favori API'den hata kodu geldi: ${favRes.status}`);
         }
       } catch (err) {
+        // Ağ hataları veya yukarıdaki throw edilen hata
         console.error(err);
         setIsLoggedIn(false);
         setFavorites([]);
@@ -68,7 +67,13 @@ export default function Favorites() {
   };
 
   const handleLoginButtonClick = () => {
-    window.location.href = "/login";
+    setIsLoginModalOpen(true); // 🔹 Modal aç
+  };
+
+  const handleLoginSuccess = (user: { email?: string; name?: string }) => {
+    setIsLoggedIn(true);
+    setIsLoginModalOpen(false);
+    // İstersen favorileri tekrar çek
   };
 
   const FavoriteSkeleton = () => (
@@ -97,14 +102,10 @@ export default function Favorites() {
           <p className="text-lg font-semibold">
             Favorilere erişmek için giriş yapın
           </p>
-          <p className="text-sm text-gray-400 text-center px-4">
-            Favorilerinizi görmek ve ürünleri kaydetmek için hesabınıza giriş
-            yapmanız gerekiyor.
-          </p>
           <Button
             variant="outline"
             className="mt-2"
-            onClick={handleLoginButtonClick}
+            onClick={handleLoginButtonClick} // 🔹 modal açıyor
           >
             Giriş Yap
           </Button>
@@ -140,6 +141,13 @@ export default function Favorites() {
           ))}
         </div>
       )}
+            <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onRegisterClick={() => (window.location.href = "/register")}
+        onForgotPasswordClick={() => (window.location.href = "/forgot-password")}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
