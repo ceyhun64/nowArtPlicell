@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
-    "export": "next export"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
