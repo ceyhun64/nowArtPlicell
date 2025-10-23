@@ -686,6 +686,7 @@ export default function ProductDetail() {
               <Button
                 variant="outline"
                 size="icon"
+                aria-label="Favoriye Ekle"
                 onClick={handleFavoriteToggle}
                 className="h-12 w-12 rounded-xl border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-all"
                 disabled={loadingFavorite} // loading sırasında tıklanmasın

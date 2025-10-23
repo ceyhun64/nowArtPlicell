@@ -252,6 +252,7 @@ export default function Navbar(): React.ReactElement {
                     variant="ghost"
                     size="icon"
                     className="text-stone-700 hover:bg-gray-100 transition-transform hover:scale-110"
+                    aria-label="Menu aç"
                   >
                     <Menu className="h-6 w-6" />
                   </Button>
@@ -502,7 +503,7 @@ export default function Navbar(): React.ReactElement {
           {/* Kategoriler / Kategori Menüsü (İstenen görseldeki menüyü açar) */}
           <Sheet open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]">
+              <button aria-label="Kategorileri aç" className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]">
                 <Menu className="h-5 w-5" />
                 <span className="text-xs mt-1">Kategoriler</span>
               </button>
