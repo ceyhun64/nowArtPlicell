@@ -2,7 +2,7 @@
 import React from "react";
 import AdminDashboard from "@/components/admin/dashboard/dashboard";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function AdminDashboardPage() {
