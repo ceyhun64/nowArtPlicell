@@ -77,10 +77,10 @@ export default function MeasurementUnitsPage() {
         </p>
         <div className="flex flex-col md:flex-row gap-4">
           <span className="flex items-center gap-2">
-            <Phone className="w-5 h-5 text-[#92e676]" /> 0552 555 10 25
+            <Phone className="w-5 h-5 text-[#92e676]" /> +90 530 130 30 84
           </span>
           <span className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-[#92e676]" /> NowArt.com
+            <Globe className="w-5 h-5 text-[#92e676]" /> nowartplicell.com
           </span>
         </div>
       </div>

@@ -131,11 +131,11 @@ export default function PlisePerdeAdvantages() {
         <div className="space-y-2 text-gray-700">
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
-            <span>0552 555 10 25</span>
+            <span>+90 530 130 30 84</span>
           </div>
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-indigo-500" />
-            <span>NowArt.com</span>
+            <span>nowartplicell.com</span>
           </div>
         </div>
       </div>

@@ -25,14 +25,13 @@ export default function DistanceSalesContract() {
           <div className="mt-3 bg-indigo-50 p-6 rounded-xl shadow-sm border border-indigo-100">
             <p className="font-medium">Satıcı Bilgileri:</p>
             <ul className="list-disc list-inside mt-1 ml-4 space-y-1">
-              <li>Unvan: NowArt</li>
+              <li>Unvan: NowArtPlicell</li>
               <li>
-                Adres: Bursa, Osmangazi, Küçükbalıklı Mah., Küçükbalıklı Cad.,
-                No: 55/3
+                Adres: HALİLİYE / ŞANLIURFA, BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B
               </li>
-              <li>Telefon: 0552 555 10 25</li>
+              <li>Telefon: +90 530 130 30 84</li>
               <li>E-posta: info@nowartplicell.com</li>
-              <li>Web Sitesi: NowArt.com</li>
+              <li>Web Sitesi: nowartplicell.com</li>
             </ul>
             <p className="mt-2 font-medium">Alıcı Bilgileri:</p>
             <p>
@@ -160,21 +159,20 @@ export default function DistanceSalesContract() {
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-indigo-500" />
             <div>
-              <p className="font-medium">Adres</p>
               <p>
-                Küçükbalıklı Mah., Küçükbalıklı Cad. No: 55/3, Osmangazi / BURSA
+              HALİLİYE / ŞANLIURFA, BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
-            <span>0552 555 10 25</span>
+            <span>+90 530 130 30 84</span>
           </div>
 
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-indigo-500" />
-            <span>NowArt.com</span>
+            <span>nowartplicell.com</span>
           </div>
 
           <div className="flex items-center gap-3">

@@ -52,7 +52,7 @@ export default function FaqPage() {
           </p>
           <p className="mb-2">
             Herhangi bir sorunla karşılaşırsanız, müşteri hizmetlerimize
-            ulaşmaktan çekinmeyin! 0552 555 10 25 info@nowartplicell.com
+            ulaşmaktan çekinmeyin! +90 530 130 30 84 info@nowartplicell.com
           </p>
         </>
       ),

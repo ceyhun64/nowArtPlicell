@@ -144,7 +144,7 @@ const Footer: React.FC = () => {
                 NowArt Plicell
               </h2>
               <address className="not-italic text-sm leading-relaxed text-gray-100 font-sans">
-                <p>BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6 B </p>
+                <p>BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B </p>
                 <p>HALİLİYE / ŞANLIURFA</p>
                 <p>info@nowartplicell.com</p>
                 <p>+90 530 130 30 84</p>

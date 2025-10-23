@@ -81,19 +81,18 @@ export default function PersonalDataConsent() {
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-indigo-500" />
             <div>
-              <p className="font-medium">Adres</p>
               <p>
-                Küçükbalıklı Mah., Küçükbalıklı Cad. No: 55/3, Osmangazi / BURSA
+              HALİLİYE / ŞANLIURFA, BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
-            <span>0552 555 10 25</span>
+            <span>+90 530 130 30 84</span>
           </div>
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-indigo-500" />
-            <span>NowArt.com</span>
+            <span>nowartplicell.com</span>
           </div>
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-indigo-500" />

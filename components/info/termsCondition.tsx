@@ -8,7 +8,7 @@ export default function TermsConditionsPage() {
     {
       title: "Genel Hükümler",
       description:
-        "Bu Şartlar ve Koşullar, NowArt Mekanik Perde Sistemleri web sitesi (www.NowArt.com) aracılığıyla yapılan satışlar için geçerlidir. Web sitemizi kullanarak bu Şartlar ve Koşullar'ı kabul etmiş sayılırsınız.",
+        "Bu Şartlar ve Koşullar, NowArt Mekanik Perde Sistemleri web sitesi (www.nowartplicell.com) aracılığıyla yapılan satışlar için geçerlidir. Web sitemizi kullanarak bu Şartlar ve Koşullar'ı kabul etmiş sayılırsınız.",
     },
     {
       title: "Hizmet Kapsamı",
@@ -23,7 +23,7 @@ export default function TermsConditionsPage() {
     {
       title: "Sipariş İptali ve Değişikliği",
       description:
-        "Sipariş edilen ürün üzerinde deforme, çizik, leke, yırtılma veya üretimle alakalı herhangi bir sorun tespit edilmesi halinde işlem başlatılabilir. Taleplerinizi info@nowartplicell.com e-posta adresine veya 0552 555 10 25 numarasına iletebilirsiniz.",
+        "Sipariş edilen ürün üzerinde deforme, çizik, leke, yırtılma veya üretimle alakalı herhangi bir sorun tespit edilmesi halinde işlem başlatılabilir. Taleplerinizi info@nowartplicell.com e-posta adresine veya +90 530 130 30 84 numarasına iletebilirsiniz.",
     },
     {
       title: "Teslimat ve Kargo",
@@ -98,11 +98,11 @@ export default function TermsConditionsPage() {
           </div>
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
-            <span> 0552 555 10 25</span>
+            <span> +90 530 130 30 84</span>
           </div>
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-indigo-500" />
-            <span> www.NowArt.com</span>
+            <span> www.nowartplicell.com</span>
           </div>
         </div>
       </div>

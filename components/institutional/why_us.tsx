@@ -137,11 +137,11 @@ export default function WhyChooseUsPage() {
         <div className="space-y-2 text-indigo-900">
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-[#92e676]" />
-            <span> 0552 555 10 25</span>
+            <span> +90 530 130 30 84</span>
           </div>
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-[#92e676]" />
-            <span> NowArt.com</span>
+            <span> nowartplicell.com</span>
           </div>
         </div>
       </div>

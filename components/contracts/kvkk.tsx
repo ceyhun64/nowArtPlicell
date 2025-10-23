@@ -34,20 +34,17 @@ export default function KvkkPage() {
               Şirket Adı: <span className="font-normal">NowArt</span>
             </p>
             <p className="font-medium">
-              Adres:{" "}
-              <span className="font-normal">
-                Bursa, Osmangazi, Küçükbalıklı Mah., Küçükbalıklı Cad., No: 55/3
-              </span>
+                Adres: <span className="font-normal">HALİLİYE / ŞANLIURFA, BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B</span>
             </p>
             <p className="font-medium">
-              Telefon: <span className="font-normal">0552 555 10 25</span>
+              Telefon: <span className="font-normal">+90 530 130 30 84</span>
             </p>
             <p className="font-medium">
               E-posta:{" "}
               <span className="font-normal">info@nowartplicell.com</span>
             </p>
             <p className="font-medium">
-              Web Site: <span className="font-normal">NowArt.com</span>
+              Web Site: <span className="font-normal">nowartplicell.com</span>
             </p>
           </div>
         </section>
@@ -184,21 +181,20 @@ export default function KvkkPage() {
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-indigo-500" />
             <div>
-              <p className="font-medium">Adres</p>
               <p>
-                Küçükbalıklı Mah., Küçükbalıklı Cad. No: 55/3, Osmangazi / BURSA
+              HALİLİYE / ŞANLIURFA, BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-indigo-500" />
-            <span>0552 555 10 25</span>
+            <span>+90 530 130 30 84</span>
           </div>
 
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-indigo-500" />
-            <span>NowArt.com</span>
+            <span>nowartplicell.com</span>
           </div>
 
           <div className="flex items-center gap-3">

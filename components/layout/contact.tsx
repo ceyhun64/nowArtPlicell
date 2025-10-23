@@ -72,8 +72,8 @@ Mesaj: ${formData.message}
           <div className="flex items-start gap-4">
             <MapPin className="w-6 h-6 text-[#92e676] mt-1" />
             <p className="text-gray-700">
-              Küçükbakkallı Mah. Küçükbakkallı Cad. No:55/3 <br />
-              Osmangazi/BURSA
+              BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B <br />
+              HALİLİYE / ŞANLIURFA
             </p>
           </div>
           <div className="flex items-center gap-4">
