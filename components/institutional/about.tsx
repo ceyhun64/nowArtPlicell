@@ -31,17 +31,19 @@ export default function AboutPage() {
     <div className="max-w-7xl mx-auto px-6 py-16 space-y-16 font-sans">
       {/* Başlık */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold text-gray-900 font-serif">Hakkımızda</h1>
+        <h1 className="text-4xl font-bold text-gray-900 font-serif">
+          Hakkımızda
+        </h1>
         <p className="text-gray-500">NowArt - 22 Nisan 2025</p>
       </div>
 
       {/* Tanıtım */}
       <div className="space-y-6 text-gray-700 leading-relaxed">
         <p>
-          NowArt Perde ve NowArt Tekstil, tekstil ve perde sistemleri
-          sektöründe yenilikçi, kaliteli ve güvenilir çözümler sunmak amacıyla
-          kurulmuş, %100 yerli sermaye ile büyüyen öncü kuruluşlardır. Bursa'nın
-          Osmangazi ilçesi Küçükbalıklı Mahallesi'nde yer alan modern üretim
+          NowArt Perde ve NowArt Tekstil, tekstil ve perde sistemleri sektöründe
+          yenilikçi, kaliteli ve güvenilir çözümler sunmak amacıyla kurulmuş,
+          %100 yerli sermaye ile büyüyen öncü kuruluşlardır. Şanlıurfa'nın
+          Osmangazi ilçesi HALİLİYE Mahallesi'nde yer alan modern üretim
           tesisimizde; plise perde, zebra kumaş ve özel tekstil ürünleri
           üretimini en ileri teknolojiyle gerçekleştiriyoruz.
         </p>
@@ -53,8 +55,8 @@ export default function AboutPage() {
           Üretimde Kalite, Tasarımda Özgünlük
         </h2>
         <p>
-          NowArt Perde markası altında, yaşam alanlarınıza şıklık ve
-          işlevsellik katan plise perde sistemleri üretmekteyiz. Modern yaşamın
+          NowArt Perde markası altında, yaşam alanlarınıza şıklık ve işlevsellik
+          katan plise perde sistemleri üretmekteyiz. Modern yaşamın
           ihtiyaçlarına cevap verebilen, hem estetik hem de kullanışlı perde
           çözümlerimizle; evlerden ofislere, otellerden mağazalara kadar geniş
           bir müşteri kitlesine hitap ediyoruz. "Her plise NowArt kalitesinde
@@ -87,9 +89,7 @@ export default function AboutPage() {
           alanlarınıza değer katacak çözümler üretmektir.
         </p>
 
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Neden NowArt?
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-900">Neden NowArt?</h2>
         <ul className="list-disc list-inside space-y-2 ml-4 text-gray-700">
           <li>
             <strong>Yüksek Kalite Standartları:</strong> En iyi malzemeleri, en
@@ -139,9 +139,7 @@ export default function AboutPage() {
         <div className="space-y-2 text-gray-700">
           <div className="flex items-center gap-3">
             <MapPin className="w-5 h-5 text-[#92e676]" />
-            <span>
-            BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B HALİLİYE / ŞANLIURFA
-            </span>
+            <span>BAMYASUYU MAH. KÖSEOĞLU SK. NO: 6B HALİLİYE / ŞANLIURFA</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-[#92e676]" />

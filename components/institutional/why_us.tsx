@@ -44,7 +44,7 @@ export default function WhyChooseUsPage() {
     {
       title: "Kurumsal Güvence",
       description:
-        "Bursa Osmangazi’de bulunan fabrikamızda üretim yapan köklü bir firmayız. Tescilli markamız, belgelenmiş kalite sistemlerimiz ve profesyonel kadromuzla size güven veriyoruz.",
+        "Şanlıurfa Osmangazi’de bulunan fabrikamızda üretim yapan köklü bir firmayız. Tescilli markamız, belgelenmiş kalite sistemlerimiz ve profesyonel kadromuzla size güven veriyoruz.",
     },
     {
       title: "Instagram’dan Gerçek Proje Paylaşımları",
