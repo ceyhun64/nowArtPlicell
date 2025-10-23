@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 // Tüm favorileri getir
 export async function GET() {
@@ -43,7 +43,8 @@ export async function POST(req: Request) {
     const favorite = await prisma.favorite.create({
       data: {
         userId: Number(session.user.id),
-        productId: parsedProductId,},
+        productId: parsedProductId,
+      },
     });
 
     return NextResponse.json(favorite);

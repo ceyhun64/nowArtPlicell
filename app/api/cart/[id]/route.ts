@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "../@/lib/auth";
 
 interface PatchRequestBody {
   quantity: number;

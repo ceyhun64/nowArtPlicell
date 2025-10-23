@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db"; // tek prisma instance
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import type { NextRequest } from "next/server";
 
 // 📍 GET: Kullanıcının adreslerini getir
@@ -48,7 +48,17 @@ export async function POST(request: NextRequest) {
       country: string;
     };
 
-    const { title, firstName, lastName, address, district, city, zip, phone, country } = body;
+    const {
+      title,
+      firstName,
+      lastName,
+      address,
+      district,
+      city,
+      zip,
+      phone,
+      country,
+    } = body;
 
     if (!firstName || !lastName || !address || !district || !city || !country) {
       return NextResponse.json(
