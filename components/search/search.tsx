@@ -36,12 +36,13 @@ export default function DefaultSearch() {
             href="/"
             className="text-2xl font-serif font-bold text-stone-900 tracking-wide  transition-colors"
           >
-            <Image
-              src="/logo/logo2.webp"
-              alt="Logo"
-              width={100}
-              height={100}
-            ></Image>
+           <Image
+                       src="/logo/logo2.webp"
+                       alt="Logo"
+                       width={411}
+                       height={294}
+                       style={{ width: 80, height: "auto" }}
+                     />
           </Link>
         )}
 

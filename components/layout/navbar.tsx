@@ -34,6 +34,7 @@ import RegisterModal from "./register";
 import ForgotPasswordModal from "./forgotPassword";
 import Link from "next/link";
 import CartDropdown from "./cartDropdown";
+import Image from "next/image";
 
 interface MenuItem {
   label: string;
@@ -328,12 +329,14 @@ export default function Navbar(): React.ReactElement {
             <Link href="/" className="flex justify-center flex-shrink-0">
               {" "}
               {/* justify-center eklendi */}
-              <img
-                src="/logo/logo2.webp"
-                alt="Logo"
-                width={80}
-                className="mb-3"
-              />
+              <Image
+                          src="/logo/logo2.webp"
+                          alt="Logo"
+                          width={411}
+                          height={294}
+                          style={{ width: 80, height: "auto" }}
+                          className="mb-3"
+                        />
             </Link>
 
             {/* Sağ ikonlar */}
@@ -374,12 +377,14 @@ export default function Navbar(): React.ReactElement {
               href="/"
               className="text-2xl font-serif font-bold text-stone-900 tracking-wide"
             >
-              <img
-                src="/logo/logo2.webp"
-                alt="Logo"
-                width={80}
-                className="mb-3"
-              />
+             <Image
+                         src="/logo/logo2.webp"
+                         alt="Logo"
+                         width={411}
+                         height={294}
+                         style={{ width: 80, height: "auto" }}
+                         className="mb-3"
+                       />
             </a>
 
             {/* Menü */}
