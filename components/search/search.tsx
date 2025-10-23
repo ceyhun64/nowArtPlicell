@@ -36,13 +36,13 @@ export default function DefaultSearch() {
             href="/"
             className="text-2xl font-serif font-bold text-stone-900 tracking-wide  transition-colors"
           >
-           <Image
-                       src="/logo/logo2.webp"
-                       alt="Logo"
-                       width={411}
-                       height={294}
-                       style={{ width: 80, height: "auto" }}
-                     />
+            <Image
+              src="/logo/logo.webp"
+              alt="Logo"
+              width={411}
+              height={294}
+              style={{ width: 80, height: "auto" }}
+            />
           </Link>
         )}
 
@@ -76,8 +76,7 @@ export default function DefaultSearch() {
           <button
             onClick={() => router.back()}
             className="p-2 rounded hover:bg-gray-200 transition"
-              aria-label="Arama sayfasını kapat"
-
+            aria-label="Arama sayfasını kapat"
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>

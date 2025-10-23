@@ -327,16 +327,15 @@ export default function Navbar(): React.ReactElement {
 
             {/* Orta Logo */}
             <Link href="/" className="flex justify-center flex-shrink-0">
-              {" "}
               {/* justify-center eklendi */}
               <Image
-                          src="/logo/logo2.webp"
-                          alt="Logo"
-                          width={411}
-                          height={294}
-                          style={{ width: 80, height: "auto" }}
-                          className="mb-3"
-                        />
+                src="/logo/logo.webp"
+                alt="Logo"
+                width={411}
+                height={294}
+                style={{ width: 80, height: "auto" }}
+                className="mb-3"
+              />
             </Link>
 
             {/* Sağ ikonlar */}
@@ -377,14 +376,14 @@ export default function Navbar(): React.ReactElement {
               href="/"
               className="text-2xl font-serif font-bold text-stone-900 tracking-wide"
             >
-             <Image
-                         src="/logo/logo2.webp"
-                         alt="Logo"
-                         width={411}
-                         height={294}
-                         style={{ width: 80, height: "auto" }}
-                         className="mb-3"
-                       />
+              <Image
+                src="/logo/logo.webp"
+                alt="Logo"
+                width={411}
+                height={294}
+                style={{ width: 80, height: "auto" }}
+                className="mb-3"
+              />
             </a>
 
             {/* Menü */}
@@ -509,7 +508,10 @@ export default function Navbar(): React.ReactElement {
           {/* Kategoriler / Kategori Menüsü (İstenen görseldeki menüyü açar) */}
           <Sheet open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
             <SheetTrigger asChild>
-              <button aria-label="Kategorileri aç" className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]">
+              <button
+                aria-label="Kategorileri aç"
+                className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59]"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="text-xs mt-1">Kategoriler</span>
               </button>
