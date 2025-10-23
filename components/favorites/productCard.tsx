@@ -101,6 +101,7 @@ export default function ProductCard({
           <button
             type="button"
             onClick={removeFavorite}
+            aria-label="Favorilerden çıkar"
             className="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
           >
             <Heart className="h-5 w-5 text-red-500 fill-red-500" />

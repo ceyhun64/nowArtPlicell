@@ -65,6 +65,7 @@ export default function ProductCard({
               e.preventDefault();
               setFavorited(!favorited);
             }}
+            aria-label="Favorilere ekle"
             className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 bg-white/80 rounded-full p-1.5 sm:p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
           >
             <Heart

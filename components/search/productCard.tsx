@@ -65,6 +65,7 @@ export default function ProductCard({
               e.preventDefault(); // Linke tıklamayı engelle
               setFavorited(!favorited);
             }}
+            aria-label="Favoriye Ekle"
             className="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
           >
             <Heart
