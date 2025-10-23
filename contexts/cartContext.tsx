@@ -40,7 +40,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const fetchCart = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/cart");
+      const res = await fetch("/api/cart", { credentials: "include" });
       const data = await res.json();
       setCartItems(data);
     } catch (err) {
@@ -56,6 +56,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, quantity }),
+        credentials: "include",
       });
 
       if (res.ok) {
@@ -71,7 +72,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromCart = async (id: number) => {
     try {
-      const res = await fetch(`/api/cart/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/cart/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (res.ok) {
         setCartItems((prev) => prev.filter((i) => i.id !== id));
       }

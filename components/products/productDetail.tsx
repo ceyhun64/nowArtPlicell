@@ -82,6 +82,7 @@ export default function ProductDetail() {
     const fetchFavorite = async () => {
       try {
         const res = await fetch("/api/favorites");
+
         if (!res.ok) return;
         const data: { productId: number }[] = await res.json();
         const fav = data.find((f) => Number(f.productId) === product.id);
@@ -155,7 +156,9 @@ export default function ProductDetail() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("/api/account/check");
+        const res = await fetch("/api/account/check", {
+          credentials: "include", // ⚡ Burayı ekle
+        });
         if (!res.ok) return setIsLoggedIn(false);
         const data = await res.json();
         setIsLoggedIn(!!data.user?.id);
@@ -192,6 +195,7 @@ export default function ProductDetail() {
           height: boy,
           device: selectedDevice,
         }),
+        credentials: "include", // ⚡ Burayı ekle
       });
 
       const data = await res.json();
@@ -224,12 +228,16 @@ export default function ProductDetail() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: product.id }),
+          credentials: "include",
         });
+
         if (res.ok) setIsFavorite(true);
       } else {
         const res = await fetch(`/api/favorites/${product.id}`, {
           method: "DELETE",
+          credentials: "include", // ⚡ Burayı ekle
         });
+
         if (res.ok) setIsFavorite(false);
       }
     } catch (error) {

@@ -34,7 +34,9 @@ export default function Cart() {
   // 🔹 Login kontrolü
   const checkLogin = async () => {
     try {
-      const res = await fetch("/api/account/check");
+      const res = await fetch("/api/account/check", {
+        credentials: "include", // ⚡ burayı ekle
+      });
       if (!res.ok) return setIsLoggedIn(false);
       const data = await res.json();
       if (data?.user?.id) setIsLoggedIn(true);
@@ -48,7 +50,9 @@ export default function Cart() {
   const fetchCart = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/cart");
+      const res = await fetch("/api/cart", {
+        credentials: "include", // ⚡ burayı ekle
+      });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setCartItems(data);
@@ -81,7 +85,9 @@ export default function Cart() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantity: newQuantity }),
+        credentials: "include", // ⚡ burayı ekle
       });
+
       const updatedItem = await res.json();
 
       if (res.ok) {
@@ -102,7 +108,10 @@ export default function Cart() {
   // 🔹 Cart item sil
   const handleRemove = async (id: number) => {
     try {
-      const res = await fetch(`/api/cart/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/cart/${id}`, {
+        method: "DELETE",
+        credentials: "include", // ⚡ burayı ekle
+      });
       const data = await res.json();
       if (res.ok) {
         setCartItems((prev) => prev.filter((c) => c.id !== id));

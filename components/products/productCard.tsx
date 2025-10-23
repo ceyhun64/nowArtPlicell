@@ -11,6 +11,7 @@ interface ProductCardProps {
   subImage?: string;
   title: string;
   pricePerM2: number;
+  user?: { id: string }; // user prop eklenebilir
 }
 
 interface Favorite {
@@ -34,17 +35,22 @@ export default function ProductCard({
   subImage,
   title,
   pricePerM2,
+  user,
 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
 
-  // Mevcut favori durumunu kontrol et
+  // Mevcut favori durumunu kontrol et (giriş yapmış kullanıcı varsa)
   useEffect(() => {
+    if (!user) return; // giriş yoksa API çağrısını atla
+
     const checkFavorite = async () => {
       try {
-        const res = await fetch("/api/favorites");
+        const res = await fetch("/api/favorites", {
+          credentials: "include", // cookie varsa gönder
+        });
         if (!res.ok) return;
         const data: Favorite[] = await res.json();
         const fav = data.find((f) => Number(f.productId) === Number(id));
@@ -54,31 +60,39 @@ export default function ProductCard({
       }
     };
     checkFavorite();
-  }, [id]);
+  }, [id, user]);
 
   // Favori ekle / sil ve Navbar ile iletişim
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!user) {
+      alert("Favori eklemek için giriş yapmanız gerekiyor.");
+      return;
+    }
+
     try {
       if (!favorited) {
         const res = await fetch("/api/favorites", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: id }),
+          credentials: "include",
         });
         if (res.ok) {
           setFavorited(true);
-          // Navbar'a ekleme bilgisini gönder
           window.dispatchEvent(
             new CustomEvent("favoriteChanged", { detail: 1 })
           );
         }
       } else {
-        const res = await fetch(`/api/favorites/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/favorites/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
         if (res.ok) {
           setFavorited(false);
-          // Navbar'a silme bilgisini gönder
           window.dispatchEvent(
             new CustomEvent("favoriteChanged", { detail: -1 })
           );
@@ -142,8 +156,7 @@ export default function ProductCard({
             type="button"
             onClick={toggleFavorite}
             className="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-red-500 hover:text-white transition-colors"
-              aria-label="Favorilere ekle"
-
+            aria-label="Favorilere ekle"
           >
             <Heart
               className={`h-5 w-5 transition-colors ${

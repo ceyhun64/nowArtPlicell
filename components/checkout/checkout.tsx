@@ -117,8 +117,8 @@ export default function PaymentPage() {
       setLoading(true);
       try {
         const [userRes, cartRes] = await Promise.all([
-          fetch("/api/user"),
-          fetch("/api/cart"),
+          fetch("/api/user", { credentials: "include" }), // ⚡ ekle
+          fetch("/api/cart", { credentials: "include" }), // ⚡ ekle
         ]);
 
         if (!userRes.ok || !cartRes.ok) throw new Error("Veri yüklenemedi");
@@ -302,7 +302,7 @@ export default function PaymentPage() {
 
       if (data.status === "success") {
         // ✅ Ödeme başarılı, sepetteki ürünleri temizle
-        await fetch("/api/cart", { method: "DELETE" });
+        await fetch("/api/cart", { method: "DELETE", credentials: "include" }); // ⚡ ekle
 
         router.push("/checkout/success");
       } else {
@@ -366,16 +366,16 @@ export default function PaymentPage() {
             />
           )}
         </div>
-      
+
         <div className="lg:col-span-1">
-            <div className="flex justify-center">
-          <img
-            src="/iyzico/iyzico_ile_ode_colored_horizontal.webp"
-            alt="iyzico ile güvenli ödeme"
-            className="h-10 md:h-12 object-contain mb-4"
-            loading="lazy"
-          />
-        </div>
+          <div className="flex justify-center">
+            <img
+              src="/iyzico/iyzico_ile_ode_colored_horizontal.webp"
+              alt="iyzico ile güvenli ödeme"
+              className="h-10 md:h-12 object-contain mb-4"
+              loading="lazy"
+            />
+          </div>
           <BasketSummaryCard
             basketItemsData={cartItems}
             subTotal={subTotal}
