@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/db";
 import bcrypt from "bcrypt";
 
+// authOptions artık export edilmiyor, sadece handler oluşturuluyor
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
@@ -25,11 +26,10 @@ const handler = NextAuth({
           credentials.password,
           user.password
         );
-
         if (!isValid) return null;
 
         return {
-          id: user.id.toString(), // App Router uyumlu string id
+          id: user.id.toString(),
           name: user.name,
           surname: user.surname,
           email: user.email,
@@ -66,6 +66,6 @@ const handler = NextAuth({
   },
 });
 
-// App Router için gerekli: GET ve POST export
+// App Router uyumu için GET ve POST export
 export const GET = handler;
 export const POST = handler;
