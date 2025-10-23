@@ -155,7 +155,7 @@ export default function AdminSidebar(): React.ReactElement {
                 className="text-xl font-bold text-gray-900 ms-10"
                 onClick={() => setIsOpen(false)}
               >
-                NewArt<span className="text-[#92e676]">Admin</span>
+                NowArt<span className="text-[#92e676]">Admin</span>
               </Link>
               <Button
                 size="icon"
