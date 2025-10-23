@@ -1,11 +1,9 @@
-// app/api/auth/[...nextauth]/route.ts
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/db";
 import bcrypt from "bcrypt";
 
-// authOptions artık export edilmiyor, sadece handler oluşturuluyor
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -29,7 +27,7 @@ const handler = NextAuth({
         if (!isValid) return null;
 
         return {
-          id: user.id.toString(),
+          id: user.id.toString(), // <-- Çözüm: id'yi string'e çevirin
           name: user.name,
           surname: user.surname,
           email: user.email,
@@ -59,13 +57,12 @@ const handler = NextAuth({
         name: token.name,
         surname: token.surname,
         email: token.email,
-        role: token.role,
+        role: token.role, // artık tip güvenli
       };
       return session;
     },
   },
-});
+};
 
-// App Router uyumu için GET ve POST export
-export const GET = handler;
-export const POST = handler;
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
