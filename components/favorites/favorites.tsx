@@ -29,14 +29,22 @@ export default function Favorites() {
   useEffect(() => {
     const checkLoginAndFetch = async () => {
       try {
-        const res = await fetch("/api/account/check");
+        // Session kontrolü (NextAuth cookie ile)
+        const res = await fetch("/api/account/check", {
+          method: "GET",
+          credentials: "include", // 🟢 cookie gönder
+        });
         const data = await res.json();
 
         if (res.ok && data.user?.id) {
           setIsLoggedIn(true);
 
-          // Giriş varsa favorileri çek
-          const favRes = await fetch("/api/favorites");
+          // Favorileri çek
+          const favRes = await fetch("/api/favorites", {
+            method: "GET",
+            credentials: "include", // 🟢 cookie gönder
+          });
+
           if (!favRes.ok) throw new Error("Favoriler alınamadı");
           const favData: Favorite[] = await favRes.json();
           setFavorites(favData);
@@ -46,6 +54,7 @@ export default function Favorites() {
       } catch (err) {
         console.error(err);
         setIsLoggedIn(false);
+        setFavorites([]);
       } finally {
         setLoading(false);
       }
@@ -59,7 +68,7 @@ export default function Favorites() {
   };
 
   const handleLoginButtonClick = () => {
-    window.location.href = "/login"; // Giriş sayfasına yönlendir
+    window.location.href = "/login";
   };
 
   const FavoriteSkeleton = () => (

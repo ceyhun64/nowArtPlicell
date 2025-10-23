@@ -70,8 +70,9 @@ export default function AdminLogin() {
           <Image
             src="/logo/logo.png"
             alt="Logo"
-            width={80}
-            height={80}
+            width={411}
+            height={294}
+            style={{ width: 80, height: "auto" }}
             className="mb-3"
           />
           <h1 className="text-4xl font-extrabold text-[#001e59] tracking-tight">

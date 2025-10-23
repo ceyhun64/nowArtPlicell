@@ -331,7 +331,6 @@ export default function Navbar(): React.ReactElement {
                 src="/logo/logo.png"
                 alt="Logo"
                 width={80}
-                height={80}
                 className="mb-3"
               />
             </Link>
@@ -376,7 +375,6 @@ export default function Navbar(): React.ReactElement {
                 src="/logo/logo.png"
                 alt="Logo"
                 width={80}
-                height={80}
                 className="mb-3"
               />
             </a>

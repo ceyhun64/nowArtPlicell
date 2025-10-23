@@ -5,6 +5,7 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
+  useCallback,
 } from "react";
 import {
   Sheet,
@@ -55,82 +56,67 @@ const CartDropdown = forwardRef(
     const [loginModalOpen, setLoginModalOpen] = useState(false);
 
     // Kullanıcı login mi?
-    const checkLogin = async () => {
+    const checkLogin = useCallback(async () => {
       try {
-        const res = await fetch("/api/account/check");
+        const res = await fetch("/api/account/check", {
+          method: "GET",
+          credentials: "include", // 🟢 session cookie gönder
+        });
         if (!res.ok) return setIsLoggedIn(false);
         const data = await res.json();
         setIsLoggedIn(!!data?.user?.id);
       } catch {
         setIsLoggedIn(false);
       }
-    };
+    }, []);
 
     // Sepeti backend’den çek
-    const fetchCart = async () => {
+    const fetchCart = useCallback(async () => {
       setIsLoading(true);
       try {
-        const res = await fetch("/api/cart");
+        const res = await fetch("/api/cart", {
+          method: "GET",
+          credentials: "include", // 🟢 session cookie gönder
+        });
         if (!res.ok) throw new Error();
         const data = await res.json();
         setCartItems(data);
       } catch {
+        setCartItems([]);
       } finally {
         setIsLoading(false);
       }
-    };
+    }, []);
 
     useImperativeHandle(ref, () => ({
       open: () => setIsOpen(true),
-      // ✅ Sepeti güncelleyen yeni metodu ekliyoruz
       refreshCart: () => {
         if (isLoggedIn) fetchCart();
       },
     }));
 
     useEffect(() => {
-      (async () => {
-        await checkLogin();
-      })();
-    }, []);
+      checkLogin();
+    }, [checkLogin]);
 
     useEffect(() => {
       if (isLoggedIn) fetchCart();
-    }, [isLoggedIn]);
-    // CartDropdown.tsx içinde
+    }, [isLoggedIn, fetchCart]);
 
-    // ... diğer useEffect'ler (isLoggedIn ve isOpen için olanlar kalsın) ...
+    useEffect(() => {
+      if (isOpen && isLoggedIn) fetchCart();
+    }, [isOpen, isLoggedIn, fetchCart]);
 
     useEffect(() => {
       const handleCartUpdate = () => {
-        // Sepet güncellendi olayını aldığımızda sepeti tekrar çekiyoruz.
-        // Ancak sadece kullanıcı giriş yapmışsa çekmeliyiz.
-        if (isLoggedIn) {
-          fetchCart();
-          // Opsiyonel: Eğer sepet kapalıysa, sadece sayacı günceller.
-          // Eğer açıksa zaten yukarıdaki isOpen/isLoggedIn useEffect'i de tetikleyebilir.
-          // Yine de burada bir kez daha çağırmak mantıklı.
-        }
+        if (isLoggedIn) fetchCart();
       };
-
-      // Global olayı dinle
       window.addEventListener("cartUpdated", handleCartUpdate);
-
-      // Component kaldırıldığında dinlemeyi bırak
       return () => {
         window.removeEventListener("cartUpdated", handleCartUpdate);
       };
-    }, [isLoggedIn, fetchCart]); // isLoggedIn değişirse veya fetchCart değişirse (değişmez ama React kuralı için) yeniden dinlemeye başla
+    }, [isLoggedIn, fetchCart]);
 
-    // NOT: fetchCart fonksiyonunu bu useEffect'in bağımlılık dizisine (dependency array) eklemek için,
-    // CartDropdown içinde fetchCart fonksiyonunu useCallback ile sarmalamanız en iyisidir.
-    // Mevcut haliyle fetchCart useEffect dışında tanımlandığı için hata vermeyecektir,
-    // ancak en temiz React yolu:
-
-    // const fetchCart = useCallback(async () => { /* ... mevcut fetchCart içeriği ... */ }, []);
-    useEffect(() => {
-      if (isOpen && isLoggedIn) fetchCart();
-    }, [isOpen, isLoggedIn]);
     const handleQuantityChange = async (id: number, delta: number) => {
       const item = cartItems.find((c) => c.id === id);
       if (!item) return;
@@ -140,6 +126,7 @@ const CartDropdown = forwardRef(
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ quantity: newQuantity }),
+          credentials: "include", // 🟢 session cookie gönder
         });
         const updatedItem = await res.json();
         if (res.ok) {
@@ -158,7 +145,10 @@ const CartDropdown = forwardRef(
 
     const handleRemove = async (id: number) => {
       try {
-        const res = await fetch(`/api/cart/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/cart/${id}`, {
+          method: "DELETE",
+          credentials: "include", // 🟢 session cookie gönder
+        });
         if (res.ok) {
           setCartItems((prev) => prev.filter((c) => c.id !== id));
         } else {
@@ -178,10 +168,8 @@ const CartDropdown = forwardRef(
     }, 0);
 
     const handleLoginButtonClick = () => {
-      setIsOpen(false); // Önce cart Sheet kapansın
-      setTimeout(() => {
-        setLoginModalOpen(true); // Sonra modal aç
-      }, 300); // 300ms delay, animasyon süresine uyumlu
+      setIsOpen(false);
+      setTimeout(() => setLoginModalOpen(true), 300);
     };
 
     return (
