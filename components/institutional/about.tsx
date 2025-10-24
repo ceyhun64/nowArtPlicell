@@ -43,7 +43,7 @@ export default function AboutPage() {
           NowArt Perde ve NowArt Tekstil, tekstil ve perde sistemleri sektöründe
           yenilikçi, kaliteli ve güvenilir çözümler sunmak amacıyla kurulmuş,
           %100 yerli sermaye ile büyüyen öncü kuruluşlardır. Şanlıurfa'nın
-          Osmangazi ilçesi HALİLİYE Mahallesi'nde yer alan modern üretim
+          Haliliye ilçesi Bamyasuyu Mahallesi'nde yer alan modern üretim
           tesisimizde; plise perde, zebra kumaş ve özel tekstil ürünleri
           üretimini en ileri teknolojiyle gerçekleştiriyoruz.
         </p>
