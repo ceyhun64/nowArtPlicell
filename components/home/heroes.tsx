@@ -16,6 +16,8 @@ import hero19 from "@/public/heroes/19.webp";
 import hero22 from "@/public/heroes/22.webp";
 import hero23 from "@/public/heroes/23.webp";
 import hero24 from "@/public/heroes/24.webp";
+import hero26 from "@/public/heroes/26.webp";
+import hero29 from "@/public/heroes/29.webp";
 
 const images = [
   hero25,
@@ -28,6 +30,8 @@ const images = [
   hero22,
   hero23,
   hero24,
+  hero26,
+  hero29,
 ];
 
 export default function Heroes(): React.ReactElement {
@@ -53,7 +57,7 @@ export default function Heroes(): React.ReactElement {
     setCurrent((prev) => (prev - 1 + images.length) % images.length);
 
   const mobileHeight = "h-[220px]";
-  const desktopHeight = "md:h-[700px]";
+  const desktopHeight = "md:h-[750px]";
 
   return (
     <div className="bg-gray-50 pt-0 md:pt-8">

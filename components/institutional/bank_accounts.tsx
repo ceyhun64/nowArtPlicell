@@ -15,14 +15,14 @@ interface BankAccount {
 const accounts: BankAccount[] = [
   {
     bankName: "Ziraat Bankası",
-    branch: "Osmangazi",
+    branch: "Haliliye",
     accountOwner: "NowArt Perde",
     iban: "TR00 0000 0000 0000 0000 00",
     currency: "TL",
   },
   {
     bankName: "VakıfBank",
-    branch: "Osmangazi",
+    branch: "Haliliye",
     accountOwner: "NowArt Perde",
     iban: "TR11 1111 1111 1111 1111 11",
     currency: "TL",

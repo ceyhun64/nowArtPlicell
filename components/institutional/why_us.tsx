@@ -44,7 +44,7 @@ export default function WhyChooseUsPage() {
     {
       title: "Kurumsal Güvence",
       description:
-        "Şanlıurfa Osmangazi’de bulunan fabrikamızda üretim yapan köklü bir firmayız. Tescilli markamız, belgelenmiş kalite sistemlerimiz ve profesyonel kadromuzla size güven veriyoruz.",
+        "Şanlıurfa Haliliye bulunan fabrikamızda üretim yapan köklü bir firmayız. Tescilli markamız, belgelenmiş kalite sistemlerimiz ve profesyonel kadromuzla size güven veriyoruz.",
     },
     {
       title: "Instagram’dan Gerçek Proje Paylaşımları",
@@ -54,7 +54,7 @@ export default function WhyChooseUsPage() {
     {
       title: "Uygun Fiyat Politikası & Kampanyalar",
       description:
-        "Kaliteli perde herkesin hakkı! Dönemsel kampanyalar ve özel fiyat avantajları sunuyoruz. Açılışa özel plise perde fiyatlarımız KDV dahil 250 TL’den başlamaktadır.",
+        "Kaliteli perde herkesin hakkı! Dönemsel kampanyalar ve özel fiyat avantajları sunuyoruz. Açılışa özel plise perde fiyatlarımız KDV dahil 350 TL’den başlamaktadır.",
     },
   ];
 
