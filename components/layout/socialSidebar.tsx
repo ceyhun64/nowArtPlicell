@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, Facebook, Phone } from "lucide-react";
 
 export default function SocialSidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const whatsappNumber = "+905301303084";
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}`;
 
