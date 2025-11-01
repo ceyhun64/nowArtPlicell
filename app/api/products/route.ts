@@ -56,18 +56,7 @@ export async function POST(request: Request) {
       method: "POST",
       body: mainUploadForm,
     });
-
-    let mainData: any;
-    if (!mainRes.ok) {
-      const text = await mainRes.text();
-      console.error("Ana görsel yükleme hatası:", text);
-      return NextResponse.json(
-        { success: false, error: text },
-        { status: mainRes.status }
-      );
-    } else {
-      mainData = await mainRes.json();
-    }
+    const mainData = await mainRes.json();
     const mainImagePath = mainData.path;
 
     // Alt görsel yükleme (opsiyonel)
@@ -81,19 +70,8 @@ export async function POST(request: Request) {
         method: "POST",
         body: subUploadForm,
       });
-
-      let subData: any;
-      if (!subRes.ok) {
-        const text = await subRes.text();
-        console.error("Alt görsel yükleme hatası:", text);
-        return NextResponse.json(
-          { success: false, error: text },
-          { status: subRes.status }
-        );
-      } else {
-        subData = await subRes.json();
-        subImagePath = subData.path;
-      }
+      const subData = await subRes.json();
+      subImagePath = subData.path;
     }
 
     // Ürün verilerini al
