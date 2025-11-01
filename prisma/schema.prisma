@@ -174,7 +174,7 @@ model product {
   pricePerM2  Float
   rating      Int
   reviewCount Int?
-  mainImage   String
+  mainImage   String      @default("default-image.jpg")
   subImage    String?
   category    String
   createdAt   DateTime    @default(now())
