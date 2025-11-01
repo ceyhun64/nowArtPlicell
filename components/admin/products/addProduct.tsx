@@ -171,7 +171,7 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                           <SelectItem value="plicell">PLICELL</SelectItem>
                           <SelectItem value="zebra">ZEBRA</SelectItem>
                           <SelectItem value="stor">STOR</SelectItem>
-                          <SelectItem value="ahsap-jaluzi">
+                          <SelectItem value="ahsap jaluzi">
                             AHŞAP JALUZİ
                           </SelectItem>
                         </SelectContent>
