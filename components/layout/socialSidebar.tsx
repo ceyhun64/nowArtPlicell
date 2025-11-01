@@ -22,7 +22,7 @@ export default function SocialSidebar() {
 
       {/* 2. FACEBOOK */}
       <a
-        href="https://www.facebook.com/"
+        href="https://www.facebook.com/share/1GzHckQSvz/?mibextid=wwXIfr"
         target="_blank"
         rel="noopener noreferrer"
         className="bg-[#1877f2] p-3 rounded-full text-white hover:brightness-90 transition"
@@ -39,7 +39,6 @@ export default function SocialSidebar() {
         className="bg-[#25D366] p-3 rounded-full text-white hover:brightness-90 transition"
         aria-label="WhatsApp"
       >
-        {/* Doğru WhatsApp SVG */}
         <svg
           width="24px"
           height="24px"
@@ -62,6 +61,29 @@ export default function SocialSidebar() {
         aria-label="Telefon"
       >
         <Phone size={24} />
+      </a>
+
+      {/* 5. TIKTOK */}
+      <a
+        href="https://www.tiktok.com/@nowart.plicell?_r=1&_t=ZS-911855IDXLM"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-black p-3 pl-4 rounded-full text-white hover:brightness-90 transition"
+        aria-label="TikTok"
+      >
+        <svg
+          width="24px"
+          height="24px"
+          viewBox="0 0 24 24"
+          role="img"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title>TikTok icon</title>
+          <path
+            fill="currentColor"
+            d="M12 2c.43 2.69 2.25 4.8 5 5v3.11a8.26 8.26 0 01-4.05-1.11v6.63a5.56 5.56 0 11-5.56-5.56c.38 0 .75.04 1.11.11v3.23a2.33 2.33 0 00-1.11-.29 2.45 2.45 0 102.45 2.45V2h2.16z"
+          />
+        </svg>
       </a>
     </div>
   );
