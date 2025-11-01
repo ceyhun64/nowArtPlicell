@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, Suspense } from "react";
-// useSearchParams ve useRouter burada kalır.
 import { useSearchParams, useRouter } from "next/navigation";
 import ProductCard from "./productCard";
 import Filter from "./filter";
@@ -10,13 +9,13 @@ import {
   Columns2,
   Columns3,
   Columns4,
-  ArrowUpRight,
   ListFilter,
   StretchHorizontal,
   StretchVertical,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-// seedProducts importu kaldırıldı.
-// import seedProducts from "@/seed/products.json";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -35,7 +34,6 @@ import {
 import { Button } from "../ui/button";
 import Loading from "../layout/loading";
 
-// === Ürün Veri Tipi (API'den gelen veriye uyacak şekilde güncellendi) ===
 interface ProductData {
   id: number;
   title: string;
@@ -43,12 +41,12 @@ interface ProductData {
   rating: number;
   reviewCount: number;
   mainImage: string;
-  subImage: string; // subImage opsiyonel olabilir
+  subImage: string;
   category: string;
-  subcategory?: string;
+  subCategory?: string;
 }
 
-// === Kategori İsimleri ===
+// Kategori isimleri
 const categoryNames: Record<string, string> = {
   "tum-urunler": "TÜM ÜRÜNLER",
   plicell: "PLİCELL",
@@ -57,52 +55,83 @@ const categoryNames: Record<string, string> = {
   "ahsap-jaluzi": "AHŞAP JALUZİ",
 };
 
+interface MenuItem {
+  label: string;
+  href: string;
+  subItems?: MenuItem[];
+}
 
-// Orijinal mantığı içeren ana bileşen.
+const productCategories: MenuItem[] = [
+  {
+    label: "PLICELL PERDE",
+    href: "/products?category=plicell",
+    subItems: [
+      { label: "Bella", href: "/products?category=plicell&sub=Bella" },
+      { label: "Valeria", href: "/products?category=plicell&sub=Valeria" },
+      { label: "Spark", href: "/products?category=plicell&sub=Spark" },
+      { label: "Merlin", href: "/products?category=plicell&sub=Merlin" },
+      {
+        label: "Duble Linen",
+        href: "/products?category=plicell&sub=Duble%20Linen",
+      },
+      { label: "Elegant", href: "/products?category=plicell&sub=Elegant" },
+      { label: "Dimout", href: "/products?category=plicell&sub=Dimout" },
+      { label: "Blackout", href: "/products?category=plicell&sub=Blackout" },
+      {
+        label: "Honeycomb20",
+        href: "/products?category=plicell&sub=Honeycomb20",
+      },
+      {
+        label: "Honeycomb16",
+        href: "/products?category=plicell&sub=Honeycomb16",
+      },
+    ],
+  },
+  { label: "ZEBRA PERDE", href: "/products?category=zebra" },
+  { label: "STOR PERDE", href: "/products?category=stor" },
+  { label: "AHŞAP JALUZİ PERDE", href: "/products?category=ahsap-jaluzi" },
+];
 const ProductsContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const categoryFromUrl = searchParams?.get("category") || null;
   const subFromUrl = searchParams?.get("sub") || null;
-  
-  // === DİNAMİK ÜRÜN STATE'LERİ ===
-  const [products, setProducts] = useState<ProductData[]>([]); // API'den çekilen tüm ürünler
-  const [isLoading, setIsLoading] = useState(true); // Yüklenme durumu
-  // ==============================
 
-  // === DİĞER STATE'LER ===
-  const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(3);
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [gridCols, setGridCols] = useState<2 | 3 | 4>(3);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
   const [sort, setSort] = useState<"az" | "za" | "priceLow" | "priceHigh">(
     "az"
   );
-  const [selectedCategory, setSelectedCategory] =
-    useState<string>("tum-urunler");
+  const [selectedCategory, setSelectedCategory] = useState("tum-urunler");
   const [selectedSub, setSelectedSub] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
-  // === ÜRÜN VERİSİNİ API'DEN ÇEKME (Dinamiğe geçiş) ===
+  const toggleSubMenu = (label: string) => {
+    setOpenSubMenus((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch("/api/products");
-        if (!response.ok) {
-          throw new Error("Ürünler API'den çekilemedi.");
-        }
+        if (!response.ok) throw new Error("Ürünler API'den çekilemedi");
         const data = await response.json();
         setProducts(data.products || []);
-      } catch (error) {
-        console.error("Ürün çekme hatası:", error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []); // Component yüklendiğinde bir kez çalışır.
+  }, []);
 
-  // === URL'den Kategori & Sub Normalizasyonu ===
+  // URL’den kategori ve subCategory normalizasyonu
   useEffect(() => {
     const normalize = (value: string | null) =>
       value ? value.toLowerCase().replace(/\s+/g, "-") : null;
@@ -115,12 +144,9 @@ const ProductsContent: React.FC = () => {
     setIsReady(true);
   }, [categoryFromUrl, subFromUrl]);
 
-  // === Grid Değiştirici ===
-  const handleGridChange = (cols: 1 | 2 | 3 | 4) => setGridCols(cols);
+  const handleGridChange = (cols: 2 | 3 | 4) => setGridCols(cols);
 
-  // === Kategori Seçimi ===
   const handleSelectCategory = (category: string, sub?: string | null) => {
-    // ... (URL yönlendirme mantığı aynı kalır)
     const normalizedCategory = category.toLowerCase().replace(/\s+/g, "-");
     const normalizedSub = sub ? sub.toLowerCase().replace(/\s+/g, "-") : null;
 
@@ -128,35 +154,29 @@ const ProductsContent: React.FC = () => {
     setSelectedSub(normalizedSub);
     setIsCategoriesOpen(false);
 
-    if (normalizedCategory === "tum-urunler") {
-      router.push("/products");
-    } else if (normalizedSub) {
+    if (normalizedCategory === "tum-urunler") router.push("/products");
+    else if (normalizedSub)
       router.push(
         `/products?category=${normalizedCategory}&sub=${normalizedSub}`
       );
-    } else {
-      router.push(`/products?category=${normalizedCategory}`);
-    }
+    else router.push(`/products?category=${normalizedCategory}`);
   };
 
-  // === Filtrelenmiş Ürünler (Artık 'products' state'ini kullanıyor) ===
   const filteredProducts = useMemo(() => {
     if (isLoading || !isReady) return [];
 
     if (selectedCategory === "tum-urunler") return products;
 
-    return products.filter((p: ProductData) => {
-      const categoryMatch =
+    return products.filter((p) => {
+      const catMatch =
         p.category.toLowerCase().replace(/\s+/g, "-") === selectedCategory;
-      // Subcategory opsiyonel olduğu için, subcategory yoksa tüm ürünleri göster.
       const subMatch = selectedSub
-        ? p.subcategory?.toLowerCase().replace(/\s+/g, "-") === selectedSub
+        ? p.subCategory?.toLowerCase().replace(/\s+/g, "-") === selectedSub
         : true;
-      return categoryMatch && subMatch;
+      return catMatch && subMatch;
     });
-  }, [selectedCategory, selectedSub, isReady, products, isLoading]);
+  }, [products, selectedCategory, selectedSub, isReady, isLoading]);
 
-  // === Sıralama (filteredProducts'ı kullanmaya devam eder) ===
   const sortedProducts = useMemo(() => {
     const sorted = [...filteredProducts];
     switch (sort) {
@@ -176,12 +196,7 @@ const ProductsContent: React.FC = () => {
     return sorted;
   }, [filteredProducts, sort]);
 
-  if (isLoading || !isReady) {
-    // Yüklenme durumunu burada göster
-    return (
-     <Loading/>
-    );
-  }
+  if (isLoading || !isReady) return <Loading />;
 
   // ... (Geri kalan render mantığı aynı kalır)
   return (
@@ -191,6 +206,7 @@ const ProductsContent: React.FC = () => {
         <div className="sticky top-28">
           <Filter
             selectedCategory={selectedCategory}
+            selectedSubCategory={selectedSub}
             onSelectCategory={handleSelectCategory}
           />
         </div>
@@ -209,7 +225,6 @@ const ProductsContent: React.FC = () => {
               : categoryNames[selectedCategory] ||
                 selectedCategory.toUpperCase()}
           </h2>
-
           {/* Kontroller */}
           <div className="flex items-center gap-3">
             {/* Mobil Kontroller */}
@@ -232,18 +247,65 @@ const ProductsContent: React.FC = () => {
                   </SheetHeader>
 
                   <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-1">
-                    {Object.keys(categoryNames).map((key) => (
-                      <div
-                        key={key}
-                        onClick={() => handleSelectCategory(key)}
-                        className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-stone-800"
-                      >
-                        <div className="h-5 w-5 rounded-full border border-gray-300 bg-gray-50 flex-shrink-0" />
-                        <span className="text-lg font-normal">
-                          {categoryNames[key]}
-                        </span>
-                      </div>
-                    ))}
+                    {productCategories.map((cat) => {
+                      const categoryKey =
+                        cat.href?.split("category=")[1]?.split("&")[0] || "";
+                      const isOpen = openSubMenus[cat.label] || false;
+
+                      return (
+                        <div key={cat.label} className="flex flex-col gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (cat.subItems?.length) {
+                                setOpenSubMenus((prev) => ({
+                                  ...prev,
+                                  [cat.label]: !prev[cat.label],
+                                }));
+                              } else {
+                                // Alt kategori yoksa direkt sayfaya git
+                                window.location.href = cat.href ?? "/products";
+                                setIsCategoriesOpen(false);
+                              }
+                            }}
+                            className="group w-full justify-between rounded-md border border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all text-sm font-medium text-stone-700"
+                          >
+                            <span>{cat.label}</span>
+                            {cat.subItems?.length && (
+                              <span>
+                                {isOpen ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronUp className="w-4 h-4" />
+                                )}
+                              </span>
+                            )}
+                          </Button>
+
+                          {/* Alt kategoriler */}
+                          {cat.subItems?.length && isOpen && (
+                            <div className="ml-4 flex flex-col gap-1 mt-1">
+                              {cat.subItems.map((sub) => (
+                                <Button
+                                  key={sub.label}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    window.location.href =
+                                      sub.href ?? "/products";
+                                    setIsCategoriesOpen(false);
+                                  }}
+                                  className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
+                                >
+                                  <span>{sub.label}</span>
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className="p-4 border-t">
@@ -365,9 +427,7 @@ const ProductsContent: React.FC = () => {
                 ? "sm:grid-cols-2"
                 : gridCols === 3
                 ? "sm:grid-cols-3"
-                : gridCols === 4
-                ? "sm:grid-cols-4"
-                : "sm:grid-cols-3"
+                : "sm:grid-cols-4"
             )}
           >
             {sortedProducts.map((product) => (
@@ -384,17 +444,10 @@ const ProductsContent: React.FC = () => {
   );
 };
 
-// ... (Products bileşeni aynı kalır)
-const Products: React.FC = () => {
-  const loadingFallback = (
-   <Loading/>
-  );
-
-  return (
-    <Suspense fallback={loadingFallback}>
-      <ProductsContent />
-    </Suspense>
-  );
-};
+const Products: React.FC = () => (
+  <Suspense fallback={<Loading />}>
+    <ProductsContent />
+  </Suspense>
+);
 
 export default Products;

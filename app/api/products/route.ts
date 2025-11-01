@@ -1,28 +1,44 @@
 // GEREKLİ NEXT.js İTHALLERİ
 import { NextResponse } from "next/server";
-// ÖRNEK VERİTABANI KULLANIMI
 import prisma from "@/lib/db";
-
-// Dosya yükleme hizmetini çağırmak için gerekli fetch fonksiyonu
-// NOT: Gerçek bir Next.js uygulamasında, sunucu tarafında fetch yerine
-// doğrudan route.ts'deki mantığı buraya taşıyarak daha verimli çalışabilirsiniz.
-// Ancak ayrılmış API rotası modelini korumak için fetch kullanıyoruz.
 
 interface ProductData {
   title: string;
-  // mainImage: string artık FormData'dan File olarak gelecek
   subImage?: string;
   pricePerM2: number;
   rating: number;
   reviewCount?: number;
   category: string;
+  subCategory?: string;
 }
 
 // GET /api/products
 export async function GET() {
   try {
-    const products = await prisma.product.findMany();
-    return NextResponse.json({ products }, { status: 200 });
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+        subCategory: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formattedProducts = products.map((p) => ({
+      id: p.id,
+      title: p.title,
+      pricePerM2: p.pricePerM2,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+      mainImage: p.mainImage,
+      subImage: p.subImage,
+      category: p.category.name,
+      subCategory: p.subCategory?.name || undefined,
+      subCategoryId: p.subCategory?.id || undefined,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+    }));
+
+    return NextResponse.json({ products: formattedProducts }, { status: 200 });
   } catch (error: any) {
     console.error("Prisma fetch error:", error);
     return NextResponse.json(
@@ -32,6 +48,7 @@ export async function GET() {
   }
 }
 
+// POST /api/products
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -51,7 +68,6 @@ export async function POST(request: Request) {
     const mainUploadForm = new FormData();
     mainUploadForm.append("file", mainFile);
     mainUploadForm.append("folderName", "products");
-
     const mainRes = await fetch(`${baseUrl}/api/upload`, {
       method: "POST",
       body: mainUploadForm,
@@ -59,13 +75,12 @@ export async function POST(request: Request) {
     const mainData = await mainRes.json();
     const mainImagePath = mainData.path;
 
-    // Alt görsel yükleme (opsiyonel)
+    // Alt görsel yükleme
     let subImagePath: string | undefined;
     if (subFile) {
       const subUploadForm = new FormData();
       subUploadForm.append("file", subFile);
       subUploadForm.append("folderName", "products");
-
       const subRes = await fetch(`${baseUrl}/api/upload`, {
         method: "POST",
         body: subUploadForm,
@@ -74,34 +89,81 @@ export async function POST(request: Request) {
       subImagePath = subData.path;
     }
 
-    // Ürün verilerini al
-    const productData: Omit<ProductData, "mainImage"> & { mainImage: string } =
-      {
-        title: formData.get("title") as string,
-        mainImage: mainImagePath,
-        subImage: subImagePath,
-        pricePerM2: parseFloat(formData.get("pricePerM2") as string),
-        rating: parseFloat(formData.get("rating") as string),
-        category: formData.get("category") as string,
-        reviewCount: formData.get("reviewCount")
-          ? parseInt(formData.get("reviewCount") as string)
-          : undefined,
-      };
+    const title = formData.get("title") as string;
+    const pricePerM2 = parseFloat(formData.get("pricePerM2") as string);
+    const rating = parseFloat(formData.get("rating") as string);
+    const reviewCount = formData.get("reviewCount")
+      ? parseInt(formData.get("reviewCount") as string)
+      : undefined;
 
-    // Prisma ile kaydet
+    const mainCategoryName = formData.get("category") as string;
+    const subCategoryName = formData.get("subCategory") as string | null;
+
+    // Ana kategori bul
+    const mainCategory = await prisma.category.findFirst({
+      where: { name: mainCategoryName },
+    });
+    if (!mainCategory) {
+      return NextResponse.json(
+        { success: false, error: "Ana kategori bulunamadı." },
+        { status: 404 }
+      );
+    }
+
+    let subCategoryId: number | undefined = undefined;
+    if (subCategoryName) {
+      const subCategory = await prisma.subCategory.findFirst({
+        where: {
+          name: subCategoryName,
+          categoryId: mainCategory.id,
+        },
+      });
+      if (!subCategory) {
+        return NextResponse.json(
+          { success: false, error: "Alt kategori bulunamadı." },
+          { status: 404 }
+        );
+      }
+      subCategoryId = subCategory.id;
+    }
+
+    // Ürün oluştur
     const product = await prisma.product.create({
       data: {
-        title: productData.title,
-        mainImage: productData.mainImage,
-        subImage: productData.subImage,
-        pricePerM2: productData.pricePerM2,
-        rating: productData.rating,
-        reviewCount: productData.reviewCount,
-        category: productData.category,
+        title,
+        mainImage: mainImagePath,
+        subImage: subImagePath,
+        pricePerM2,
+        rating,
+        reviewCount,
+        categoryId: mainCategory.id,
+        subCategoryId, // null olabilir
+      },
+      include: {
+        category: true,
+        subCategory: true,
       },
     });
 
-    return NextResponse.json({ success: true, product }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        product: {
+          id: product.id,
+          title: product.title,
+          pricePerM2: product.pricePerM2,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          mainImage: product.mainImage,
+          subImage: product.subImage,
+          category: product.category.name,
+          subCategory: product.subCategory?.name,
+          createdAt: product.createdAt.toISOString(),
+          updatedAt: product.updatedAt.toISOString(),
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error("Ürün oluştururken hata:", error);
     return NextResponse.json(

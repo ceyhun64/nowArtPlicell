@@ -26,6 +26,8 @@ export interface Product {
   category: string;
   createdAt: string;
   updatedAt: string;
+  subCategory?: string;
+  subCategoryId?: string;
 }
 
 export interface ProductTableProps {
@@ -126,9 +128,12 @@ export default function ProductTable({
                 <TableCell className="font-medium">{product.title}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="capitalize">
-                    {product.category}
+                    {product.category === "Plicell" && product.subCategory
+                      ? `${product.category} - ${product.subCategory}`
+                      : product.category}
                   </Badge>
                 </TableCell>
+
                 <TableCell>{product.pricePerM2.toLocaleString()} ₺</TableCell>
                 <TableCell>{product.rating} ⭐</TableCell>
                 <TableCell>{product.reviewCount || 0}</TableCell>
@@ -182,8 +187,11 @@ export default function ProductTable({
               <div className="flex-1 flex flex-col gap-1">
                 <p className="font-semibold text-[#001e59]">{product.title}</p>
                 <Badge variant="outline" className="capitalize w-max">
-                  {product.category}
+                  {product.category === "Plicell" && product.subCategory
+                    ? `${product.category} - ${product.subCategory}`
+                    : product.category}
                 </Badge>
+
                 <p className="text-[#001e59] font-semibold">
                   {product.pricePerM2.toLocaleString()} ₺ / m²
                 </p>

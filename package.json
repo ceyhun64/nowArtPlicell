@@ -8,6 +8,7 @@
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
+    
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

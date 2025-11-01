@@ -168,21 +168,51 @@ model Blog {
   @@map("blog")
 }
 
+model Category {
+  id            Int           @id @default(autoincrement())
+  name          String
+  subCategories SubCategory[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  product       product[]
+
+  @@map("category")
+}
+
+model SubCategory {
+  id         Int       @id @default(autoincrement())
+  name       String
+  categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id])
+  products   product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("sub_category")
+}
+
 model product {
-  id          Int         @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String
   pricePerM2  Float
   rating      Int
   reviewCount Int?
-  mainImage   String      @default("default-image.jpg")
+  mainImage   String  @default("default-image.jpg")
   subImage    String?
-  category    String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  CartItem    CartItem[]
-  Favorite    Favorite[]
-  OrderItem   OrderItem[]
-  Review      Review[]
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  subCategoryId Int?
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  CartItem  CartItem[]
+  Favorite  Favorite[]
+  OrderItem OrderItem[]
+  Review    Review[]
 }
 
 enum OrderStatus {

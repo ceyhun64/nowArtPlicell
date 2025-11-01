@@ -26,6 +26,8 @@ export interface ProductFormData {
   rating: number;
   reviewCount: number;
   category: string;
+  subCategory?: string;
+  subCategoryId?: string; // yeni ID alanı
   mainImage?: string;
   subImage?: string;
 }
@@ -48,6 +50,7 @@ export default function UpdateProductDialog({
   onOpenChange,
 }: UpdateProductDialogProps) {
   const id = useId();
+  console.log("product:", product);
 
   const [productData, setProductData] = useState<ProductFormData>({
     title: "",
@@ -55,6 +58,8 @@ export default function UpdateProductDialog({
     rating: 0,
     reviewCount: 0,
     category: "",
+    subCategory: "",
+    subCategoryId: "",
     mainImage: "",
     subImage: "",
   });
@@ -65,7 +70,19 @@ export default function UpdateProductDialog({
   const [subPreview, setSubPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Helper: extract filename from URL (remove querystring)
+  const plicellSubCategories = [
+    { id: "1", name: "Bella" },
+    { id: "2", name: "Valeria" },
+    { id: "3", name: "Spark" },
+    { id: "4", name: "Merlin" },
+    { id: "5", name: "Duble Linen" },
+    { id: "6", name: "Elegant" },
+    { id: "7", name: "Dimout" },
+    { id: "8", name: "Blackout" },
+    { id: "9", name: "Honeycomb20" },
+    { id: "10", name: "Honeycomb16" },
+  ];
+
   const filenameFromUrl = (url?: string) => {
     if (!url) return null;
     try {
@@ -77,11 +94,33 @@ export default function UpdateProductDialog({
     }
   };
 
-  // When the parent provides a product, populate local state
+  // product değiştiğinde formu güncelle
   useEffect(() => {
     if (product) {
-      setProductData(product);
-      // reset files and previews so fallback uses product.mainImage/subImage
+      let subCategoryName = product.subCategory || "";
+
+      // subCategoryId varsa bul ve alt kategori adını ata
+      if (
+        product.subCategoryId !== undefined &&
+        product.subCategoryId !== null
+      ) {
+        const idStr = product.subCategoryId.toString();
+        const found = plicellSubCategories.find((sub) => sub.id === idStr);
+        if (found) subCategoryName = found.name;
+      }
+
+      setProductData({
+        title: product.title || "",
+        pricePerM2: product.pricePerM2 || 0,
+        rating: product.rating || 0,
+        reviewCount: product.reviewCount || 0,
+        category: product.category || "",
+        subCategory: subCategoryName,
+        subCategoryId: product.subCategoryId?.toString() || "",
+        mainImage: product.mainImage || "",
+        subImage: product.subImage || "",
+      });
+
       setMainFile(null);
       setSubFile(null);
       setMainPreview(null);
@@ -89,15 +128,13 @@ export default function UpdateProductDialog({
     }
   }, [product]);
 
-  // create/revoke preview URLs when files change
+  // Dosya değişimi önizleme
   useEffect(() => {
     if (mainFile) {
       const url = URL.createObjectURL(mainFile);
       setMainPreview(url);
       return () => URL.revokeObjectURL(url);
-    } else {
-      setMainPreview(null);
-    }
+    } else setMainPreview(null);
   }, [mainFile]);
 
   useEffect(() => {
@@ -105,9 +142,7 @@ export default function UpdateProductDialog({
       const url = URL.createObjectURL(subFile);
       setSubPreview(url);
       return () => URL.revokeObjectURL(url);
-    } else {
-      setSubPreview(null);
-    }
+    } else setSubPreview(null);
   }, [subFile]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -133,16 +168,35 @@ export default function UpdateProductDialog({
   const getPreviewSrc = (filePreview: string | null, fallbackUrl?: string) =>
     filePreview || fallbackUrl || null;
 
-  // Submit: await parent's onUpdate (may be async), then close dialog
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!productData.title || !productData.category) return;
+
+    // Plicell için alt kategori seçilmedi ise uyar
+    if (productData.category === "Plicell" && !productData.subCategoryId) {
+      alert("Plicell için alt kategori seçmelisiniz!");
+      return;
+    }
+
     try {
       setLoading(true);
-      await onUpdate(productData, mainFile || undefined, subFile || undefined);
-      // close dialog (parent controls open state)
+
+      // Plicell dışı kategori ise alt kategori null gönder
+      const submitData = {
+        ...productData,
+        subCategory:
+          productData.category === "Plicell" ? productData.subCategory : "null",
+        subCategoryId:
+          productData.category === "Plicell"
+            ? productData.subCategoryId
+            : "null",
+      };
+
+      await onUpdate(submitData, mainFile || undefined, subFile || undefined);
       onOpenChange(false);
     } catch (err) {
-      console.error("UpdateProductDialog.onUpdate error:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -150,7 +204,6 @@ export default function UpdateProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Yeni Ürün Ekle diyaloğu ile aynı genişlik ve yükseklik ayarları */}
       <DialogContent className="bg-white text-gray-900 max-w-5xl w-full border border-gray-300 rounded-2xl shadow-2xl sm:max-h-[90vh] sm:overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-[#001e59]">
@@ -159,11 +212,9 @@ export default function UpdateProductDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          {/* Ana İki Sütunlu Düzenleyici (Mobil: Tek Sütun, MD: İki Sütun - Yeni Ürün Ekle ile uyumlu olarak 'lg' yerine 'md' kullanıldı) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 mt-4">
-            {/* Sol: Form Alanı */}
+            {/* Form Alanları */}
             <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-200">
-              {/* Input Grubu: Ürün Adı, Kategori ve Fiyat (Mobil: 2 sütun, MD: 1 sütun) */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-1 md:gap-5">
                 {/* Ürün Adı */}
                 <div className="col-span-1 md:col-span-full">
@@ -188,22 +239,62 @@ export default function UpdateProductDialog({
                   <Select
                     value={productData.category}
                     onValueChange={(val) =>
-                      setProductData((prev) => ({ ...prev, category: val }))
+                      setProductData((prev) => ({
+                        ...prev,
+                        category: val,
+                        // Plicell değilse alt kategori ve ID'yi boş yap
+                        subCategory: val === "Plicell" ? prev.subCategory : "",
+                        subCategoryId:
+                          val === "Plicell" ? prev.subCategoryId : "",
+                      }))
                     }
                   >
                     <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Kategori Seç" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="plicell">PLICELL</SelectItem>
-                      <SelectItem value="zebra">ZEBRA</SelectItem>
-                      <SelectItem value="stor">STOR</SelectItem>
-                      <SelectItem value="ahsap-jaluzi">AHŞAP JALUZİ</SelectItem>
+                      <SelectItem value="Plicell">PLICELL</SelectItem>
+                      <SelectItem value="Zebra">ZEBRA</SelectItem>
+                      <SelectItem value="Stor">STOR</SelectItem>
+                      <SelectItem value="Ahşap Jaluzi">AHŞAP JALUZİ</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Fiyat (m²) */}
+                {/* Alt Kategori */}
+                {productData.category === "Plicell" && (
+                  <div className="col-span-1 md:col-span-full">
+                    <Label className="text-sm font-semibold text-[#001e59]">
+                      Alt Kategori
+                    </Label>
+                    <Select
+                      value={productData.subCategoryId || ""}
+                      onValueChange={(val) => {
+                        const selected = plicellSubCategories.find(
+                          (sub) => sub.id === val
+                        );
+                        setProductData((prev) => ({
+                          ...prev,
+                          subCategoryId: val,
+                          subCategory: selected?.name || "",
+                        }));
+                      }}
+                    >
+                      <SelectTrigger className="mt-1 w-full">
+                        <SelectValue placeholder="Alt Kategori Seç" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plicellSubCategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name.toUpperCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Fiyat */}
                 <div className="col-span-2 md:col-span-full">
                   <Label className="text-sm font-semibold text-[#001e59]">
                     Fiyat (m²)
@@ -220,9 +311,8 @@ export default function UpdateProductDialog({
                 </div>
               </div>
 
-              {/* YENİ DÜZEN: Görsel Seçim Inputları (Mobil: 2 Sütunlu Grid, MD: 1 Sütunlu Grid) */}
+              {/* Görseller */}
               <div className="grid grid-cols-2 gap-x-4 mt-3 md:grid-cols-1 md:gap-5 md:mt-5">
-                {/* Ana Görsel */}
                 <div>
                   <Label className="text-sm font-semibold text-[#001e59]">
                     Ana Görsel
@@ -245,7 +335,6 @@ export default function UpdateProductDialog({
                     >
                       Yeni Ana Görsel Seç
                     </Button>
-                    {/* Mevcut dosya bilgisi sadece dosya seçilmemişse gösteriliyor */}
                     {!mainFile && productData.mainImage && (
                       <p className="text-xs text-gray-500 mt-1">
                         Mevcut: {filenameFromUrl(productData.mainImage)}
@@ -254,7 +343,6 @@ export default function UpdateProductDialog({
                   </label>
                 </div>
 
-                {/* Alt Görsel */}
                 <div>
                   <Label className="text-sm font-semibold text-[#001e59]">
                     Alt Görsel
@@ -277,7 +365,6 @@ export default function UpdateProductDialog({
                     >
                       Yeni Alt Görsel Seç
                     </Button>
-                    {/* Mevcut dosya bilgisi sadece dosya seçilmemişse gösteriliyor */}
                     {!subFile && productData.subImage && (
                       <p className="text-xs text-gray-500 mt-1">
                         Mevcut: {filenameFromUrl(productData.subImage)}
@@ -288,15 +375,13 @@ export default function UpdateProductDialog({
               </div>
             </div>
 
-            {/* Sağ: Önizleme */}
+            {/* Önizleme */}
             <div className="flex flex-col gap-4 border border-gray-200 rounded-xl p-4 sm:p-6 bg-gray-50">
               <h3 className="text-lg font-semibold text-[#001e59] text-center">
                 Ürün Önizleme
               </h3>
 
-              {/* Önizleme Görselleri (Mobil ve MD'de yan yana - Yeni Ürün Ekle ile uyumlu w-full sm:w-full md:w-40 yapısı) */}
               <div className="flex flex-row items-center justify-center gap-4">
-                {/* Ana Görsel */}
                 <div className="relative w-full sm:w-full md:w-40 h-40 rounded-lg overflow-hidden border border-dashed border-gray-300 flex items-center justify-center">
                   {getPreviewSrc(mainPreview, productData.mainImage) ? (
                     <Image
@@ -312,7 +397,6 @@ export default function UpdateProductDialog({
                   )}
                 </div>
 
-                {/* Alt Görsel */}
                 <div className="relative w-full sm:w-full md:w-40 h-40 rounded-lg overflow-hidden border border-dashed border-gray-300 flex items-center justify-center">
                   {getPreviewSrc(subPreview, productData.subImage) ? (
                     <Image
@@ -329,7 +413,6 @@ export default function UpdateProductDialog({
                 </div>
               </div>
 
-              {/* Ürün adı, kategori ve fiyat */}
               <div className="text-center mt-4">
                 <p className="text-lg font-semibold">
                   {productData.title || "Ürün adı"}

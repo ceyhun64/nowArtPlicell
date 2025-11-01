@@ -13,6 +13,7 @@ import {
   FileText,
   User,
   ArrowUpRight, // Yeni ikon eklendi
+  ChevronUp,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,81 +51,92 @@ const MobileNestedMenu = ({
   item: MenuItem;
   setIsMobileMenuOpen: (open: boolean) => void;
 }) => {
-  // Eğer subItems varsa ve Mekanik Perde Sistemleri değilse DropdownMenu kullan
-  // Mekanik Perde Sistemleri mobil alt barda ayrı bir Sheet olarak açılacağı için
-  if (item.subItems?.length && item.label !== "Mekanik Perde Sistemleri") {
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
+
+  // Alt kategorileri Sheet gibi açılır yap
+  if (item.subItems?.length) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex items-center justify-between w-full text-stone-700 hover:text-[#001e59] transition-colors text-lg font-medium p-0 h-auto"
-          >
-            {item.label}
-            <ChevronDown className="h-4 w-4 ml-2" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-full bg-gray-50 p-2 space-y-1 border-none shadow-none">
-          {item.subItems.map((subItem) => (
-            <DropdownMenuItem
-              key={subItem.label}
-              className="hover:bg-gray-100 transition-colors py-2 px-3 text-base cursor-pointer"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Link href={subItem.href ?? "#"} className="block text-stone-600">
-                {subItem.label}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  } else if (
-    item.label === "Mekanik Perde Sistemleri" &&
-    item.subItems?.length
-  ) {
-    // Mekanik Perde Sistemleri için, alt menüyü açan bir buton yapısı
-    return (
-      <>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex items-center justify-between w-full text-stone-700 hover:text-[#001e59] transition-colors text-lg font-medium p-0 h-auto"
-            >
-              {item.label}
-              <ChevronDown className="h-4 w-4 ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full bg-gray-50 p-2 space-y-1 border-none shadow-none">
-            {item.subItems.map((subItem) => (
-              <DropdownMenuItem
-                key={subItem.label}
-                className="hover:bg-gray-100 transition-colors py-2 px-3 text-base cursor-pointer"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Link
-                  href={subItem.href ?? "#"}
-                  className="block text-stone-600"
+      <div className="flex flex-col gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setOpenSubMenus((prev) => ({
+              ...prev,
+              [item.label]: !prev[item.label],
+            }));
+          }}
+          className="group w-full justify-between rounded-md border border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all text-sm font-medium text-stone-700"
+        >
+          <span>{item.label}</span>
+          <span>
+            {openSubMenus[item.label] ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </span>
+        </Button>
+
+        {/* Alt kategoriler */}
+        {item.subItems.length > 0 && openSubMenus[item.label] && (
+          <div className="ml-4 flex flex-col gap-1 mt-1">
+            {item.subItems.map((sub) => (
+              <div key={sub.label} className="flex flex-col gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (sub.subItems?.length) {
+                      // Alt kategori varsa toggle
+                      setOpenSubMenus((prev) => ({
+                        ...prev,
+                        [sub.label]: !prev[sub.label],
+                      }));
+                    } else {
+                      // Yoksa sayfaya git
+                      window.location.href = sub.href ?? "/products";
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
                 >
-                  {subItem.label}
-                </Link>
-              </DropdownMenuItem>
+                  <span>{sub.label}</span>
+                  {sub.subItems?.length && (
+                    <span>
+                      {openSubMenus[sub.label] ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </span>
+                  )}
+                </Button>
+
+                {/* Eğer alt kategorinin kendi alt kategorisi varsa */}
+                {sub.subItems?.length && openSubMenus[sub.label] && (
+                  <div className="ml-4 flex flex-col gap-1 mt-1">
+                    {sub.subItems.map((subSub) => (
+                      <Button
+                        key={subSub.label}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = subSub.href ?? "/products";
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
+                      >
+                        {subSub.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
-            <DropdownMenuItem
-              className="hover:bg-gray-100 transition-colors py-2 px-3 text-base cursor-pointer font-semibold"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <a
-                href={item.href ?? "/products"}
-                className="block text-stone-800"
-              >
-                Tümünü Gör
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -151,6 +163,7 @@ export default function Navbar(): React.ReactElement {
   const [user, setUser] = useState<{ name?: string; email?: string } | null>(
     null
   );
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({});
 
   const [favoriteCount, setFavoriteCount] = useState(0);
 
@@ -211,11 +224,34 @@ export default function Navbar(): React.ReactElement {
 
   // Görseldeki Ürün Kategorileri (Artık href de içerebilir)
   const productCategories: MenuItem[] = [
-    // NOT: Buradaki label'lar artık 'Products' bileşenindeki categoryNames'deki değerlerle EŞLEŞMELİ.
-    { label: "PLICELL PERDE", href: "/products?category=plicell" }, // slug: blackout
-    { label: "ZEBRA PERDE", href: "products?category=zebra" }, // slug: duz-seri
-    { label: "STOR PERDE", href: "/products?category=stor" }, // slug: dimout
-    { label: "AHŞAP JALUZİ PERDE", href: "/products?category=ahsap-jaluzi" }, // slug: cift-sistem-tul
+    {
+      label: "PLICELL PERDE",
+      href: "/products?category=plicell",
+      subItems: [
+        { label: "Bella", href: "/products?category=plicell&sub=Bella" },
+        { label: "Valeria", href: "/products?category=plicell&sub=Valeria" },
+        { label: "Spark", href: "/products?category=plicell&sub=Spark" },
+        { label: "Merlin", href: "/products?category=plicell&sub=Merlin" },
+        {
+          label: "Duble Linen",
+          href: "/products?category=plicell&sub=Duble%20Linen",
+        },
+        { label: "Elegant", href: "/products?category=plicell&sub=Elegant" },
+        { label: "Dimout", href: "/products?category=plicell&sub=Dimout" },
+        { label: "Blackout", href: "/products?category=plicell&sub=Blackout" },
+        {
+          label: "Honeycomb20",
+          href: "/products?category=plicell&sub=Honeycomb20",
+        },
+        {
+          label: "Honeycomb16",
+          href: "/products?category=plicell&sub=Honeycomb16",
+        },
+      ],
+    },
+    { label: "ZEBRA PERDE", href: "/products?category=zebra" },
+    { label: "STOR PERDE", href: "/products?category=stor" },
+    { label: "AHŞAP JALUZİ PERDE", href: "/products?category=ahsap-jaluzi" },
   ];
 
   const mobileMenuItems: MenuItem[] = [
@@ -427,18 +463,31 @@ export default function Navbar(): React.ReactElement {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-60 shadow-lg border border-gray-200 rounded-md bg-white">
                   {productCategories.map((item) => (
-                    <DropdownMenuItem asChild key={item.label}>
-                      <Link
-                        href={item.href ?? "/products"}
-                        className="block w-full px-2 py-1.5 rounded-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                      >
-                        {item.label}
-                      </Link>
-                    </DropdownMenuItem>
+                    <div key={item.label}>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={item.href ?? "/products"}
+                          className="block w-full px-2 py-1.5 rounded-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                      {item.subItems?.length && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.subItems.map((sub) => (
+                            <DropdownMenuItem asChild key={sub.label}>
+                              <Link
+                                href={sub.href ?? "/products"}
+                                className="block w-full px-2 py-1 rounded-sm text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                              >
+                                {sub.label}
+                              </Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
-                  <DropdownMenuItem className="hover:bg-gray-50 transition-colors font-semibold">
-                    <Link href="/products">Tüm Ürünler</Link>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -518,32 +567,75 @@ export default function Navbar(): React.ReactElement {
                 <span className="text-xs mt-1">Kategoriler</span>
               </button>
             </SheetTrigger>
-
             <SheetContent
               side="bottom"
               className="h-auto max-h-[80vh] w-full p-0 flex flex-col rounded-t-lg"
             >
-              {/* Header */}
               <SheetHeader className="p-4 flex flex-row justify-between items-center">
                 <SheetTitle>Kategoriler</SheetTitle>
               </SheetHeader>
 
-              {/* Kategori Listesi */}
               <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-1">
-                {productCategories.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href ?? "#"}
-                    onClick={() => setIsCategoriesOpen(false)}
-                    className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-stone-800"
-                  >
-                    <div className="h-5 w-5 rounded-full border border-gray-300 bg-gray-50 flex-shrink-0" />
-                    <span className="text-lg font-normal">{item.label}</span>
-                  </a>
-                ))}
+                {productCategories.map((cat) => {
+                  const categoryKey =
+                    cat.href?.split("category=")[1]?.split("&")[0] || "";
+                  const isOpen = openSubMenus[cat.label] || false;
+
+                  return (
+                    <div key={cat.label} className="flex flex-col gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (cat.subItems?.length) {
+                            setOpenSubMenus((prev) => ({
+                              ...prev,
+                              [cat.label]: !prev[cat.label],
+                            }));
+                          } else {
+                            // Alt kategori yoksa direkt sayfaya git
+                            window.location.href = cat.href ?? "/products";
+                            setIsCategoriesOpen(false);
+                          }
+                        }}
+                        className="group w-full justify-between rounded-md border border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all text-sm font-medium text-stone-700"
+                      >
+                        <span>{cat.label}</span>
+                        {cat.subItems?.length && (
+                          <span>
+                            {isOpen ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronUp className="w-4 h-4" />
+                            )}
+                          </span>
+                        )}
+                      </Button>
+
+                      {/* Alt kategoriler */}
+                      {cat.subItems?.length && isOpen && (
+                        <div className="ml-4 flex flex-col gap-1 mt-1">
+                          {cat.subItems.map((sub) => (
+                            <Button
+                              key={sub.label}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                window.location.href = sub.href ?? "/products";
+                                setIsCategoriesOpen(false);
+                              }}
+                              className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
+                            >
+                              <span>{sub.label}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Tüm Ürünleri Listele Butonu */}
               <div className="p-4 border-t">
                 <a
                   href="/products"

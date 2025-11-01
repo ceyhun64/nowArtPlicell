@@ -36,11 +36,15 @@ interface Product {
   category: string;
   createdAt: string;
   updatedAt: string;
+  subCategory?: string;
+  subCategoryId?: string;
 }
 
 export default function Products(): React.ReactElement {
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState("all");
+  const [subFilter, setSubFilter] = useState("all");
+
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,11 +80,18 @@ export default function Products(): React.ReactElement {
   }, [updateDialogOpen, deleteDialogOpen]);
 
   // Filtreleme + Arama
+  // Filtreleme + Arama
   const filteredProducts = products
     .filter((p) =>
       filter === "all"
         ? true
         : p.category.toLowerCase() === filter.toLowerCase()
+    )
+    .filter((p) =>
+      // sadece Plicell seçilmiş ve alt filtre aktif ise
+      filter.toLowerCase() === "plicell" && subFilter !== "all"
+        ? p.subCategory?.toLowerCase() === subFilter.toLowerCase()
+        : true
     )
     .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()));
 
@@ -99,8 +110,10 @@ export default function Products(): React.ReactElement {
     dataForm.append("title", formData.title);
     dataForm.append("pricePerM2", String(formData.pricePerM2));
     dataForm.append("rating", String(formData.rating));
-    dataForm.append("reviewCount", String(formData.reviewCount));
+    dataForm.append("reviewCount", String(formData.reviewCount || 0));
     dataForm.append("category", formData.category);
+    if (formData.subCategory)
+      dataForm.append("subCategory", formData.subCategory);
     dataForm.append("file", mainFile);
     if (subFile) dataForm.append("subImageFile", subFile);
 
@@ -110,6 +123,7 @@ export default function Products(): React.ReactElement {
         body: dataForm,
       });
       const data = await res.json();
+
       if (res.ok) {
         toast.success("Ürün başarıyla eklendi!");
         fetchProducts();
@@ -130,22 +144,29 @@ export default function Products(): React.ReactElement {
   ) => {
     if (!selectedProduct) return;
 
+    const formData = new FormData();
+    formData.append("title", updatedData.title);
+    formData.append("pricePerM2", String(updatedData.pricePerM2));
+    formData.append("rating", String(updatedData.rating));
+    formData.append("reviewCount", String(updatedData.reviewCount || 0));
+    formData.append("category", updatedData.category);
+
+    // Alt kategori null olarak gönderilecek
+    formData.append(
+      "subCategory",
+      updatedData.subCategory && updatedData.subCategory !== ""
+        ? updatedData.subCategory
+        : "null"
+    );
+
+    if (mainFile) formData.append("file", mainFile);
+    if (subFile) formData.append("subImageFile", subFile);
+
     try {
-      const formData = new FormData();
-      formData.append("title", updatedData.title);
-      formData.append("pricePerM2", String(updatedData.pricePerM2));
-      formData.append("rating", String(updatedData.rating));
-      formData.append("reviewCount", String(updatedData.reviewCount));
-      formData.append("category", updatedData.category);
-
-      if (mainFile) formData.append("file", mainFile);
-      if (subFile) formData.append("subImageFile", subFile);
-
       const res = await fetch(`/api/products/${selectedProduct.id}`, {
         method: "PUT",
         body: formData,
       });
-
       const data = await res.json();
 
       if (res.ok) {
@@ -267,12 +288,37 @@ export default function Products(): React.ReactElement {
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-200 text-gray-800 rounded-lg">
                 <SelectItem value="all">Tüm Ürünler</SelectItem>
-                <SelectItem value="plicell">Plicell</SelectItem>
-                <SelectItem value="zebra">Zebra</SelectItem>
-                <SelectItem value="stor">Stor</SelectItem>
-                <SelectItem value="ahsap-jaluzi">Ahşap Jaluzi</SelectItem>
+                <SelectItem value="Plicell">Plicell</SelectItem>
+                <SelectItem value="Zebra">Zebra</SelectItem>
+                <SelectItem value="Stor">Stor</SelectItem>
+                <SelectItem value="Ahşap Jaluzi">Ahşap Jaluzi</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Alt kategori filtresi, sadece Plicell seçildiğinde görünür */}
+            {filter.toLowerCase() === "plicell" && (
+              <Select
+                onValueChange={(val) => setSubFilter(val)}
+                defaultValue="all"
+              >
+                <SelectTrigger className="w-full sm:w-48 bg-white border border-gray-200 text-gray-800 rounded-lg shadow-sm">
+                  <SelectValue placeholder="Alt kategori seç" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 text-gray-800 rounded-lg">
+                  <SelectItem value="all">Tüm Alt Kategoriler</SelectItem>
+                  <SelectItem value="Bella">Bella</SelectItem>
+                  <SelectItem value="Valeria">Valeria</SelectItem>
+                  <SelectItem value="Spark">Spark</SelectItem>
+                  <SelectItem value="Merlin">Merlin</SelectItem>
+                  <SelectItem value="Duble Linen">Duble Linen</SelectItem>
+                  <SelectItem value="Elegant">Elegant</SelectItem>
+                  <SelectItem value="Dimout">Dimout</SelectItem>
+                  <SelectItem value="Blackout">Blackout</SelectItem>
+                  <SelectItem value="Honeycomb20">Honeycomb20</SelectItem>
+                  <SelectItem value="Honeycomb16">Honeycomb16</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
 
             <Input
               type="text"
@@ -308,6 +354,8 @@ export default function Products(): React.ReactElement {
               category: selectedProduct.category,
               mainImage: selectedProduct.mainImage,
               subImage: selectedProduct.subImage,
+              subCategory: selectedProduct.subCategory,
+              subCategoryId: selectedProduct.subCategoryId,
             }}
             open={updateDialogOpen}
             onOpenChange={setUpdateDialogOpen}

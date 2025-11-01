@@ -26,6 +26,8 @@ export interface ProductFormData {
   rating: number;
   reviewCount: number;
   category: string;
+  subCategory?: string; // Önceki kod için
+  subCategoryId?: string; // Yeni alan
 }
 
 interface AddProductDialogProps {
@@ -42,10 +44,24 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
       rating: 0,
       reviewCount: 0,
       category: "",
+      subCategory: "",
     });
     const [mainFile, setMainFile] = useState<File | null>(null);
     const [subFile, setSubFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const plicellSubCategories = [
+      { id: "1", name: "Bella" },
+      { id: "2", name: "Valeria" },
+      { id: "3", name: "Spark" },
+      { id: "4", name: "Merlin" },
+      { id: "5", name: "Duble Linen" },
+      { id: "6", name: "Elegant" },
+      { id: "7", name: "Dimout" },
+      { id: "8", name: "Blackout" },
+      { id: "9", name: "Honeycomb20" },
+      { id: "10", name: "Honeycomb16" },
+    ];
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
@@ -71,6 +87,7 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
         rating: 0,
         reviewCount: 0,
         category: "",
+        subCategory: "",
       });
       setMainFile(null);
       setSubFile(null);
@@ -78,8 +95,14 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!productData.title || !mainFile || !subFile || !productData.category)
+      if (!productData.title || !mainFile || !productData.category) return;
+
+      // Plicell seçildiyse subCategoryId zorunlu
+      if (productData.category === "plicell" && !productData.subCategoryId) {
+        alert("Plicell için alt kategori seçmelisiniz!");
         return;
+      }
+
       onSubmit(productData, mainFile, subFile || undefined);
       resetForm();
       setOpen(false);
@@ -101,7 +124,6 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
         </Button>
 
         <Dialog open={open} onOpenChange={setOpen}>
-          {/* sm:max-h-[90vh] ve sm:overflow-y-auto sınıfları diyaloğun yüksekliğini mobil ekranla sınırlar */}
           <DialogContent className="bg-white text-gray-900 max-w-5xl w-full border border-gray-300 rounded-2xl shadow-2xl sm:max-h-[90vh] sm:overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-[#001e59]">
@@ -110,13 +132,9 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
             </DialogHeader>
 
             <form onSubmit={handleSubmit}>
-              {/* Ana İki Sütunlu Düzenleyici (Mobil: Tek Sütun, MD: İki Sütun) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 mt-4">
-                {/* Sol: Form Alanı */}
                 <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-200">
-                  {/* Input Grubu: Ürün Adı, Kategori ve Fiyat (Mobil: 2 sütun, MD: 1 sütun) */}
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-1 md:gap-5">
-                    {/* Ürün Adı */}
                     <div className="col-span-1 md:col-span-full">
                       <Label className="text-sm font-semibold text-[#001e59]">
                         Ürün Adı
@@ -131,7 +149,7 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                       />
                     </div>
 
-                    {/* Kategori */}
+                    {/* Ana kategori */}
                     <div className="col-span-1 md:col-span-full">
                       <Label className="text-sm font-semibold text-[#001e59]">
                         Kategori
@@ -139,7 +157,11 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                       <Select
                         value={productData.category}
                         onValueChange={(val) =>
-                          setProductData((prev) => ({ ...prev, category: val }))
+                          setProductData((prev) => ({
+                            ...prev,
+                            category: val,
+                            subCategory: "", // kategori değişince alt kategori sıfırlanır
+                          }))
                         }
                       >
                         <SelectTrigger className="mt-1 w-full">
@@ -156,7 +178,35 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                       </Select>
                     </div>
 
-                    {/* Fiyat (m²) */}
+                    {/* Plicell alt kategori */}
+                    {productData.category === "plicell" && (
+                      <Select
+                        value={productData.subCategoryId || ""}
+                        onValueChange={(val) => {
+                          const selected = plicellSubCategories.find(
+                            (sub) => sub.id === val
+                          );
+                          setProductData((prev) => ({
+                            ...prev,
+                            subCategoryId: val,
+                            subCategory: selected?.name || "",
+                          }));
+                        }}
+                      >
+                        <SelectTrigger className="mt-1 w-full">
+                          <SelectValue placeholder="Alt Kategori Seç" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {plicellSubCategories.map((sub) => (
+                            <SelectItem key={sub.id} value={sub.id}>
+                              {sub.name.toUpperCase()}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+
+                    {/* Fiyat */}
                     <div className="col-span-2 md:col-span-full">
                       <Label className="text-sm font-semibold text-[#001e59]">
                         Fiyat (m²)
@@ -173,11 +223,8 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                     </div>
                   </div>
 
-                  {/* YENİ DEĞİŞİKLİK: Görsel Seçim Inputları mobil'de 2 sütunlu grid yapıldı. 
-                MD'de yine alt alta gelmesi için 'md:flex-col' ve 'md:gap-5' sınıfları eklendi.
-            */}
+                  {/* Görseller */}
                   <div className="grid grid-cols-2 gap-x-4 mt-3 md:grid-cols-1 md:gap-5 md:mt-5">
-                    {/* Ana Görsel */}
                     <div>
                       <Label className="text-sm font-semibold text-[#001e59]">
                         Ana Görsel
@@ -203,7 +250,6 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                       </label>
                     </div>
 
-                    {/* Alt Görsel */}
                     <div>
                       <Label className="text-sm font-semibold text-[#001e59]">
                         Alt Görsel
@@ -231,7 +277,8 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                   </div>
                 </div>
 
-                {/* Sağ: Önizleme */}
+                {/* Önizleme */}
+
                 <div className="flex flex-col gap-4 border border-gray-200 rounded-xl p-4 sm:p-6 bg-gray-50">
                   <h3 className="text-lg font-semibold text-[#001e59] text-center">
                     Ürün Önizleme

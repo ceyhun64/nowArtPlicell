@@ -6,19 +6,32 @@ import path from "path";
 // --- GET /api/products/:id ---
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // 👈 params artık Promise
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
   try {
     const product = await prisma.product.findUnique({
       where: { id: Number(id) },
+      include: {
+        category: true,
+        subCategory: true,
+      },
     });
 
     if (!product) {
       return NextResponse.json({ error: "Ürün bulunamadı" }, { status: 404 });
     }
 
-    return NextResponse.json({ product }, { status: 200 });
+    return NextResponse.json(
+      {
+        product: {
+          ...product,
+          category: product.category.name,
+          subCategory: product.subCategory?.name,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Ürünleri getirirken hata:", error);
     return NextResponse.json({ error: "Ürünler alınamadı" }, { status: 500 });
@@ -73,69 +86,89 @@ export async function PUT(
 
   try {
     const formData = await request.formData();
+    const mainFile = formData.get("file") as File | null;
+    const subFile = formData.get("subImageFile") as File | null;
 
     const title = formData.get("title")?.toString();
-    const pricePerM2 = Number(formData.get("pricePerM2"));
-    const rating = Number(formData.get("rating"));
-    const reviewCount = Number(formData.get("reviewCount"));
-    const category = formData.get("category")?.toString();
+    const pricePerM2 = parseFloat(formData.get("pricePerM2") as string);
+    const rating = parseFloat(formData.get("rating") as string);
+    const reviewCount = formData.get("reviewCount")
+      ? parseInt(formData.get("reviewCount") as string)
+      : undefined;
 
-    const mainFile = formData.get("file") as Blob | null;
-    const subFile = formData.get("subImageFile") as Blob | null;
+    const mainCategoryName = formData.get("category") as string;
+    const subCategoryName = formData.get("subCategory") as string | null;
+
+    if (!mainCategoryName) {
+      return NextResponse.json(
+        { success: false, error: "Ana kategori seçilmedi." },
+        { status: 400 }
+      );
+    }
+
+    const mainCategory = await prisma.category.findFirst({
+      where: { name: mainCategoryName },
+    });
+
+    if (!mainCategory) {
+      return NextResponse.json(
+        { success: false, error: "Ana kategori bulunamadı." },
+        { status: 404 }
+      );
+    }
+
+    let subCategoryId: number | undefined = undefined;
+    if (subCategoryName && subCategoryName !== "null") {
+      const subCategory = await prisma.subCategory.findFirst({
+        where: { name: subCategoryName, categoryId: mainCategory.id },
+      });
+      if (!subCategory) {
+        return NextResponse.json(
+          { success: false, error: "Alt kategori bulunamadı." },
+          { status: 404 }
+        );
+      }
+      subCategoryId = subCategory.id;
+    } else {
+      // Alt kategori yoksa null gönder
+      subCategoryId = undefined; // null yerine
+    }
 
     const existingProduct = await prisma.product.findUnique({
       where: { id: Number(id) },
     });
 
     if (!existingProduct) {
-      return NextResponse.json({ error: "Ürün bulunamadı" }, { status: 404 });
-    }
-
-    const deleteOldFile = async (filePath?: string | null) => {
-      if (!filePath) return;
-      try {
-        await fs.unlink(path.join(process.cwd(), "public", filePath));
-      } catch {}
-    };
-
-    let mainImageUrl: string = existingProduct.mainImage;
-    let subImageUrl: string | undefined = existingProduct.subImage || undefined;
-
-    const saveFile = async (
-      file: Blob,
-      folderName = "products"
-    ): Promise<string> => {
-      const safeFolder = folderName
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "_")
-        .replace(/[^a-z0-9_]/g, "");
-      const uploadDir = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        safeFolder
+      return NextResponse.json(
+        { success: false, error: "Ürün bulunamadı." },
+        { status: 404 }
       );
-      await fs.mkdir(uploadDir, { recursive: true });
+    }
 
-      const filename = `${Date.now()}-${(file as any).name || "file"}`;
-      const filePath = path.join(uploadDir, filename);
+    const uploadFile = async (
+      file: File | null
+    ): Promise<string | undefined> => {
+      if (!file) return undefined;
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      uploadForm.append("folderName", "products");
 
-      const arrayBuffer = await file.arrayBuffer();
-      await fs.writeFile(filePath, Buffer.from(arrayBuffer));
-
-      return `/uploads/${safeFolder}/${filename}`;
+      const res = await fetch(`${baseUrl}/api/upload`, {
+        method: "POST",
+        body: uploadForm,
+      });
+      const data = await res.json();
+      return data.path;
     };
 
-    if (mainFile) {
-      await deleteOldFile(existingProduct.mainImage);
-      mainImageUrl = await saveFile(mainFile);
-    }
-
-    if (subFile) {
-      await deleteOldFile(existingProduct.subImage);
-      subImageUrl = await saveFile(subFile);
-    }
+    const mainImagePath = mainFile
+      ? await uploadFile(mainFile)
+      : existingProduct.mainImage;
+    const subImagePath = subFile
+      ? await uploadFile(subFile)
+      : existingProduct.subImage;
 
     const updatedProduct = await prisma.product.update({
       where: { id: Number(id) },
@@ -144,15 +177,33 @@ export async function PUT(
         pricePerM2,
         rating,
         reviewCount,
-        category,
-        mainImage: mainImageUrl,
-        subImage: subImageUrl,
+        mainImage: mainImagePath,
+        subImage: subImagePath,
+        categoryId: mainCategory.id,
+        subCategoryId,
+      },
+      include: {
+        category: true,
+        subCategory: true,
       },
     });
 
-    return NextResponse.json({ product: updatedProduct }, { status: 200 });
-  } catch (error) {
-    console.error("PUT error:", error);
-    return NextResponse.json({ error: "Ürün güncellenemedi" }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: true,
+        product: {
+          ...updatedProduct,
+          category: updatedProduct.category.name,
+          subCategory: updatedProduct.subCategory?.name,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Ürün güncellenirken hata:", error);
+    return NextResponse.json(
+      { success: false, error: error.message || "Ürün güncellenemedi" },
+      { status: 500 }
+    );
   }
 }

@@ -35,11 +35,11 @@ interface ProductData {
 }
 
 const profiles = [
-  { name: "ANTRASİT", src: "/profiles/antrasit.webp" },
+  { name: "ANTRASİT", src: "/profiles/antrasit_gri.webp" },
   { name: "BEYAZ", src: "/profiles/beyaz.webp" },
-  { name: "BRONZ", src: "/profiles/bronz.webp" },
+  { name: "BRONZ", src: "/profiles/parlak_bronz.webp" },
   { name: "GRİ", src: "/profiles/gri.webp" },
-  { name: "KAHVE", src: "/profiles/kahve.webp" },
+  { name: "KAHVE", src: "/profiles/kahverengi.webp" },
   { name: "KREM", src: "/profiles/krem.webp" },
   { name: "SİYAH", src: "/profiles/siyah.webp" },
 ];
@@ -451,7 +451,7 @@ export default function ProductDetail() {
               <h2 className="text-sm font-semibold text-gray-800 mb-4 uppercase tracking-wide">
                 Profiller
               </h2>
-              <div className="grid grid-cols-4 gap-4 lg:flex lg:items-center lg:space-x-4 lg:overflow-x-auto lg:pb-3 lg:p-3">
+              <div className="grid grid-cols-4 gap-4 lg:flex lg:items-center lg:space-x-4 lg:overflow-x-auto lg:pb-3 lg:p-3 text-xs">
                 {profiles.map((profile) => {
                   const isActive = selectedProfile === profile.name;
                   return (
@@ -461,7 +461,7 @@ export default function ProductDetail() {
                         setSelectedProfile(profile.name);
                         handleProfileClick(profile.src); // ✅ modalı aç
                       }}
-                      className={`relative w-full aspect-square rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 
+                      className={`relative w-full aspect-square  cursor-pointer overflow-hidden transition-all duration-300 
                     ${
                       isActive
                         ? "ring-1 ring-[#001e59] ring-offset-2 scale-105 shadow-md"
@@ -472,13 +472,13 @@ export default function ProductDetail() {
                       <Image
                         src={profile.src}
                         alt={profile.name}
-                        width={96}
-                        height={96}
+                        width={120}
+                        height={120}
                         className="object-cover w-full h-full"
                         unoptimized
                       />
                       <span
-                        className={`absolute bottom-1.5 left-1/2 -translate-x-1/2 text-xs font-medium px-2 py-0.5 rounded-md 
+                        className={`absolute bottom-1 left-1/2 -translate-x-1/2 font-medium px-2 py-0.5 text-xs
                       ${
                         isActive
                           ? "bg-[#001e59] text-white"
@@ -501,7 +501,7 @@ export default function ProductDetail() {
                 onClick={() => setOpenProfileImage(false)} // Boş alana tıklayınca kapansın
               >
                 <div
-                  className="relative bg-white rounded-2xl overflow-hidden shadow-2xl max-w-[90%] md:max-w-xl"
+                  className="relative bg-white overflow-hidden shadow-2xl max-w-[90%] md:max-w-xl"
                   onClick={(e) => e.stopPropagation()} // içeriğe tıklayınca kapanmasın
                 >
                   <button
