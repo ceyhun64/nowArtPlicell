@@ -98,10 +98,13 @@ export default function SocialSidebar() {
                   boxShadow: `0 0 18px ${icon.bg}90`,
                 }}
                 transition={{ duration: 0.4 }}
-                className={`p-3 rounded-full text-white flex items-center justify-center ${icon.bg} shadow-lg backdrop-blur-md`}
+                className={`p-2 md:p-3 rounded-full text-white flex items-center justify-center ${icon.bg} shadow-lg backdrop-blur-md`}
                 aria-label={icon.name}
               >
-                {icon.icon}
+                {React.cloneElement(icon.icon, {
+                  size: 20,
+                  className: "md:w-6 md:h-6 w-5 h-5",
+                })}
               </motion.a>
             ))}
           </motion.div>
