@@ -102,36 +102,7 @@ const MobileNestedMenu = ({
                   className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
                 >
                   <span>{sub.label}</span>
-                  {sub.subItems?.length && (
-                    <span>
-                      {openSubMenus[sub.label] ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </span>
-                  )}
                 </Button>
-
-                {/* Eğer alt kategorinin kendi alt kategorisi varsa */}
-                {sub.subItems?.length && openSubMenus[sub.label] && (
-                  <div className="ml-4 flex flex-col gap-1 mt-1">
-                    {sub.subItems.map((subSub) => (
-                      <Button
-                        key={subSub.label}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          window.location.href = subSub.href ?? "/products";
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full text-sm justify-between hover:bg-gray-100 transition-all"
-                      >
-                        {subSub.label}
-                      </Button>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -227,27 +198,6 @@ export default function Navbar(): React.ReactElement {
     {
       label: "PLICELL PERDE",
       href: "/products?category=plicell",
-      subItems: [
-        { label: "Bella", href: "/products?category=plicell&sub=Bella" },
-        { label: "Valeria", href: "/products?category=plicell&sub=Valeria" },
-        { label: "Spark", href: "/products?category=plicell&sub=Spark" },
-        { label: "Merlin", href: "/products?category=plicell&sub=Merlin" },
-        {
-          label: "Duble Linen",
-          href: "/products?category=plicell&sub=Duble%20Linen",
-        },
-        { label: "Elegant", href: "/products?category=plicell&sub=Elegant" },
-        { label: "Dimout", href: "/products?category=plicell&sub=Dimout" },
-        { label: "Blackout", href: "/products?category=plicell&sub=Blackout" },
-        {
-          label: "Honeycomb20",
-          href: "/products?category=plicell&sub=Honeycomb20",
-        },
-        {
-          label: "Honeycomb16",
-          href: "/products?category=plicell&sub=Honeycomb16",
-        },
-      ],
     },
     { label: "ZEBRA PERDE", href: "/products?category=zebra" },
     { label: "STOR PERDE", href: "/products?category=stor" },
