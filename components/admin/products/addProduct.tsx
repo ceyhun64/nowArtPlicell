@@ -179,7 +179,7 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                     </div>
 
                     {/* Plicell alt kategori */}
-                    {productData.category === "plicell" && (
+                    {productData.category === "Plicell" && (
                       <Select
                         value={productData.subCategoryId || ""}
                         onValueChange={(val) => {
