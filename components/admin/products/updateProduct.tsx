@@ -253,10 +253,10 @@ export default function UpdateProductDialog({
                       <SelectValue placeholder="Kategori Seç" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Plicell">PLICELL</SelectItem>
-                      <SelectItem value="Zebra">ZEBRA</SelectItem>
-                      <SelectItem value="Stor">STOR</SelectItem>
-                      <SelectItem value="Ahşap Jaluzi">AHŞAP JALUZİ</SelectItem>
+                      <SelectItem value="Plicell">Plicell</SelectItem>
+                      <SelectItem value="Zebra">Zebra</SelectItem>
+                      <SelectItem value="Stor">Stor</SelectItem>
+                      <SelectItem value="Ahsap-Jaluzi">Ahşap Jaluzi</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

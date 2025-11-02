@@ -45,7 +45,7 @@ async function seedAdmin() {
 // 🧩 CATEGORY SEED
 //
 async function seedCategories() {
-  const mainCategories = ["Plicell", "Zebra", "Stor", "Ahşap Jaluzi"];
+  const mainCategories = ["Plicell", "Zebra", "Stor", "Ahsap-Jaluzi"];
   const plicellSubs = [
     "Bella",
     "Valeria",

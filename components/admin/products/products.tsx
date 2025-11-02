@@ -80,17 +80,25 @@ export default function Products(): React.ReactElement {
   }, [updateDialogOpen, deleteDialogOpen]);
 
   // Filtreleme + Arama
-  // Filtreleme + Arama
+  // Türkçe karakterleri ve boşlukları normalize eden yardımcı fonksiyon
+  const normalize = (str: string) =>
+    str
+      .toLowerCase()
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/\s+/g, "-");
+
   const filteredProducts = products
     .filter((p) =>
-      filter === "all"
-        ? true
-        : p.category.toLowerCase() === filter.toLowerCase()
+      filter === "all" ? true : normalize(p.category) === normalize(filter)
     )
     .filter((p) =>
-      // sadece Plicell seçilmiş ve alt filtre aktif ise
-      filter.toLowerCase() === "plicell" && subFilter !== "all"
-        ? p.subCategory?.toLowerCase() === subFilter.toLowerCase()
+      normalize(filter) === "plicell" && subFilter !== "all"
+        ? normalize(p.subCategory || "") === normalize(subFilter)
         : true
     )
     .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()));

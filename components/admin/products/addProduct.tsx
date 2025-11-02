@@ -168,11 +168,11 @@ const AddProductDialog = forwardRef<HTMLDivElement, AddProductDialogProps>(
                           <SelectValue placeholder="Kategori Seç" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="plicell">PLICELL</SelectItem>
-                          <SelectItem value="zebra">ZEBRA</SelectItem>
-                          <SelectItem value="stor">STOR</SelectItem>
-                          <SelectItem value="ahsap jaluzi">
-                            AHŞAP JALUZİ
+                          <SelectItem value="Plicell">Plicell</SelectItem>
+                          <SelectItem value="Zebra">Zebra</SelectItem>
+                          <SelectItem value="Stor">Stor</SelectItem>
+                          <SelectItem value="Ahsap-Jaluzi">
+                            Ahşap Jaluzi
                           </SelectItem>
                         </SelectContent>
                       </Select>
