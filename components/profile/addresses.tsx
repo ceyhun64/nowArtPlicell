@@ -24,6 +24,7 @@ interface Address {
   zip?: string;
   phone?: string;
   country?: string;
+  email?: string;
 }
 
 // AddressFormProps ve AddressFormData interface'leri zaten AdresForm bileşeninden geliyor.
@@ -40,6 +41,7 @@ interface AddressFormData {
   zip?: string; // Formda yok, opsiyonel yapıldı
   phone?: string; // Formda yok, opsiyonel yapıldı
   country?: string; // Formda yok, opsiyonel yapıldı
+  email?: string;
 }
 
 export default function Adreslerim() {
@@ -61,6 +63,7 @@ export default function Adreslerim() {
     zip: "",
     phone: "",
     country: "Türkiye", // Varsayılan ülke
+    email: "",
   };
 
   const [ekleFormData, setEkleFormData] =
@@ -171,6 +174,7 @@ export default function Adreslerim() {
       zip: adres.zip || "", // Varsayılan değer atandı
       phone: adres.phone || "", // Varsayılan değer atandı
       country: adres.country || "Türkiye", // Varsayılan değer atandı
+      email: adres.email,
     });
     setDuzenleForm(true);
     setYeniAdresForm(false); // Yeni adres formunu kapat

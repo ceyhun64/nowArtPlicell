@@ -27,7 +27,7 @@ export interface AddressFormData {
   zip?: string; // Formda yok, opsiyonel
   phone?: string; // Formda yok, opsiyonel
   country?: string; // Formda yok, opsiyonel (varsayılan Türkiye)
-  email: string; // ✅ Yeni eklendi
+  email?: string; // ✅ Yeni eklendi
 }
 
 export interface AddressFormProps {
