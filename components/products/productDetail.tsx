@@ -33,6 +33,7 @@ interface ProductData {
   reviewCount?: number;
   category: string;
   device?: string;
+  subCategory?: string;
 }
 
 const profiles = [
@@ -124,13 +125,24 @@ export default function ProductDetail() {
       try {
         const res = await fetch("/api/products");
         const data = await res.json();
+        console.log("data:", data);
         if (res.ok && data.products) {
           // Aynı kategorideki ürünleri filtrele
-          const filtered = data.products.filter(
-            (p: ProductData) =>
+          const filtered = data.products.filter((p: ProductData) => {
+            // Ana kategori eşleşmeli
+            const categoryMatch =
               p.category.trim().toLowerCase() ===
-              product.category.trim().toLowerCase()
-          );
+              product.category.trim().toLowerCase();
+
+            // Eğer ürünün subCategory'si varsa, onu da kontrol et
+            const subCategoryMatch = product.subCategory
+              ? p.subCategory?.trim().toLowerCase() ===
+                product.subCategory?.trim().toLowerCase()
+              : true; // alt kategori yoksa sadece ana kategori yeterli
+
+            return categoryMatch && subCategoryMatch;
+          });
+
           setCategoryProducts(filtered);
         }
       } catch (error) {
