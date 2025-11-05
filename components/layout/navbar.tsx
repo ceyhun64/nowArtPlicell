@@ -36,6 +36,7 @@ import ForgotPasswordModal from "./forgotPassword";
 import Link from "next/link";
 import CartDropdown from "./cartDropdown";
 import Image from "next/image";
+import { getGuestCartCount } from "@/utils/cart";
 
 interface MenuItem {
   label: string;
@@ -144,14 +145,19 @@ export default function Navbar(): React.ReactElement {
     // Sayfa yüklendiğinde API’den favori sayısını al
     const fetchFavorites = async () => {
       try {
-        const res = await fetch("/api/favorites");
+        const res = await fetch("/api/favorites", { credentials: "include" });
+        if (res.status === 401) {
+          setFavoriteCount(0); // login değilse hata verme
+          return;
+        }
         if (!res.ok) return;
         const data = await res.json();
         setFavoriteCount(data.length);
-      } catch (err) {
-        console.error(err);
+      } catch {
+        setFavoriteCount(0);
       }
     };
+
     fetchFavorites();
 
     // Event listener ekle
@@ -184,6 +190,21 @@ export default function Navbar(): React.ReactElement {
     };
     checkUser();
   }, []);
+  // 🔹 Yeni: guest cart dinle
+  useEffect(() => {
+    if (!user) {
+      // Guest sepetini dinle ve güncelle
+      const updateCart = () => {
+        const count = getGuestCartCount();
+        const event = new CustomEvent("cartCountUpdated", { detail: count });
+        window.dispatchEvent(event);
+      };
+
+      updateCart();
+      window.addEventListener("cartUpdated", updateCart);
+      return () => window.removeEventListener("cartUpdated", updateCart);
+    }
+  }, [user]);
   // Menü verileri
   const kurumsalItems: MenuItem[] = [
     { label: "Hakkımızda", href: "/institutional/about" },
@@ -498,7 +519,11 @@ export default function Navbar(): React.ReactElement {
               </Link>
 
               {/* Sepet */}
-              <CartDropdown ref={cartDropdownRef} showCount={true} />
+              <CartDropdown
+                ref={cartDropdownRef}
+                showCount={true}
+                guest={!user} // kullanıcı yoksa guest olarak işaretle
+              />
             </div>
           </div>
         </div>
@@ -630,7 +655,10 @@ export default function Navbar(): React.ReactElement {
 
           {/* Sepet */}
           <div className="flex flex-col items-center justify-center text-stone-700 hover:text-[#001e59] mb-2">
-            <CartDropdown showCount={false} />
+            <CartDropdown
+              showCount={true}
+              guest={!user} // kullanıcı yoksa guest olarak işaretle
+            />
             <span className="text-xs ">Sepet</span>
           </div>
         </div>

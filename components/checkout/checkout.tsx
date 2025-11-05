@@ -1,7 +1,9 @@
+// PaymentPage.tsx
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react"; // 👈 Oturum açma için eklendi
 import PaymentStepper from "@/components/checkout/paymentStepper";
 import StepAddress from "@/components/checkout/stepAddress";
 import StepCargo from "@/components/checkout/stepCargo";
@@ -9,6 +11,7 @@ import StepPaymentCard from "@/components/checkout/stepPayment";
 import BasketSummaryCard from "@/components/checkout/cartSummary";
 import Loading from "@/components/layout/loading";
 import { AddressFormData } from "@/components/profile/addressForm";
+import { getCart, clearGuestCart, GuestCartItem } from "@/utils/cart";
 
 const cargoOptions = [
   { id: "standart", name: "Standart Kargo", fee: 12.0 },
@@ -27,6 +30,7 @@ interface Address {
   zip?: string;
   phone?: string;
   country?: string;
+  email?: string;
 }
 
 interface User {
@@ -68,7 +72,6 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- State tipi ---
   const [user, setUser] = useState<UserUser | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -83,21 +86,14 @@ export default function PaymentPage() {
   const [expireYear, setExpireYear] = useState("");
   const [cvc, setCvc] = useState("");
   const [holderName, setHolderName] = useState("");
-  // PaymentPage içinde
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
 
-  // user ve addresses yüklendiğinde ilk adresi seçili yap
-  useEffect(() => {
-    if (user?.user?.addresses?.length) {
-      setSelectedAddress(user.user.addresses[0].id);
-    }
-  }, [user]);
-
-  // Yeni adres ekleme (isteğe bağlı)
-  const initialAddressForm: AddressFormData = {
+  // Yeni adres formu (guest kullanıcı için de kullanılacak)
+  const initialAddressForm: AddressFormData & { email?: string } = {
     title: "",
     firstName: "",
     lastName: "",
+    email: "", // 👈 checkout formuna eklendi
     address: "",
     district: "",
     city: "",
@@ -106,33 +102,28 @@ export default function PaymentPage() {
     phone: "",
     country: "Türkiye",
   };
-  const [newAddressForm, setNewAddressForm] =
-    useState<AddressFormData>(initialAddressForm);
+  const [newAddressForm, setNewAddressForm] = useState(initialAddressForm);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
 
-  // --- Kullanıcı ve sepet verilerini çek ---
+  // Kullanıcı ve sepet verilerini çek
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [userRes, cartRes] = await Promise.all([
-          fetch("/api/user", { credentials: "include" }), // ⚡ ekle
-          fetch("/api/cart", { credentials: "include" }), // ⚡ ekle
-        ]);
+        const localCart = localStorage.getItem("cart");
+        if (localCart) setCartItems(JSON.parse(localCart));
 
-        if (!userRes.ok || !cartRes.ok) throw new Error("Veri yüklenemedi");
-
-        const userDataRaw: any = await userRes.json();
-        console.log("userDataRaw:", userDataRaw);
-        const cartData: CartItem[] = await cartRes.json();
-
-        setUser(userDataRaw); // artık user.user değil, direkt user
-
-        setCartItems(cartData);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Veri yüklenemedi");
+        const userRes = await fetch("/api/user", { credentials: "include" });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Fetch hatası:", err);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -141,9 +132,7 @@ export default function PaymentPage() {
     fetchData();
   }, []);
 
-  console.log(user);
-
-  // --- Hesaplamalar ---
+  // Subtotal ve total hesaplama
   const subTotal = useMemo(() => {
     return cartItems.reduce((acc, item) => {
       const area =
@@ -167,60 +156,196 @@ export default function PaymentPage() {
   if (error)
     return <div className="text-red-500 text-center mt-8">{error}</div>;
 
+  // Adres kaydetme (login + guest kullanıcılar için)
   const handleSaveAddress = async () => {
     try {
       setIsSavingAddress(true);
-      const res = await fetch("/api/address", {
+
+      let userId = user?.user?.id;
+      let passwordForLogin: string | undefined;
+
+      // 🔹 Guest kullanıcı için register ve login
+      if (!userId) {
+        const guestEmail =
+          newAddressForm.email || `guest_${Date.now()}@example.com`;
+        const password = Math.random().toString(36).slice(-8);
+        passwordForLogin = password;
+
+        // Register
+        const registerRes = await fetch("/api/account/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: newAddressForm.firstName,
+            surname: newAddressForm.lastName,
+            email: guestEmail,
+            password,
+          }),
+        });
+
+        if (!registerRes.ok) {
+          const text = await registerRes.text();
+          throw new Error("Register failed: " + text);
+        }
+
+        const registerData = await registerRes.json();
+        userId = registerData.user.id;
+        setUser({ user: registerData.user });
+
+        // Otomatik login
+        if (passwordForLogin) {
+          const signInResult = await signIn("credentials", {
+            email: guestEmail,
+            password: passwordForLogin,
+            redirect: false,
+          });
+          if (signInResult?.error)
+            console.error("Login error:", signInResult.error);
+
+          // Session’in backend’e yansıması için kısa delay
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+      }
+
+      // 🔹 Adres kaydet
+      const addressRes = await fetch("/api/address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAddressForm),
+        body: JSON.stringify({ ...newAddressForm, userId, country: "Türkiye" }),
       });
 
-      if (!res.ok) throw new Error("Adres kaydedilemedi");
+      if (!addressRes.ok) {
+        const text = await addressRes.text();
+        throw new Error("Address save failed: " + text);
+      }
 
-      const data = await res.json();
-      // Kullanıcı adreslerini güncelle (opsiyonel)
+      const addressData = await addressRes.json();
       setUser((prev) =>
         prev
           ? {
               ...prev,
-              addresses: [data.address, ...(prev.user.addresses ?? [])], // prev.user yerine prev
+              user: {
+                ...prev.user,
+                addresses: [
+                  addressData.address,
+                  ...(prev.user.addresses ?? []),
+                ],
+              },
             }
           : prev
       );
 
+      // 🔹 Guest cart’dan backend’e aktar
+      const guestCart: GuestCartItem[] = getCart();
+      for (const item of guestCart) {
+        const res = await fetch("/api/cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: item.productId,
+            quantity: item.quantity || 1,
+            note: item.note || null,
+            profile: item.profile || "",
+            width: item.width || 0,
+            height: item.height || 0,
+            device: item.device || "vidali",
+          }),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Cart POST failed:", text);
+          throw new Error("Cart item save failed: " + text);
+        }
+        console.log("Cart item saved:", item.productId);
+      }
+
+      // 🔹 Guest cart temizle
+      clearGuestCart();
+
       setIsAddingNewAddress(false);
       setNewAddressForm(initialAddressForm);
+      console.log("Address and cart saved successfully");
     } catch (err) {
-      console.error(err);
+      console.error("handleSaveAddress error:", err);
+      alert(
+        "Adres kaydedilemedi veya sepet aktarımı başarısız oldu. Konsolu kontrol edin."
+      );
     } finally {
       setIsSavingAddress(false);
     }
   };
 
-  // --- Ödeme işlemi ---
+  // 🔹 Ödeme işlemi
   const handlePayment = async () => {
-    if (!user || !user.user.id) {
-      return alert("Geçersiz kullanıcı ID. Lütfen giriş yapınız.");
+    let currentUser = user;
+    let passwordForLogin: string | undefined = undefined; // Oturum açmak için parolayı tut
+
+    // 🔹 Giriş yapılmamışsa guest user oluştur
+    if (!currentUser) {
+      try {
+        const guestEmail =
+          newAddressForm.email || `guest_${Date.now()}@example.com`;
+        const password = Math.random().toString(36).slice(-8);
+        passwordForLogin = password; // Parolayı kaydet ve kullan
+
+        const registerRes = await fetch("/api/account/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: newAddressForm.firstName,
+            surname: newAddressForm.lastName,
+            email: guestEmail,
+            password,
+          }),
+        });
+
+        if (!registerRes.ok) {
+          return alert(
+            "Kullanıcı oluşturulamadı, lütfen bilgilerinizi kontrol edin."
+          );
+        }
+
+        const registerData = await registerRes.json();
+        currentUser = { user: registerData.user };
+        setUser(currentUser);
+
+        // 🚨 OTOMATİK OTURUM AÇMA 🚨
+        if (passwordForLogin) {
+          const signInResult = await signIn("credentials", {
+            email: guestEmail,
+            password: passwordForLogin, // Kayıt sırasında oluşturulan parolayı kullan
+            redirect: false,
+          });
+
+          if (signInResult?.error) {
+            console.error(
+              "Ödeme öncesi otomatik oturum açma başarısız oldu:",
+              signInResult.error
+            );
+            // Hata olsa bile ödeme işlemine devam et
+          }
+        }
+      } catch (err) {
+        console.error("Register error:", err);
+        return alert("Kullanıcı oluşturulurken hata oluştu.");
+      }
     }
 
-    const userId = Number(user.user.id);
+    const userId = Number(currentUser?.user?.id);
     if (isNaN(userId) || userId <= 0) {
       return alert("Geçersiz kullanıcı ID");
     }
 
-    const shippingAddr = user.user.addresses?.find(
-      (a) => a.id === selectedAddress
-    );
-    if (!shippingAddr) {
-      return alert("Adres bulunamadı");
-    }
+    // Guest için adres formunu kullan
+    const shippingAddr =
+      currentUser.user.addresses?.[0] || (newAddressForm as Address);
 
     const buyer = {
       id: userId.toString(),
       buyerName: shippingAddr.firstName || "Adınız",
       buyerSurname: shippingAddr.lastName || "Soyadınız",
-      email: user.user.email ?? "",
+      email: currentUser.user.email ?? "",
       identityNumber: "11111111111",
       registrationDate: new Date().toISOString(),
       lastLoginDate: new Date().toISOString(),
@@ -253,16 +378,7 @@ export default function PaymentPage() {
         category1: item.product.category,
         itemType: "PHYSICAL",
         price: unitPrice.toFixed(2),
-        unitPrice: item.product.pricePerM2.toFixed(2),
         quantity: item.quantity,
-        productId: item.product.id,
-        totalPrice: unitPrice.toFixed(2),
-        note: item.note,
-        profile: item.profile,
-        width: item.width,
-        height: item.height,
-        m2: area,
-        device: item.device,
       };
     });
 
@@ -294,16 +410,12 @@ export default function PaymentPage() {
         body: JSON.stringify(orderPayload),
       });
 
-      if (!res.ok) {
-        return router.push("/checkout/unsuccess");
-      }
+      if (!res.ok) return router.push("/checkout/unsuccess");
 
       const data = await res.json();
 
       if (data.status === "success") {
-        // ✅ Ödeme başarılı, sepetteki ürünleri temizle
-        await fetch("/api/cart", { method: "DELETE", credentials: "include" }); // ⚡ ekle
-
+        localStorage.removeItem("cart");
         router.push("/checkout/success");
       } else {
         router.push("/checkout/unsuccess");
@@ -323,12 +435,13 @@ export default function PaymentPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <PaymentStepper currentStep={step} />
-          {step === 1 && user && (
-            // StepAddress
+
+          {/* ✅ Guest kullanıcı da adres formunu görebilir */}
+          {step === 1 && (
             <StepAddress
-              addresses={user.user.addresses ?? []}
+              addresses={user?.user.addresses ?? []}
               selectedAddress={selectedAddress}
-              onSelectAddress={setSelectedAddress} // state güncellenecek
+              onSelectAddress={setSelectedAddress}
               onNext={() => setStep(2)}
               newAddressForm={newAddressForm}
               setNewAddressForm={setNewAddressForm}
@@ -347,7 +460,7 @@ export default function PaymentPage() {
               setStep={setStep}
             />
           )}
-          {step === 3 && user && (
+          {step === 3 && (
             <StepPaymentCard
               holderName={holderName}
               setHolderName={setHolderName}

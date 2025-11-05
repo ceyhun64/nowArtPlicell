@@ -27,6 +27,7 @@ export interface AddressFormData {
   zip?: string; // Formda yok, opsiyonel
   phone?: string; // Formda yok, opsiyonel
   country?: string; // Formda yok, opsiyonel (varsayılan Türkiye)
+  email: string; // ✅ Yeni eklendi
 }
 
 export interface AddressFormProps {
@@ -171,6 +172,16 @@ export default function AdresForm({
         />
       </div>
 
+      <div className="space-y-1 md:col-span-2">
+        <Label htmlFor="email">E-posta *</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+      </div>
       {/* Şehir */}
       <div className="space-y-1">
         <Label htmlFor="city">Şehir *</Label>

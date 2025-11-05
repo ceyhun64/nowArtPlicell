@@ -1,6 +1,6 @@
 // app/api/address/route.ts
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db"; // tek prisma instance
+import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { NextRequest } from "next/server";
@@ -28,25 +28,18 @@ export async function GET() {
   }
 }
 
-// 📦 POST: Yeni adres ekleme
+// 📦 POST: Yeni adres ekleme (login veya guest kullanıcı)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
+    const body = await request.json();
+
+    // 🧩 login değilse frontend'den gelen userId'yi kullan
+    const userId = session?.user?.id ?? body.userId;
+
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const body = (await request.json()) as {
-      title?: string;
-      firstName: string;
-      lastName: string;
-      address: string;
-      district: string;
-      city: string;
-      zip?: string;
-      phone?: string;
-      country: string;
-    };
 
     const {
       title,
@@ -69,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const newAddress = await prisma.address.create({
       data: {
-        userId: Number(session.user.id),
+        userId: Number(userId),
         title: title || "Home",
         firstName,
         lastName,

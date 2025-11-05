@@ -21,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import DescriptionandReview from "./descriptionAndReview";
 import MeasureModal from "./measureModal";
 import Loading from "../layout/loading";
+import { addToGuestCart } from "@/utils/cart"; // en üste import et
 
 interface ProductData {
   id: number;
@@ -171,43 +172,50 @@ export default function ProductDetail() {
 
   // Sepete ekleme
   const handleAddToCart = async () => {
-    if (!isLoggedIn) {
-      toast.warning("Sepete eklemek için giriş yapmalısınız."); // opsiyonel
-      return;
-    }
-
     if (!acceptedMeasurement) {
       toast.error("Lütfen ölçülerinizi onaylayın.");
       return;
     }
+
     if (!product) return;
 
+    const item = {
+      productId: product.id,
+      quantity,
+      note: note ?? undefined, // ✅ null ise undefined yap
+      profile: selectedProfile,
+      width: en,
+      height: boy,
+      m2: calculatedM2,
+      device: selectedDevice,
+      title: product.title,
+      pricePerM2: product.pricePerM2,
+      image: product.mainImage,
+    };
+
+    // 👇 Eğer kullanıcı login değilse localStorage kullan
+    if (!isLoggedIn) {
+      addToGuestCart(item);
+      toast.success("Ürün sepete eklendi.");
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+      return;
+    }
+
+    // 👇 Login ise backend'e gönder
     try {
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity,
-          note,
-          profile: selectedProfile,
-          width: en,
-          height: boy,
-          device: selectedDevice,
-        }),
-        credentials: "include", // ⚡ Burayı ekle
+        body: JSON.stringify(item),
+        credentials: "include",
       });
 
       const data = await res.json();
       if (res.ok) {
         toast.success(`Ürün sepete eklendi! Toplam: ₺${totalPrice.toFixed(2)}`);
-        // Örneğin, sepete ekleme başarılı olduktan sonra:
-        if (window) {
-          // Sepetin güncellenmesi gerektiğini bildiren global bir olay oluşturun ve tetikleyin
-          window.dispatchEvent(new CustomEvent("cartUpdated"));
-        }
-        cartDropdownRef.current?.open();
-        (cartDropdownRef.current as any)?.refreshCart();
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
+        cartDropdownRef.current?.open?.();
+        cartDropdownRef.current?.refreshCart?.();
       } else {
         toast.error(data.error || "Sepete eklenemedi");
       }

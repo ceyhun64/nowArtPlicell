@@ -59,7 +59,7 @@ model Favorite {
 
 model CartItem {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId    Int? // nullable, guest cart için
   productId Int
   quantity  Int      @default(1)
   note      String?

@@ -32,6 +32,7 @@ interface Address {
   zip?: string;
   phone?: string;
   country?: string;
+  
 }
 
 interface StepAddressProps {

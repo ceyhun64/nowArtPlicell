@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getCart, GuestCartItem } from "@/utils/cart";
 
 interface Product {
   id: number;
@@ -33,19 +34,121 @@ interface BasketItem {
 }
 
 interface BasketSummaryCardProps {
-  basketItemsData: BasketItem[];
-  subTotal: number;
+  basketItemsData?: BasketItem[];
+  subTotal?: number;
   selectedCargoFee: number;
-  totalPrice: number;
+  totalPrice?: number;
 }
 
 export default function BasketSummaryCard({
-  basketItemsData,
-  subTotal,
+  basketItemsData = [],
+  subTotal = 0,
   selectedCargoFee,
-  totalPrice,
+  totalPrice = 0,
 }: BasketSummaryCardProps) {
-  // --- Ürün detayları ---
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [guestItems, setGuestItems] = useState<GuestCartItem[]>([]);
+  const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
+
+  // ✅ Giriş durumunu kontrol et
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const res = await fetch("/api/account/check", { method: "GET" });
+        const data = await res.json();
+        setIsLoggedIn(!!data.user);
+      } catch (error) {
+        console.error("Oturum kontrolü başarısız:", error);
+        setIsLoggedIn(false);
+      }
+    };
+    checkLoginStatus();
+  }, []);
+
+  // ✅ Cart verisini yükle (login -> backend, guest -> localStorage)
+  useEffect(() => {
+    if (isLoggedIn === null) return;
+
+    const fetchCart = async () => {
+      if (isLoggedIn) {
+        try {
+          const res = await fetch("/api/cart");
+          if (res.ok) {
+            const data = await res.json();
+            const items: BasketItem[] = data.map((item: any, i: number) => ({
+              id: i,
+              product: {
+                id: item.product.id,
+                title: item.product.title,
+                pricePerM2: item.product.pricePerM2,
+                mainImage: item.product.mainImage,
+                oldPrice: item.product.oldPrice,
+              },
+              quantity: item.quantity,
+              note: item.note ?? undefined,
+              profile: item.profile,
+              width: item.width,
+              height: item.height,
+              device: item.device,
+            }));
+            setBasketItems(items);
+            setGuestItems([]);
+          } else {
+            console.error("Backend cart fetch failed");
+            setBasketItems([]);
+          }
+        } catch (err) {
+          console.error("Cart fetch error:", err);
+          setBasketItems([]);
+        }
+      } else {
+        const localCart = getCart();
+        setGuestItems(localCart);
+        setBasketItems([]);
+      }
+    };
+
+    fetchCart();
+
+    // 🔹 Cart güncellendiğinde tekrar yükle
+    const handleCartUpdated = () => {
+      fetchCart();
+    };
+    window.addEventListener("cartUpdated", handleCartUpdated);
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdated);
+    };
+  }, [isLoggedIn]);
+
+  // 🔹 Gösterilecek ürünleri belirle
+  const itemsToRender =
+    isLoggedIn && basketItems.length > 0
+      ? basketItems
+      : guestItems.map((item, i) => ({
+          id: i,
+          product: {
+            id: item.productId,
+            title: item.title,
+            pricePerM2: item.pricePerM2,
+            mainImage: item.image,
+          },
+          quantity: item.quantity,
+          note: item.note ?? undefined,
+          profile: item.profile,
+          width: item.width,
+          height: item.height,
+          device: item.device,
+        }));
+
+  // 🔹 Ara toplam ve toplam hesapla
+  const calculatedSubTotal = itemsToRender.reduce((acc, item) => {
+    const area =
+      item.width && item.height ? (item.width * item.height) / 10000 : 1;
+    return acc + item.product.pricePerM2 * area * item.quantity;
+  }, 0);
+
+  const calculatedTotal = calculatedSubTotal + selectedCargoFee;
+
   const getItemDetails = (item: BasketItem): string[] => {
     const details: string[] = [];
     if (item.note) details.push(`Not: "${item.note}"`);
@@ -57,12 +160,17 @@ export default function BasketSummaryCard({
     return details;
   };
 
-  if (!basketItemsData || basketItemsData.length === 0)
+  if (isLoggedIn === null) {
+    return <p className="text-center mt-4 text-gray-400">Yükleniyor...</p>;
+  }
+
+  if (!itemsToRender || itemsToRender.length === 0) {
     return (
       <p className="text-center mt-4 text-gray-500">
         Sepetinizde ürün bulunmamaktadır.
       </p>
     );
+  }
 
   return (
     <Card className="sticky top-6 lg:h-fit">
@@ -72,14 +180,14 @@ export default function BasketSummaryCard({
 
       <CardContent className="space-y-4">
         <div className="space-y-4">
-          {basketItemsData.map((item) => {
+          {itemsToRender.map((item) => {
             const product: Product = item.product;
-            const details: string[] = getItemDetails(item);
-            const area: number =
+            const details = getItemDetails(item);
+            const area =
               item.width && item.height
                 ? (item.width * item.height) / 10000
                 : 1;
-            const itemPrice: number = product.pricePerM2 * area * item.quantity;
+            const itemPrice = product.pricePerM2 * area * item.quantity;
 
             return (
               <div key={item.id} className="flex items-center space-x-4">
@@ -128,7 +236,9 @@ export default function BasketSummaryCard({
         <div className="space-y-2 text-sm">
           <div className="flex justify-between font-normal">
             <span>Ara Toplam</span>
-            <span className="font-medium">{subTotal.toFixed(2)}TL</span>
+            <span className="font-medium">
+              {calculatedSubTotal.toFixed(2)}TL
+            </span>
           </div>
           <div className="flex justify-between font-normal">
             <span>Kargo / Teslimat</span>
@@ -148,7 +258,7 @@ export default function BasketSummaryCard({
 
         <div className="flex justify-between text-lg font-bold">
           <span>Toplam</span>
-          <span>{totalPrice.toFixed(2)}TL</span>
+          <span>{calculatedTotal.toFixed(2)}TL</span>
         </div>
       </CardContent>
 
