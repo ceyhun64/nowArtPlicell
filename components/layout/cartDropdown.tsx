@@ -26,7 +26,7 @@ import {
   getCart,
   updateGuestCartQuantity,
   removeFromGuestCart,
-  GuestCartItem, // 🟢 tipi import ettik
+  GuestCartItem,
 } from "@/utils/cart";
 
 interface Product {
@@ -52,7 +52,7 @@ export interface CartItemType {
 
 interface CartDropdownProps {
   showCount?: boolean;
-  guest?: boolean; // 🔹 Ekledik
+  guest?: boolean;
 }
 
 const CartDropdown = forwardRef(
@@ -63,21 +63,30 @@ const CartDropdown = forwardRef(
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loginModalOpen, setLoginModalOpen] = useState(false);
 
-    const checkLogin = useCallback(async () => {
+    const debug = (label: string, data?: any) =>
+      console.log(`[🧩 CartDropdown DEBUG] ${label}`, data ?? "");
+
+    // 🔹 checkLogin artık login durumunu döndürüyor
+    const checkLogin = useCallback(async (): Promise<boolean> => {
       try {
         const res = await fetch("/api/account/check", {
           method: "GET",
           credentials: "include",
         });
-        if (!res.ok) return setIsLoggedIn(false);
+        if (!res.ok) {
+          setIsLoggedIn(false);
+          return false;
+        }
         const data = await res.json();
-        setIsLoggedIn(!!data?.user?.id);
+        const logged = !!data?.user?.id;
+        setIsLoggedIn(logged);
+        return logged;
       } catch {
         setIsLoggedIn(false);
+        return false;
       }
     }, []);
 
-    // Fetch cart
     const fetchCart = useCallback(async () => {
       debug("fetchCart() started");
       setIsLoading(true);
@@ -86,7 +95,6 @@ const CartDropdown = forwardRef(
           method: "GET",
           credentials: "include",
         });
-        debug("fetchCart response", res.status);
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
         debug("fetchCart data", data);
@@ -95,17 +103,14 @@ const CartDropdown = forwardRef(
         debug("fetchCart error", err);
         setCartItems([]);
       } finally {
-        debug("fetchCart finished, stopping loader");
         setIsLoading(false);
       }
     }, []);
 
-    // Guest cart
     const loadGuestCart = useCallback(() => {
       debug("loadGuestCart() started");
       try {
         const cart = getCart();
-        debug("localStorage getCart()", cart);
         const guestCart = cart.map((item: GuestCartItem) => ({
           id: item.productId,
           quantity: item.quantity,
@@ -123,16 +128,33 @@ const CartDropdown = forwardRef(
           device: item.device,
           note: item.note,
         }));
-
-        debug("mapped guestCart()", guestCart);
         setCartItems(guestCart);
       } catch (err) {
         debug("loadGuestCart() error", err);
       } finally {
-        debug("loadGuestCart() finished, stopping loader");
         setIsLoading(false);
       }
     }, []);
+
+    // ✅ Bileşen ilk yüklendiğinde login kontrolü + sepet yükleme
+    useEffect(() => {
+      (async () => {
+        debug("Initial login + cart load");
+        const logged = await checkLogin();
+        if (logged && !guest) await fetchCart();
+        else loadGuestCart();
+      })();
+    }, [checkLogin, fetchCart, loadGuestCart, guest]);
+
+    // 🔄 Sheet açıldığında yeniden yükle
+    useEffect(() => {
+      if (isOpen) {
+        if (isLoggedIn && !guest) fetchCart();
+        else loadGuestCart();
+      }
+    }, [isOpen, isLoggedIn, fetchCart, loadGuestCart, guest]);
+
+    // 🧩 Dıştan erişim
     useImperativeHandle(ref, () => ({
       open: () => setIsOpen(true),
       refreshCart: () => {
@@ -141,24 +163,7 @@ const CartDropdown = forwardRef(
       },
     }));
 
-    // Login kontrolü
-    useEffect(() => {
-      debug("checkLogin() running...");
-      checkLogin();
-    }, [checkLogin]);
-
-    useEffect(() => {
-      if (isLoggedIn && !guest) fetchCart();
-      else loadGuestCart();
-    }, [isLoggedIn, fetchCart, loadGuestCart]);
-
-    useEffect(() => {
-      if (isOpen) {
-        if (isLoggedIn && !guest) fetchCart();
-        else loadGuestCart();
-      }
-    }, [isOpen, isLoggedIn, fetchCart, loadGuestCart]);
-
+    // 🧩 Sepet değişikliklerinde dinle
     useEffect(() => {
       const handleCartUpdate = () => {
         if (isLoggedIn && !guest) fetchCart();
@@ -166,15 +171,15 @@ const CartDropdown = forwardRef(
       };
       window.addEventListener("cartUpdated", handleCartUpdate);
       return () => window.removeEventListener("cartUpdated", handleCartUpdate);
-    }, [isLoggedIn, fetchCart, loadGuestCart]);
+    }, [isLoggedIn, fetchCart, loadGuestCart, guest]);
 
+    // 🔄 Miktar değiştirme
     const handleQuantityChange = async (id: number, delta: number) => {
       if (!isLoggedIn) {
         updateGuestCartQuantity(id, delta);
         loadGuestCart();
         return;
       }
-
       try {
         const res = await fetch(`/api/cart/${id}`, {
           method: "PATCH",
@@ -189,13 +194,13 @@ const CartDropdown = forwardRef(
       }
     };
 
+    // 🔄 Ürün kaldırma
     const handleRemove = async (id: number) => {
       if (!isLoggedIn) {
         removeFromGuestCart(id);
         loadGuestCart();
         return;
       }
-
       try {
         const res = await fetch(`/api/cart/${id}`, {
           method: "DELETE",
@@ -207,12 +212,6 @@ const CartDropdown = forwardRef(
         toast.error("Ürün kaldırılamadı");
       }
     };
-    useEffect(() => {
-      debug("isOpen changed", isOpen);
-      debug("isLoggedIn", isLoggedIn);
-      debug("guest", guest);
-      debug("cartItems length", cartItems.length);
-    }, [isOpen, isLoggedIn, guest, cartItems]);
 
     const subtotal = cartItems.reduce((acc, item) => {
       const price = item.product.pricePerM2 || 0;
@@ -220,9 +219,6 @@ const CartDropdown = forwardRef(
       const m2 = item.m2 || 1;
       return acc + price * quantity * m2;
     }, 0);
-    const debug = (label: string, data?: any) => {
-      console.log(`[🧩 CartDropdown DEBUG] ${label}`, data ?? "");
-    };
 
     return (
       <>
