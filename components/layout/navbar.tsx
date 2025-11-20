@@ -125,7 +125,6 @@ const MobileNestedMenu = ({
 };
 
 export default function Navbar(): React.ReactElement {
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false); // Kategori menüsü için yeni durum
 
@@ -205,6 +204,7 @@ export default function Navbar(): React.ReactElement {
       return () => window.removeEventListener("cartUpdated", updateCart);
     }
   }, [user]);
+  
   // Menü verileri
   const kurumsalItems: MenuItem[] = [
     { label: "Hakkımızda", href: "/institutional/about" },

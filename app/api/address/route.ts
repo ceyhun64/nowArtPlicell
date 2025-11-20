@@ -51,13 +51,28 @@ export async function POST(request: NextRequest) {
       zip,
       phone,
       country,
+      tcno, // ← EKLENDİ
     } = body;
 
-    if (!firstName || !lastName || !address || !district || !city || !country) {
+    // 🛑 Eksik alan kontrolü
+    if (
+      !firstName ||
+      !lastName ||
+      !address ||
+      !district ||
+      !city ||
+      !country ||
+      !tcno
+    ) {
       return NextResponse.json(
         { error: "Required fields missing" },
         { status: 400 }
       );
+    }
+
+    // 🧪 TC Kimlik Validation (opsiyonel ama önerilir)
+    if (tcno.length !== 11 || !/^[0-9]+$/.test(tcno)) {
+      return NextResponse.json({ error: "Invalid TC number" }, { status: 400 });
     }
 
     const newAddress = await prisma.address.create({
@@ -72,6 +87,7 @@ export async function POST(request: NextRequest) {
         zip: zip || "",
         phone: phone || "",
         country,
+        tcno, // ← DATABASE’E YAZILDI
       },
     });
 

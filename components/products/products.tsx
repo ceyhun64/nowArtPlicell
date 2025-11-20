@@ -369,51 +369,30 @@ const ProductsContent: React.FC = () => {
             </div>
 
             {/* Masaüstü Kontroller */}
-            <div className="hidden md:flex items-center gap-3">
-              {/* Grid Seçici */}
-              <div className="flex items-center bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                {[2, 3, 4].map((cols) => (
-                  <button
-                    key={cols}
-                    onClick={() => handleGridChange(cols as 2 | 3 | 4)}
-                    className={cn(
-                      "p-2.5 transition-all",
-                      gridCols === cols
-                        ? "bg-gray-100 text-stone-800"
-                        : "text-gray-500 hover:text-stone-800"
-                    )}
-                  >
-                    {cols === 2 ? (
-                      <Columns2 size={18} />
-                    ) : cols === 3 ? (
-                      <Columns3 size={18} />
-                    ) : (
-                      <Columns4 size={18} />
-                    )}
-                  </button>
-                ))}
+              <div className="flex items-center bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:hidden">
+                <button
+                  onClick={() =>
+                    setMobileGridCols(mobileGridCols === 1 ? 2 : 1)
+                  }
+                  title={
+                    mobileGridCols === 1
+                      ? "2'li görünümü göster"
+                      : "1'li görünümü göster"
+                  }
+                  className={cn(
+                    "p-2.5 transition-all flex items-center justify-center rounded-xl",
+                    mobileGridCols === 1
+                      ? "bg-gray-50 text-stone-800 shadow-sm hover:bg-gray-100"
+                      : "bg-gray-100 text-stone-800 shadow-inner hover:bg-gray-200"
+                  )}
+                >
+                  {mobileGridCols === 1 ? (
+                    <StretchHorizontal size={18} />
+                  ) : (
+                    <StretchVertical size={18} />
+                  )}
+                </button>
               </div>
-
-              {/* Sıralama */}
-              <Select
-                value={sort}
-                onValueChange={(value) => setSort(value as typeof sort)}
-              >
-                <SelectTrigger className="w-64 bg-white border border-gray-200 rounded-xl shadow-sm">
-                  <SelectValue placeholder="Sırala" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="az">Alfabetik A-Z</SelectItem>
-                  <SelectItem value="za">Alfabetik Z-A</SelectItem>
-                  <SelectItem value="priceLow">
-                    Fiyat: Düşükten Yükseğe
-                  </SelectItem>
-                  <SelectItem value="priceHigh">
-                    Fiyat: Yüksekten Düşüğe
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
 

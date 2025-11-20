@@ -4,7 +4,6 @@ import React from "react";
 import Image, { StaticImageData } from "next/image";
 import { Button } from "../ui/button";
 
-// Statik import, Next.js otomatik optimize eder
 import hero21 from "@/public/heroes/21.webp";
 import hero22 from "@/public/heroes/22.webp";
 import hero23 from "@/public/heroes/23.webp";
@@ -13,7 +12,9 @@ interface PromoCardProps {
   image: StaticImageData;
   link: string;
   buttonText: string;
-  priority?: boolean; // opsiyonel
+  priority?: boolean;
+  download?: boolean;
+  fileName?: string;
 }
 
 const PromoCard: React.FC<PromoCardProps> = ({
@@ -21,6 +22,8 @@ const PromoCard: React.FC<PromoCardProps> = ({
   link,
   buttonText,
   priority = false,
+  download = false,
+  fileName = "download.pdf",
 }) => {
   return (
     <div className="relative h-[400px] md:h-[500px] w-[85%] md:w-full flex-shrink-0 overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group snap-center">
@@ -36,7 +39,11 @@ const PromoCard: React.FC<PromoCardProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 transition-opacity duration-500 group-hover:from-black/50 rounded-2xl"></div>
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-        <a href={link} className="block">
+        <a
+          href={link}
+          download={download ? fileName : undefined}
+          className="block"
+        >
           <Button
             variant="outline"
             className="px-6 py-3 text-base md:px-8 md:py-4 md:text-lg tracking-wider font-bold rounded-full transition-all duration-300 transform group-hover:scale-105 shadow-2xl"
@@ -59,10 +66,12 @@ export default function PromoCards() {
 
         <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide">
           <PromoCard
-            image={hero22}
-            link="/products"
-            buttonText="NowArt Ayrıcalıktır"
+            image={hero21}
+            link="/docs/Nowart-Plicell.pdf"
+            buttonText="Dökümanı İncele"
             priority
+            download
+            fileName="Nowart-Plicell.pdf"
           />
 
           <PromoCard
@@ -73,7 +82,7 @@ export default function PromoCards() {
           />
 
           <PromoCard
-            image={hero21}
+            image={hero22}
             link="/products"
             buttonText="Fırsatları Kaçırmayın"
             priority

@@ -31,6 +31,7 @@ interface Address {
   phone?: string;
   country?: string;
   email?: string;
+  tcno?: string;
 }
 
 interface User {
@@ -101,6 +102,7 @@ export default function PaymentPage() {
     zip: "",
     phone: "",
     country: "Türkiye",
+    tcno: "",
   };
   const [newAddressForm, setNewAddressForm] = useState(initialAddressForm);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
