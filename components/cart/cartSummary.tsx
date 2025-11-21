@@ -1,8 +1,9 @@
+// CartSummary.tsx
 "use client";
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lock, Truck } from "lucide-react";
+import { ArrowRight, Lock, Percent } from "lucide-react"; // Truck yerine Percent eklendi
 import Link from "next/link";
 
 interface CartSummaryProps {
@@ -26,7 +27,7 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
         </div>
 
         <p className="text-xs text-gray-400 mt-4">
-          Kargo ücreti ödeme sayfasında hesaplanacaktır.
+          KDV tutarı (%10) ödeme sayfasında hesaplanacaktır.
         </p>
       </div>
 
@@ -46,8 +47,11 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
           <span>256-bit SSL ile güvenli ödeme</span>
         </div>
         <div className="flex items-center gap-2">
-          <Truck className="h-4 w-4" />
-          <span>150TL ve üzeri siparişlerde ücretsiz kargo</span>
+          <Percent className="h-4 w-4" /> {/* KDV ikonuna çevrildi */}
+          <span>
+            Tüm fiyatlarımıza %10 KDV dahildir (Ödeme sayfasında hesaplanır).
+          </span>{" "}
+          {/* KDV metni */}
         </div>
       </div>
     </div>

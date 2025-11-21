@@ -49,8 +49,7 @@ const PaymentStepper: React.FC<PaymentStepperProps> = ({ currentStep }) => {
   return (
     <div className="flex justify-between mb-6 text-sm font-medium text-center">
       <StepIndicator step={1} currentStep={currentStep} label="Adres" />
-      <StepIndicator step={2} currentStep={currentStep} label="Kargo" />
-      <StepIndicator step={3} currentStep={currentStep} label="Kart Bilgileri" />
+      <StepIndicator step={2} currentStep={currentStep} label="Kart Bilgileri" />
     </div>
   );
 };

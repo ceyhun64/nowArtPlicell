@@ -146,7 +146,7 @@ export default function StepPaymentCard({
               <Loader2 className="w-5 h-5 animate-spin" /> İşlem Yapılıyor...
             </span>
           ) : (
-            `Ödemeyi Tamamla ${totalPrice.toFixed(2)} TL`
+            `Ödemeyi Tamamla`
           )}
         </Button>
       </CardFooter>

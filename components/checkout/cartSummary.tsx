@@ -1,3 +1,4 @@
+// BasketSummaryCard.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -13,6 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getCart, GuestCartItem } from "@/utils/cart";
+
+// KDV Oranı
+const KDV_RATE = 0.1; // %10
 
 interface Product {
   id: number;
@@ -36,6 +40,7 @@ interface BasketItem {
 interface BasketSummaryCardProps {
   basketItemsData?: BasketItem[];
   subTotal?: number;
+  // selectedCargoFee: number; // Kargo kaldırıldığı için kullanılmıyor, ancak imzayı bozmamak için bırakıldı.
   selectedCargoFee: number;
   totalPrice?: number;
 }
@@ -43,7 +48,7 @@ interface BasketSummaryCardProps {
 export default function BasketSummaryCard({
   basketItemsData = [],
   subTotal = 0,
-  selectedCargoFee,
+  selectedCargoFee, // Artık KDV yerine kullanılacak
   totalPrice = 0,
 }: BasketSummaryCardProps) {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -140,14 +145,18 @@ export default function BasketSummaryCard({
           device: item.device,
         }));
 
-  // 🔹 Ara toplam ve toplam hesapla
+  // 🔹 Ara toplamı hesapla
   const calculatedSubTotal = itemsToRender.reduce((acc, item) => {
     const area =
       item.width && item.height ? (item.width * item.height) / 10000 : 1;
     return acc + item.product.pricePerM2 * area * item.quantity;
   }, 0);
 
-  const calculatedTotal = calculatedSubTotal + selectedCargoFee;
+  // 🔹 KDV'yi hesapla (Ara Toplamın %10'u)
+  const calculatedKdv = calculatedSubTotal * KDV_RATE;
+
+  // 🔹 Toplamı hesapla (Ara Toplam + KDV)
+  const calculatedTotal = calculatedSubTotal + calculatedKdv;
 
   const getItemDetails = (item: BasketItem): string[] => {
     const details: string[] = [];
@@ -235,21 +244,17 @@ export default function BasketSummaryCard({
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between font-normal">
-            <span>Ara Toplam</span>
+            <span>Ara Toplam (KDV Hariç)</span> {/* Yeni metin */}
             <span className="font-medium">
               {calculatedSubTotal.toFixed(2)}TL
             </span>
           </div>
           <div className="flex justify-between font-normal">
-            <span>Kargo / Teslimat</span>
+            <span>KDV (%10)</span> {/* KDV eklendi */}
             <span
-              className={`font-medium ${
-                selectedCargoFee === 0 ? "text-green-600" : ""
-              }`}
+              className="font-medium text-red-500" // KDV'yi de vurgulayabiliriz
             >
-              {selectedCargoFee === 0
-                ? "Ücretsiz"
-                : `+${selectedCargoFee.toFixed(2)}TL`}
+              +{calculatedKdv.toFixed(2)}TL
             </span>
           </div>
         </div>
@@ -257,7 +262,7 @@ export default function BasketSummaryCard({
         <Separator />
 
         <div className="flex justify-between text-lg font-bold">
-          <span>Toplam</span>
+          <span>Genel Toplam</span>
           <span>{calculatedTotal.toFixed(2)}TL</span>
         </div>
       </CardContent>

@@ -454,15 +454,8 @@ export default function PaymentPage() {
             />
           )}
 
+       
           {step === 2 && (
-            <StepCargo
-              cargoOptions={cargoOptions}
-              selectedCargo={selectedCargo}
-              setSelectedCargo={setSelectedCargo}
-              setStep={setStep}
-            />
-          )}
-          {step === 3 && (
             <StepPaymentCard
               holderName={holderName}
               setHolderName={setHolderName}
