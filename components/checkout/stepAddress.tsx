@@ -153,7 +153,7 @@ export default function StepAddress({
           onClick={onNext}
           disabled={!selectedAddress || isAddingNewAddress || isSavingAddress}
         >
-          Kargo Seçimine Geç
+          Ödemeye Geç
         </Button>
       </CardFooter>
     </Card>
