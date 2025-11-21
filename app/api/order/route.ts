@@ -235,10 +235,16 @@ export async function POST(req: NextRequest) {
         transactionId: paymentResult?.paymentId || null,
         items: {
           create: basketItems.map((item) => ({
-            productId: Number(item.productId),
+            // DÜZELTME: productId yerine zorunlu 'product' ilişkisini 'connect' ile bağlıyoruz.
+
+            product: {
+              connect: { id: Number(item.id) },
+            },
             quantity: Number(item.quantity || 1),
-            unitPrice: Number(item.unitPrice), 
-            totalPrice:Number(item.totalPrice) ,
+            // DÜZELTME: item.unitPrice undefined ise 0 kullan
+            unitPrice: Number(item.unitPrice || 0),
+            // totalPrice için de güvenlik önlemi
+            totalPrice: Number(item.totalPrice || 0),
             note: item.note,
             profile: item.profile,
             width: item.width,

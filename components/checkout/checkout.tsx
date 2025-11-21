@@ -109,30 +109,61 @@ export default function PaymentPage() {
   const [isSavingAddress, setIsSavingAddress] = useState(false);
 
   // Kullanıcı ve sepet verilerini çek
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const localCart = localStorage.getItem("cart");
-        if (localCart) setCartItems(JSON.parse(localCart));
-
-        const userRes = await fetch("/api/user", { credentials: "include" });
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        console.error("Fetch hatası:", err);
+  const fetchData = async () => {
+    // 👈 Dışarı taşıdık
+    setLoading(true);
+    try {
+      // Kullanıcıyı çek
+      const userRes = await fetch("/api/user", { credentials: "include" });
+      let userData = null;
+      if (userRes.ok) {
+        userData = await userRes.json();
+        setUser(userData);
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
       }
-    };
 
+      // Sepeti belirle
+      if (userData?.user?.id) {
+        // Login olmuş kullanıcı için backend cart
+        const cartRes = await fetch("/api/cart", { credentials: "include" });
+        if (cartRes.ok) {
+          const cartData = await cartRes.json();
+          setCartItems(cartData);
+        } else {
+          setCartItems([]); // Hata durumunda sepeti temizle
+        }
+      } else {
+        // Guest için localStorage cart
+        const localCart = getCart(); // getCart() fonksiyonunu kullan (localStorage'dan çeker)
+        if (localCart.length > 0) {
+          // Sadece doluysa ayarla
+          // Local storage'daki basit ürünleri API'dan detaylı ürün bilgisi ile çekmek gerekebilir.
+          // Ancak mevcut yapıda, local cart'ın sadece ürün ID'leri yerine tam item yapısını
+          // döndürdüğünü varsayarak sadece `getCart()`'ı çağırıp dönen veriyi kullanabiliriz.
+          // Eğer `getCart()` sadece GuestCartItem[] döndürüyorsa, PaymentPage'in CartItem[] tipine dönüştürmelisiniz.
+          // Mevcut kodunuzda localCart'ı doğrudan setCartItems'a atıyorsunuz, bu da `GuestCartItem[]`'ın `CartItem[]` olarak kullanılması anlamına geliyor.
+          // UYUMLULUK SORUNU YAŞAMAMAK İÇİN:
+          // Eğer `getCart()` GuestCartItem[] döndürüyorsa, aşağıdakini kullanın:
+          // setCartItems(localCart as any as CartItem[]);
+          // Eğer `getCart()` (veya localStorage) zaten CartItem[] formatına uygun veri tutuyorsa, mevcut haliyle devam edin:
+          setCartItems(JSON.parse(localStorage.getItem("cart") || "[]"));
+        } else {
+          setCartItems([]);
+        }
+      }
+    } catch (err) {
+      console.error("Fetch hatası:", err);
+      setUser(null);
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, []); // 👈 Sayfa
 
   // Subtotal ve total hesaplama
   const subTotal = useMemo(() => {
@@ -264,7 +295,7 @@ export default function PaymentPage() {
 
       // 🔹 Guest cart temizle
       clearGuestCart();
-
+      await fetchData();
       setIsAddingNewAddress(false);
       setNewAddressForm(initialAddressForm);
       console.log("Address and cart saved successfully");
@@ -369,6 +400,7 @@ export default function PaymentPage() {
     };
 
     const billingAddress = { ...shippingAddress };
+    console.log("cartItems:", cartItems);
 
     const basketItemsFormatted = cartItems.map((item) => {
       const area =
@@ -383,6 +415,8 @@ export default function PaymentPage() {
         quantity: item.quantity,
       };
     });
+
+    console.log("basketItemsFormatted:", basketItemsFormatted);
 
     const paymentCardFormatted = {
       cardHolderName: holderName,
@@ -454,7 +488,6 @@ export default function PaymentPage() {
             />
           )}
 
-       
           {step === 2 && (
             <StepPaymentCard
               holderName={holderName}
