@@ -34,6 +34,7 @@ export default function OrderDetailDialog({
   getNextStatus,
 }: Props) {
   if (!order) return null;
+  console.log(order);
 
   const nextStatus = getNextStatus(order.status);
 
@@ -118,14 +119,9 @@ export default function OrderDetailDialog({
               <div className="flex-1 min-w-0 text-sm space-y-0.5">
                 <p className="font-medium truncate">{item.product.title}</p>
                 <p className="text-gray-500 text-xs">
-                  Kategori: {item.product.category}
+                  Kategori: {item.product.category?.name ?? "-"}
                 </p>
-                <p className="text-gray-500 text-xs">
-                  Birim: {item.unitPrice.toLocaleString("tr-TR")} ₺
-                </p>
-                <p className="text-gray-500 text-xs">
-                  Toplam: {item.totalPrice.toLocaleString("tr-TR")} ₺
-                </p>
+
                 {item.profile && (
                   <p className="text-gray-500 text-xs">
                     Profil: {item.profile}
@@ -133,14 +129,14 @@ export default function OrderDetailDialog({
                 )}
                 {item.width && item.height && (
                   <p className="text-gray-500 text-xs">
-                    Boyut: {item.width}x{item.height} cm
+                    Genişlik x Yükseklik: {item.width}x{item.height} cm
                   </p>
                 )}
                 {item.m2 && (
                   <p className="text-gray-500 text-xs">m²: {item.m2}</p>
                 )}
                 {item.device && (
-                  <p className="text-gray-500 text-xs">Cihaz: {item.device}</p>
+                  <p className="text-gray-500 text-xs">Aparat: {item.device}</p>
                 )}
                 {item.note && (
                   <p className="text-gray-500 text-xs">Not: {item.note}</p>

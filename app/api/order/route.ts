@@ -314,7 +314,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const orders = await prisma.order.findMany({
       include: {
-        items: { include: { product: true } },
+        items: {
+          include: {
+            product: {
+              include: {
+                category: true, // ✅ category bilgisi burada gelir
+              },
+            },
+          },
+        },
         addresses: true,
         user: true,
       },

@@ -14,8 +14,8 @@ import { AddressFormData } from "@/components/profile/addressForm";
 import { getCart, clearGuestCart, GuestCartItem } from "@/utils/cart";
 
 const cargoOptions = [
-  { id: "standart", name: "Standart Kargo", fee: 12.0 },
-  { id: "express", name: "Hızlı Kargo", fee: 22.0 },
+  { id: "standart", name: "Standart Kargo", fee: 0.0 }, // 👈 Ücret sıfırlandı
+  { id: "express", name: "Hızlı Kargo", fee: 0.0 }, // 👈 Ücret sıfırlandı
 ];
 
 interface Address {
@@ -62,6 +62,7 @@ interface CartItem {
   width?: number;
   height?: number;
   device?: string;
+  m2?: number;
 }
 
 interface UserUser {
@@ -180,10 +181,14 @@ export default function PaymentPage() {
     return cargo ? cargo.fee : 0;
   }, [selectedCargo]);
 
-  const totalPrice = useMemo(
-    () => subTotal + selectedCargoFee,
-    [subTotal, selectedCargoFee]
-  );
+  const totalPrice = useMemo(() => {
+    const baseTotal = subTotal + selectedCargoFee;
+    // Yüzde 10'luk artışı ekle (1.1 ile çarp)
+    const totalWithMarkup = baseTotal * 1.1;
+    // Virgülden sonra iki basamak hassasiyeti için toFixed kullanabilirsiniz,
+    // ancak useMemo'dan dönen değerin number olması önerilir.
+    return totalWithMarkup;
+  }, [subTotal, selectedCargoFee]);
 
   if (loading) return <Loading />;
   if (error)
@@ -413,6 +418,11 @@ export default function PaymentPage() {
         itemType: "PHYSICAL",
         price: unitPrice.toFixed(2),
         quantity: item.quantity,
+        profile: item.profile,
+        width: item.width,
+        height: item.height,
+        m2: item.m2,
+        device: item.device,
       };
     });
 
