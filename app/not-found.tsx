@@ -8,7 +8,7 @@ export default function NotFound() {
       <p className="text-xl text-gray-600 mt-4">Sayfa bulunamadı</p>
       <Link
         href="/"
-        className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+        className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
       >
         Ana Sayfaya Dön
       </Link>
