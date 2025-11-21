@@ -118,9 +118,7 @@ export default function OrderDetailDialog({
               />
               <div className="flex-1 min-w-0 text-sm space-y-0.5">
                 <p className="font-medium truncate">{item.product.title}</p>
-                <p className="text-gray-500 text-xs">
-                  Kategori: {item.product.category?.name ?? "-"}
-                </p>
+               
 
                 {item.profile && (
                   <p className="text-gray-500 text-xs">
