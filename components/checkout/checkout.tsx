@@ -461,10 +461,21 @@ export default function PaymentPage() {
       const data = await res.json();
 
       if (data.status === "success") {
+        // 🔥 Veritabanındaki her cartItem'ı sil
+        for (const item of cartItems) {
+          try {
+            await fetch(`/api/cart/${item.id}`, {
+              method: "DELETE",
+            });
+          } catch (err) {
+            console.error("Cart item delete error:", err);
+          }
+        }
+
+        // 🔥 Local sepeti temizle
         localStorage.removeItem("cart");
+
         router.push("/checkout/success");
-      } else {
-        router.push("/checkout/unsuccess");
       }
     } catch (err) {
       console.error("handlePayment fetch hatası:", err);
