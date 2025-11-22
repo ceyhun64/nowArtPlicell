@@ -132,7 +132,7 @@ export default function StepPaymentCard({
       <CardFooter className="flex justify-between w-full">
         <Button
           variant="outline"
-          onClick={() => setStep(2)}
+          onClick={() => setStep(1)}
           disabled={isProcessing}
         >
           Geri

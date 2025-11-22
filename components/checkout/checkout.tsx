@@ -6,12 +6,11 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react"; // 👈 Oturum açma için eklendi
 import PaymentStepper from "@/components/checkout/paymentStepper";
 import StepAddress from "@/components/checkout/stepAddress";
-import StepCargo from "@/components/checkout/stepCargo";
 import StepPaymentCard from "@/components/checkout/stepPayment";
 import BasketSummaryCard from "@/components/checkout/cartSummary";
-import Loading from "@/components/layout/loading";
 import { AddressFormData } from "@/components/profile/addressForm";
 import { getCart, clearGuestCart, GuestCartItem } from "@/utils/cart";
+import { Spinner } from "@/components/ui/spinner";
 
 const cargoOptions = [
   { id: "standart", name: "Standart Kargo", fee: 0.0 }, // 👈 Ücret sıfırlandı
@@ -190,7 +189,7 @@ export default function PaymentPage() {
     return totalWithMarkup;
   }, [subTotal, selectedCargoFee]);
 
-  if (loading) return <Loading />;
+  if (loading) return <Spinner />;
   if (error)
     return <div className="text-red-500 text-center mt-8">{error}</div>;
 
@@ -392,6 +391,7 @@ export default function PaymentPage() {
       country: shippingAddr.country ?? "Türkiye",
       zipCode: shippingAddr.zip ?? "",
       ip: "127.0.0.1",
+      tcno: shippingAddr.tcno ?? "",
     };
 
     const shippingAddress = {
@@ -459,7 +459,6 @@ export default function PaymentPage() {
       if (!res.ok) return router.push("/checkout/unsuccess");
 
       const data = await res.json();
-
       if (data.status === "success") {
         // 🔥 Veritabanındaki her cartItem'ı sil
         for (const item of cartItems) {

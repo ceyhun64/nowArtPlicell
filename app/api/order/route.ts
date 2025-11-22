@@ -28,6 +28,7 @@ interface Address {
   zip?: string;
   phone: string;
   country: string;
+  tcno?: string;
 }
 
 interface CreateOrderBody {
@@ -68,6 +69,7 @@ interface Address {
   zip?: string;
   phone: string;
   country: string;
+  tcno?: string;
 }
 
 interface CreateOrderBody {
@@ -235,7 +237,6 @@ export async function POST(req: NextRequest) {
         transactionId: paymentResult?.paymentId || null,
         items: {
           create: basketItems.map((item) => ({
-            // DÜZELTME: productId yerine zorunlu 'product' ilişkisini 'connect' ile bağlıyoruz.
 
             product: {
               connect: { id: Number(item.id) },
@@ -258,25 +259,27 @@ export async function POST(req: NextRequest) {
           create: [
             {
               type: "shipping",
-              firstName: shippingAddress.firstName ?? firstName ?? "",
-              lastName: shippingAddress.lastName ?? lastName ?? "",
+              firstName: body.buyer?.buyerName ?? "",
+              lastName: body.buyer?.buyerSurname ?? "",
               address: shippingAddress.address ?? "",
               district: shippingAddress.district ?? "",
               city: shippingAddress.city ?? "",
-              zip: shippingAddress.zip ?? "",
-              phone: shippingAddress.phone ?? "",
-              country: shippingAddress.country ?? "",
+              zip: shippingAddress.zip ?? shippingAddress.zipCode ?? "",
+              phone: body.buyer?.phone ?? "",
+              country: shippingAddress.country ?? "Türkiye",
+              tcno: body.buyer?.tcno ?? "",
             },
             {
               type: "billing",
-              firstName: billingAddress.firstName ?? firstName ?? "",
-              lastName: billingAddress.lastName ?? lastName ?? "",
+              firstName: body.buyer?.buyerName ?? "",
+              lastName: body.buyer?.buyerSurname ?? "",
               address: billingAddress.address ?? "",
               district: billingAddress.district ?? "",
               city: billingAddress.city ?? "",
-              zip: billingAddress.zip ?? "",
-              phone: billingAddress.phone ?? "",
-              country: billingAddress.country ?? "",
+              zip: billingAddress.zip ?? billingAddress.zipCode ?? "",
+              phone: body.buyer?.phone ?? "",
+              country: billingAddress.country ?? "Türkiye",
+              tcno: body.buyer?.tcno ?? "",
             },
           ],
         },

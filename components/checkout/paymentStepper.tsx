@@ -18,7 +18,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ step, currentStep, label 
 
   return (
     <div
-      className={`flex flex-col items-center w-1/3 ${
+      className={`flex flex-col items-center w-1/2 ${
         step > 1 ? "border-l pl-4 border-gray-200 dark:border-gray-700" : ""
       }`}
     >

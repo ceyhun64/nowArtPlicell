@@ -118,7 +118,6 @@ export default function OrderDetailDialog({
               />
               <div className="flex-1 min-w-0 text-sm space-y-0.5">
                 <p className="font-medium truncate">{item.product.title}</p>
-               
 
                 {item.profile && (
                   <p className="text-gray-500 text-xs">
@@ -160,6 +159,11 @@ export default function OrderDetailDialog({
               {addr ? (
                 <div className="p-3 bg-gray-50 border rounded-lg text-sm space-y-1">
                   <p>Adres Tipi: {addr.type}</p>
+                  <p>
+                    Alıcı: {addr.firstName} {addr.lastName}
+                  </p>
+                  <p>Tc. No: {addr.tcno}</p>
+
                   <p>Adres: {addr.address}</p>
                   <p>
                     Şehir / Ülke: {addr.city} / {addr.country}

@@ -151,6 +151,7 @@ model OrderAddress {
   lastName  String
   address   String
   district  String
+  tcno      String? @db.VarChar(11) // <- burası schema ile uyumlu olmalı
   city      String
   zip       String
   phone     String
