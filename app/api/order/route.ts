@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       name: item.name ?? "Ürün",
       category1: item.category1 ?? "Kategori",
       itemType: "PHYSICAL",
-      price: Number(item.price).toFixed(2),
+      price: (Number(item.price) * 1.1).toFixed(2), // %10 eklenmiş fiyat
     }));
 
     // --- Iyzipay uyumlu paymentCard ---
@@ -237,15 +237,14 @@ export async function POST(req: NextRequest) {
         transactionId: paymentResult?.paymentId || null,
         items: {
           create: basketItems.map((item) => ({
-
             product: {
               connect: { id: Number(item.id) },
             },
             quantity: Number(item.quantity || 1),
             // DÜZELTME: item.unitPrice undefined ise 0 kullan
-            unitPrice: Number(item.unitPrice || 0),
+            unitPrice: Number(item.unitPrice),
             // totalPrice için de güvenlik önlemi
-            totalPrice: Number(item.totalPrice || 0),
+            totalPrice: Number(item.totalPrice),
             note: item.note,
             profile: item.profile,
             width: item.width,

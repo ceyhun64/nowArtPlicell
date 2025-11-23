@@ -333,7 +333,7 @@ export default function Orders() {
 
                       {/* Alt Kısım */}
                       <div className="flex justify-between items-center">
-                        <p className="font-bold text-lg text-gray-800">
+                        <p className="font-bold text-sm text-gray-800">
                           Toplam:{" "}
                           {formatCurrency(order.totalPrice, order.currency)}
                         </p>

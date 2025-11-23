@@ -257,6 +257,7 @@ export default function PaymentPage() {
       }
 
       const addressData = await addressRes.json();
+
       setUser((prev) =>
         prev
           ? {
@@ -272,10 +273,13 @@ export default function PaymentPage() {
           : prev
       );
 
-      // 🔹 Guest cart’dan backend’e aktar
+      // 🔹 Yeni adresi otomatik seç
+      setSelectedAddress(addressData.address.id);
+
+      // Guest cart’ı backend’e aktar, temizle ve form resetle
       const guestCart: GuestCartItem[] = getCart();
       for (const item of guestCart) {
-        const res = await fetch("/api/cart", {
+        await fetch("/api/cart", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -288,21 +292,11 @@ export default function PaymentPage() {
             device: item.device || "vidali",
           }),
         });
-
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Cart POST failed:", text);
-          throw new Error("Cart item save failed: " + text);
-        }
-        console.log("Cart item saved:", item.productId);
       }
-
-      // 🔹 Guest cart temizle
       clearGuestCart();
       await fetchData();
       setIsAddingNewAddress(false);
       setNewAddressForm(initialAddressForm);
-      console.log("Address and cart saved successfully");
     } catch (err) {
       console.error("handleSaveAddress error:", err);
       alert(
@@ -423,6 +417,8 @@ export default function PaymentPage() {
         height: item.height,
         m2: item.m2,
         device: item.device,
+        unitPrice: unitPrice.toFixed(2),
+        totalPrice: (unitPrice * item.quantity).toFixed(2),
       };
     });
 
