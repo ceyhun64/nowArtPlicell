@@ -27,8 +27,7 @@ export const metadata: Metadata = {
     description:
       "Plicell, zebra, stor ve ahşap jaluzi perde modelleriyle evinize zarafet katın.",
     siteName: "NowArt Plicell",
-    images: ["/og-image.webp"],
-    locale: "tr_TR",
+    images: ["https://www.nowartplicell.com/og-image.webp"], // ✅ MUTLAK URL    locale: "tr_TR",
     type: "website",
   },
 };
