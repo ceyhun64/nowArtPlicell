@@ -67,12 +67,13 @@ export default function PromoCards() {
         <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide">
           <PromoCard
             image={hero21}
-            link="/docs/Nowart-Plicell.pdf"
+            link="/docs/NowartPlicell.pdf"
             buttonText="Dökümanı İncele"
             priority
             download
             fileName="Nowart-Plicell.pdf"
           />
+
 
           <PromoCard
             image={hero23}
