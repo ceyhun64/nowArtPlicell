@@ -49,7 +49,7 @@
     "input-otp": "^1.4.2",
     "iyzipay": "^2.0.64",
     "lucide-react": "^0.544.0",
-    "next": "15.5.4",
+    "next": "15.5.7",
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.2",
     "next-session": "^4.0.5",
