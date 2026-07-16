@@ -1,555 +1,251 @@
-# 🪟 NowArt Plicell — Premium Online Curtain Store
+# NowArt Plicell — Online Curtain Store
 
-<div align="center">
+A full-stack e-commerce web application for an online curtain / window-treatment retailer, built with Next.js 15 (App Router + Pages Router), TypeScript, Prisma ORM, and MySQL.
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.9-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-19.1.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-6.18.0-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
-**Turkey's leading online curtain retailer — Plicell, Zebra, Stor & Wood Venetian Blinds**
-
-**🌐 [nowartplicell.com](https://www.nowartplicell.com)**
-
-[Features](#-features) • [Tech Stack](#️-technology-stack) • [Installation](#-installation) • [API](#-api-endpoints) • [Database](#️-database-schema) • [Deployment](#-deployment)
-
-</div>
+> `package.json` name field: `plise`. Public-facing branding in the codebase (page titles, seed data, legal-page content) is "NowArt" / "NowArt Plicell".
 
 ---
 
-## 📋 About the Project
+## Overview
 
-**NowArt Plicell** is a modern full-stack e-commerce platform built for one of Turkey's leading curtain retailers. The platform offers a curated catalog of premium window treatments — Plicell, Zebra, Stor, and Wood Venetian Blind (Ahşap Jaluzi) — along with detailed product pages, color profile previews, measurement guides, and a seamless checkout experience powered by iyzico.
+The application is a customer-facing storefront for curtains (Plicell, Zebra, Stor, and "Ahsap-Jaluzi" / wood venetian blinds), plus an admin panel for managing products, orders, blog posts, and users. It uses:
 
-The application is built on Next.js 15 with Turbopack, TypeScript, Prisma ORM, and MySQL, featuring a complete admin panel, password reset flow, blog system, institutional pages, and Turkish location data (city/district/neighborhood) for address management.
+- **Next.js App Router** for the storefront, admin panel, and most API routes
+- **Next.js Pages Router** for a single legacy API route (`pages/api/payment.ts`) that integrates with the iyzico payment gateway
+- **Prisma ORM** against a **MySQL** database
+- **NextAuth.js (Credentials provider)** with **bcrypt** password hashing for authentication
 
----
-
-## ✨ Features
-
-### 🛍️ Customer Features
-
-- **Product Catalog** — Browse all curtain types with filtering by category and subcategory
-- **Product Detail Pages** — Multi-image gallery with zoom, color profile previews, size/variant selection
-- **Measurement Guide** — Dedicated measurement instruction page with visual guides (`/info/measure`)
-- **Search** — Full-text product search with instant results
-- **Shopping Cart** — Persistent cart with quantity management and real-time totals
-- **Wishlist / Favorites** — Save products for later
-- **Multi-Step Checkout** — Address → Cargo → Payment guided flow with iyzico integration
-- **Secure Payment** — iyzico payment gateway with installment support for Turkish bank cards
-- **Order Tracking** — Order history and status from the user profile
-- **User Profile** — Manage personal information and delivery addresses
-- **Password Reset** — Forgot password and reset password email flow
-- **Blog** — Curtain care tips, decoration guides, and news
-- **FAQ Page** — Frequently asked questions
-- **Institutional Pages** — About, Bank Accounts, Documents (PDF download), Measurement, Why Us
-- **Info Pages** — Advantages, Measurement Guide, Terms & Conditions, Why NowArt
-- **Legal Pages** — Distance Sale Agreement, KVKK, Payment Options, Personal Data Policy
-- **Location API** — Turkish city/district/neighborhood cascading dropdowns for address forms
-- **Responsive Design** — Mobile-first layout for all screen sizes
-- **Social Sidebar** — Persistent social media quick links
-
-### 🔧 Admin Features
-
-- **Admin Dashboard** — Sales analytics with Recharts graphs, order volume, revenue metrics
-- **Product Management** — Add, edit, delete products with category/subcategory, color profiles, images, Cloudinary upload
-- **Order Management** — Full order list with detailed dialog view and status updates
-- **User Management** — List all registered users and manage accounts
-- **Blog Management** — Create, update, delete blog posts with rich content and images
-- **Protected Routes** — Admin area secured by NextAuth session
-
-### ⚙️ Technical Features
-
-- **Next.js 15 with Turbopack** — Fast development builds and optimized production output
-- **Pages Router for Payment** — iyzico payment endpoint lives in `pages/api/payment.ts` for compatibility
-- **Prisma ORM + MySQL** — Type-safe relational data access with full migration history
-- **NextAuth.js** — Session management for both customers and admin
-- **Password Reset Flow** — Email-based reset token generation and validation
-- **Cloudinary + next-cloudinary** — Image upload, optimization, and CDN delivery
-- **Sharp** — Server-side image processing and optimization
-- **Nodemailer** — Transactional emails (contact form, password reset)
-- **Seed System** — JSON-based seed files for products, blogs, and orders
+This README documents only what is verifiable in the current source tree. Sections or details that could not be confirmed from the code are called out explicitly rather than assumed.
 
 ---
 
-## 🛠️ Technology Stack
+## Features
 
-### Frontend
+Verified from `app/`, `components/`, and `app/api/` source:
 
-| Technology | Version | Description |
-|-----------|---------|-------------|
-| Next.js | 15.5.9 | App Router + Pages Router, SSR/SSG, Turbopack |
-| React | 19.1.0 | Component-based UI |
-| TypeScript | 5 | Type-safe development |
-| Tailwind CSS | 4 | Utility-first styling |
-| Radix UI | 1.x | Accessible UI primitives (20+ components) |
-| Framer Motion | 12.23.22 | Animations and transitions |
-| Lucide React | 0.544.0 | Icon library |
-| Embla Carousel | 8.6.0 | Product image carousel |
-| React Hook Form | 7.64.0 | Form state management |
-| Zod | 4.1.11 | Schema validation |
-| Recharts | 2.15.4 | Admin dashboard analytics |
-| Sonner | 2.0.7 | Toast notifications |
-| next-themes | 0.4.6 | Theme management |
-| date-fns | 4.1.0 | Date formatting |
+### Customer-facing
+- Product catalog with category/sub-category browsing (`app/products`, `components/products/filter.tsx`)
+- Product detail pages (`app/products/[id]`) with reviews (`app/api/review`)
+- Full-text-style search (`app/search`, `app/api/products` filtering)
+- Shopping cart backed by the `CartItem` table, scoped to the logged-in user (`app/api/cart`)
+- Favorites / wishlist (`app/api/favorites`)
+- Multi-step checkout (Address → Cargo → Payment) using `components/checkout/*`
+- iyzico card payment via `pages/api/payment.ts`, with order creation on success (`app/api/order`)
+- Order history and self-service order cancellation (`app/api/order/user`)
+- User profile editing and saved addresses (`app/api/user`, `app/api/address`)
+- Email/password registration and login (NextAuth Credentials provider)
+- "Forgot password" / "reset password" email flow (`app/api/account/forgot_password`, `app/api/account/reset_password`)
+- Blog listing and detail pages (`app/blog`)
+- Turkish address cascading dropdowns backed by the public `turkiyeapi.dev` API (`app/api/location/ilceler/[ilId]`, `app/api/location/mahalleler/[ilceId]`) — **this calls an external third-party API at request time, not local data**, despite `public/city.json` also existing in the repo
+- Static informational, institutional, and legal pages (`app/info/*`, `app/institutional/*`, `app/contracts/*`), including a KVKK (Turkish data-protection law) page and a downloadable PDF (`public/docs/NowartPlicell.pdf`)
 
-### Backend & Database
+### Admin panel (`app/admin/*`)
+- Dashboard, product management, order management, blog management, and user list pages
+- Each admin page checks `session.user.role === "ADMIN"` server-side and redirects to `/admin` (the login page) if not authenticated as an admin — **see the Authentication and Security sections below: this page-level check is not consistently mirrored in the underlying API routes.**
 
-| Technology | Version | Description |
-|-----------|---------|-------------|
-| Prisma | 6.18.0 | ORM & database migrations |
-| MySQL | 8.0 | Relational database |
-| NextAuth.js | 4.24.11 | Authentication & session management |
-| bcrypt | 6.0.0 | Password hashing |
-| Nodemailer | 6.10.1 | Transactional email delivery |
-| Cloudinary | 2.8.0 | Image storage & CDN |
-| next-cloudinary | 6.16.2 | Next.js Cloudinary integration |
-| Sharp | 0.34.4 | Server-side image processing |
-| iyzipay | 2.0.64 | iyzico payment gateway SDK |
-| formidable | 3.5.4 | Multipart form/file parsing |
-| tsx | 4.20.6 | TypeScript seed script runner |
-
-### Infrastructure
-
-| Technology | Description |
-|-----------|-------------|
-| Vercel | Frontend deployment (recommended) |
-| Cloudinary | CDN & image management |
-| MySQL (cloud) | Managed DB (PlanetScale / Railway / AWS RDS) |
+### Not verifiable / not present
+- No `LICENSE` file exists in the repository, despite the previous README claiming an MIT license — omitted below.
+- No screenshot images exist for documentation purposes (only product/hero/UI photography used by the live site) — Screenshots section omitted.
+- The `/seed` directory contains `products.json`, `blogs.json`, and `orders.json`, but **`prisma/seed.ts` does not read or reference any of these files** — see Database section.
 
 ---
 
-## 🏗️ Architecture Overview
+## Technology Stack
+
+| Category | Technology | Notes (from `package.json`) |
+|---|---|---|
+| Framework | Next.js 15.5.9 | `next dev --turbopack`, `next build --turbopack` |
+| UI library | React 19.1.0 | |
+| Language | TypeScript 5 | |
+| Styling | Tailwind CSS 4 | via `@tailwindcss/postcss` |
+| UI primitives | Radix UI | ~20 `@radix-ui/react-*` packages, shadcn/ui "new-york" style (`components.json`) |
+| Animation | Framer Motion 12.23.22 | |
+| Icons | Lucide React 0.544.0 | |
+| Carousel | Embla Carousel React 8.6.0 | |
+| Forms | React Hook Form 7.64.0 + `@hookform/resolvers` | |
+| Validation | Zod 4.1.11 | |
+| Charts | Recharts 2.15.4 | admin dashboard |
+| Toasts | Sonner 2.0.7 | |
+| Theming | next-themes 0.4.6 | |
+| Dates | date-fns 4.1.0 | |
+| ORM | Prisma 6.18.0 (`prisma`, `@prisma/client`) | `@prisma/client` is a **devDependency**, not a regular dependency — confirmed present |
+| Database | MySQL | `provider = "mysql"` in `prisma/schema.prisma` |
+| Auth | next-auth 4.24.11 | Credentials provider, JWT session strategy |
+| Password hashing | bcrypt 6.0.0 | |
+| Email | Nodemailer 6.10.1 | custom SMTP host/port |
+| Images | `cloudinary` 2.8.0 SDK | used directly in `app/api/upload/route.ts` |
+| Payments | iyzipay 2.0.64 | Turkish payment gateway |
+| Seed runner | tsx 4.20.6 | runs `prisma/seed.ts` |
+| Unused (present in `package.json`, no code import found) | `next-session`, `sharp`, `next-cloudinary`, `formidable` | see note below |
+
+**Dead/unused dependency note:** the following packages are listed in `package.json` but have **no matching import** anywhere in `.ts`/`.tsx` source (verified by repo-wide search):
+- `next-session` — `lib/session.ts` configures it, but nothing imports `lib/session.ts`; all real session handling goes through NextAuth.
+- `sharp` — not imported anywhere; `app/api/upload/route.ts` even has a comment noting the Cloudinary upload is done "without sharp" (`sharp olmadan`).
+- `next-cloudinary` — not imported anywhere; the actual Cloudinary integration in `app/api/upload/route.ts` uses the plain `cloudinary` SDK directly.
+- `formidable` — no `import ... from "formidable"` found; only its type declarations (`types/formidable.d.ts`) exist. `pages/api/payment.ts` reads `req.body` directly and does not use `formidable`.
+
+---
+
+## Architecture
+
+- **App Router (`app/`)** serves the storefront pages, the admin panel, and almost all API routes (`app/api/**/route.ts`), using Next.js Route Handlers (`GET`/`POST`/`PUT`/`PATCH`/`DELETE` exports).
+- **Pages Router (`pages/api/payment.ts`)** hosts exactly one API endpoint — the iyzico payment call — kept on the legacy Pages Router API format.
+- **Prisma** (`prisma/schema.prisma`) defines the MySQL schema. The generated Prisma Client is emitted to a **custom output path**, `lib/generated/prisma` (not the default `node_modules/.prisma/client`), per the `generator client { output = "../lib/generated/prisma" }` block. `lib/db.ts` imports from `@/lib/generated/prisma` and exports a singleton `PrismaClient`, cached on `globalThis` in non-production to avoid exhausting connections during hot reload.
+- **Authentication** is handled by NextAuth (`next-auth/next`, `getServerSession`) using a Credentials provider defined in two places — `auth.ts` at the project root and `lib/auth.ts` (`authOptions`) — both implementing the same email/password + bcrypt logic (see Authentication section).
+- **External API dependency:** the district/neighborhood lookup routes (`app/api/location/*`) proxy to the public `https://api.turkiyeapi.dev` service at request time rather than reading from the bundled `public/city.json`.
 
 ```
-Browser / Client
-       │
-       ▼
-  Next.js 15 (Turbopack)
-  ┌─────────────────────────────────────────────────┐
-  │  App Router (SSR / SSG / API Routes)            │
-  │                                                 │
-  │  Public Pages                                   │
-  │  ├── / (Homepage)                               │
-  │  ├── /products & /products/[id]                 │
-  │  ├── /blog & /blog/[id]                         │
-  │  ├── /cart, /checkout, /favorites               │
-  │  ├── /profile (orders, addresses)               │
-  │  ├── /search                                    │
-  │  ├── /contact, /faq, /reset-password            │
-  │  ├── /info/* (advantage, measure, terms, why)   │
-  │  ├── /institutional/* (about, bank, docs...)    │
-  │  └── /contracts/* (kvkk, distance_sale...)      │
-  │                                                 │
-  │  Admin Pages (/admin/*)                         │
-  │  ├── dashboard, products, orders                │
-  │  ├── blogs, users                               │
-  │                                                 │
-  │  App Router API (/api/*)                        │
-  │  Pages Router API (pages/api/payment.ts) ◄──── iyzico
-  └─────────────────────────────────────────────────┘
-         │                    │
-         ▼                    ▼
-       MySQL              Cloudinary
-    (via Prisma)          (Images/CDN)
-         │
-      iyzico           Nodemailer
-    (Payments)        (Email / Reset)
+Browser
+   │
+   ▼
+Next.js 15 (Turbopack dev/build)
+ ├─ App Router pages (storefront, /admin/*)
+ ├─ App Router API routes (app/api/**/route.ts)
+ └─ Pages Router API route (pages/api/payment.ts) ──► iyzico
+        │                         │
+        ▼                         ▼
+   Prisma Client            Cloudinary (image upload)
+   (lib/generated/prisma)   Nodemailer (SMTP email)
+        │
+      MySQL
 ```
-
-> **Note:** The payment endpoint lives in `pages/api/payment.ts` (Pages Router) rather than the App Router for iyzico SDK compatibility with `formidable` multipart parsing.
 
 ---
 
-## 📁 Project Structure
+## Folder Structure
 
 ```
 NowArt/
-├── app/
-│   ├── page.tsx                            # Homepage
-│   ├── layout.tsx                          # Root layout
-│   ├── not-found.tsx                       # 404 page
-│   ├── globals.css
-│   │
-│   ├── products/
-│   │   ├── page.tsx                        # Product listing with filters
-│   │   └── [id]/page.tsx                   # Product detail page
-│   │
-│   ├── blog/
-│   │   ├── page.tsx                        # Blog listing
-│   │   └── [id]/page.tsx                   # Blog detail
-│   │
-│   ├── cart/page.tsx                       # Shopping cart
-│   ├── favorites/page.tsx                  # Wishlist
-│   ├── search/page.tsx                     # Search results
-│   ├── contact/page.tsx                    # Contact form
-│   ├── faq/page.tsx                        # FAQ
-│   ├── reset-password/page.tsx             # Password reset page
-│   │
-│   ├── checkout/
-│   │   ├── page.tsx                        # Multi-step checkout
-│   │   ├── success/page.tsx                # Payment success
-│   │   └── unsuccess/page.tsx              # Payment failure
-│   │
-│   ├── profile/
-│   │   ├── page.tsx                        # Profile overview
-│   │   ├── orders/page.tsx                 # Order history
-│   │   └── addresses/page.tsx             # Saved addresses
-│   │
-│   ├── info/                               # Informational pages
-│   │   ├── advantage/page.tsx              # Why choose NowArt
-│   │   ├── measure/page.tsx                # Measurement guide
-│   │   ├── terms/page.tsx                  # Terms & conditions
-│   │   └── why/page.tsx                    # Why NowArt
-│   │
-│   ├── institutional/                      # Company pages
-│   │   ├── about/page.tsx
-│   │   ├── bank_accounts/page.tsx
-│   │   ├── documents/page.tsx              # PDF document download
-│   │   ├── measurement/page.tsx
-│   │   └── why_us/page.tsx
-│   │
-│   ├── contracts/                          # Legal pages
-│   │   ├── distance_sale/page.tsx
-│   │   ├── kvkk/page.tsx
-│   │   ├── payment_options/page.tsx
-│   │   └── personal_data/page.tsx
-│   │
-│   ├── admin/
-│   │   ├── page.tsx                        # Admin login
-│   │   ├── dashboard/page.tsx
-│   │   ├── products/page.tsx
-│   │   ├── orders/page.tsx
-│   │   ├── blogs/page.tsx
-│   │   └── users/page.tsx
-│   │
-│   └── api/                                # App Router API handlers
-│       ├── auth/[...nextauth]/             # NextAuth
-│       ├── auth/logout/
-│       ├── account/check/                  # Email existence check
-│       ├── account/register/               # User registration
-│       ├── account/forgot_password/        # Send reset email
-│       ├── account/reset_password/         # Reset password with token
-│       ├── products/                       # Product CRUD
-│       ├── products/[id]/
-│       ├── cart/                           # Cart management
-│       ├── cart/[id]/
-│       ├── order/                          # Order creation
-│       ├── order/user/                     # User orders
-│       ├── favorites/                      # Wishlist
-│       ├── favorites/[id]/
-│       ├── review/                         # Product reviews
-│       ├── review/[id]/
-│       ├── blog/                           # Blog CRUD
-│       ├── blog/[id]/
-│       ├── address/                        # User addresses
-│       ├── address/[id]/
-│       ├── user/                           # User profile
-│       ├── user/all/                       # Admin user list
-│       ├── user/all/[id]/
-│       ├── location/ilceler/[ilId]/        # Districts by province
-│       ├── location/mahalleler/[ilceId]/   # Neighborhoods by district
-│       ├── send-mail/                      # Contact email
-│       └── upload/                         # Cloudinary upload
-│
+├── app/                     # App Router pages and API routes
+│   ├── admin/               # Admin panel pages (dashboard, products, orders, blogs, users)
+│   ├── api/                 # App Router API route handlers (see API section)
+│   ├── products/, blog/, cart/, checkout/, favorites/, search/,
+│   │   profile/, contact/, faq/, reset-password/,
+│   │   info/, institutional/, contracts/   # storefront + informational/legal pages
+│   ├── layout.tsx, page.tsx, not-found.tsx, globals.css
 ├── pages/
-│   └── api/
-│       └── payment.ts                      # iyzico payment (Pages Router)
-│
-├── components/
-│   ├── admin/
-│   │   ├── login/login.tsx
-│   │   ├── sideBar.tsx
-│   │   ├── dashboard/dashboard.tsx
-│   │   ├── products/                       # Add, update, table, list
-│   │   ├── orders/                         # Orders table + detail dialog
-│   │   ├── blogs/                          # Add, update, list
-│   │   └── users/users.tsx
-│   ├── blog/
-│   │   ├── blog.tsx                        # Blog listing component
-│   │   └── blogDetail.tsx                  # Blog detail component
-│   ├── cart/
-│   │   ├── cart.tsx
-│   │   ├── cartItem.tsx
-│   │   └── cartSummary.tsx
-│   ├── checkout/
-│   │   ├── checkout.tsx                    # Stepper controller
-│   │   ├── paymentStepper.tsx              # Step indicator UI
-│   │   ├── stepAddress.tsx                 # Address selection
-│   │   ├── stepCargo.tsx                   # Cargo info
-│   │   ├── stepPayment.tsx                 # iyzico payment
-│   │   ├── cartSummary.tsx                 # Order summary sidebar
-│   │   ├── success.tsx
-│   │   └── unsuccess.tsx
-│   ├── contracts/
-│   │   ├── distanceSale.tsx
-│   │   ├── kvkk.tsx
-│   │   ├── paymentOptions.tsx
-│   │   └── personalData.tsx
-│   ├── favorites/
-│   │   ├── favorites.tsx
-│   │   └── productCard.tsx
-│   ├── home/
-│   │   ├── heroes.tsx                      # Hero image slider (34 WebP images)
-│   │   ├── about.tsx                       # Brand intro section
-│   │   ├── mostPreffered.tsx               # Bestseller products
-│   │   ├── productCard.tsx                 # Home product card
-│   │   └── promo.tsx                       # Promotional banner
-│   ├── info/
-│   │   ├── advantage.tsx
-│   │   ├── measure.tsx
-│   │   ├── termsCondition.tsx
-│   │   └── why.tsx
-│   ├── institutional/
-│   │   ├── about.tsx
-│   │   ├── bank_accounts.tsx
-│   │   ├── documents.tsx
-│   │   ├── measurement.tsx
-│   │   └── why_us.tsx
-│   ├── layout/
-│   │   ├── navbar.tsx
-│   │   ├── footer.tsx
-│   │   ├── topbar.tsx
-│   │   ├── ClientLayoutWrapper.tsx
-│   │   ├── breadCrumb.tsx
-│   │   ├── cartDropdown.tsx                # Navbar cart preview
-│   │   ├── cartItem.tsx
-│   │   ├── contact.tsx
-│   │   ├── faq.tsx
-│   │   ├── login.tsx                       # Modal login form
-│   │   ├── register.tsx                    # Modal register form
-│   │   ├── forgotPassword.tsx              # Forgot password modal
-│   │   ├── reset-password.tsx              # Reset password form
-│   │   ├── imageZoom.tsx
-│   │   ├── loading.tsx
-│   │   ├── pagination.tsx
-│   │   ├── scrollToTop.tsx
-│   │   ├── socialSidebar.tsx
-│   │   └── unauthorized.tsx
-│   ├── products/
-│   │   ├── products.tsx                    # Product listing grid
-│   │   ├── productCard.tsx
-│   │   ├── productDetail.tsx               # Full product detail
-│   │   ├── descriptionAndReview.tsx        # Tabs: description & reviews
-│   │   ├── filter.tsx                      # Category/subcategory filter
-│   │   └── measureModal.tsx                # Measurement guide modal
-│   ├── profile/
-│   │   ├── sideBar.tsx
-│   │   ├── myPersonalInformation.tsx
-│   │   ├── orders.tsx
-│   │   ├── addresses.tsx
-│   │   └── addressForm.tsx
-│   ├── search/
-│   │   ├── search.tsx
-│   │   └── productCard.tsx
-│   └── ui/                                 # 50+ Radix-based UI primitives
-│
-├── contexts/
-│   └── cartContext.tsx                      # Global cart state
-│
-├── hooks/
-│   └── use-mobile.ts                        # Mobile breakpoint hook
-│
+│   └── api/payment.ts       # iyzico payment endpoint (Pages Router)
+├── components/              # UI components grouped by feature (admin/, blog/, cart/,
+│                             # checkout/, home/, layout/, products/, profile/, search/, ui/)
+├── contexts/cartContext.tsx # Global cart React context
+├── hooks/use-mobile.ts      # Mobile breakpoint hook
 ├── lib/
-│   ├── auth.ts                              # NextAuth configuration
-│   ├── db.ts                               # Prisma client singleton
-│   ├── session.ts                           # Session helpers
-│   └── utils.ts                             # cn() and general utilities
-│
-├── auth.ts                                  # Auth config (root-level export)
-│
+│   ├── auth.ts              # NextAuth authOptions (Credentials provider)
+│   ├── db.ts                # Prisma client singleton
+│   ├── session.ts           # next-session config (unused elsewhere — see stack note)
+│   ├── utils.ts             # cn() helper, etc.
+│   └── generated/prisma/    # Generated Prisma Client (custom output path)
+├── auth.ts                  # Root-level NextAuth handlers/config (duplicate of lib/auth.ts)
 ├── prisma/
-│   ├── schema.prisma                        # Database schema
-│   ├── seed.ts                              # Seed script (tsx runner)
-│   └── migrations/                          # 11 migration files
-│
-├── seed/
-│   ├── products.json                        # Product seed data
-│   ├── blogs.json                           # Blog seed data
-│   └── orders.json                          # Order seed data
-│
-├── types/                                   # TypeScript type definitions
-│   ├── next-auth.d.ts
-│   ├── iyzipay.d.ts
-│   ├── nodemailer.d.ts
-│   ├── formidable.d.ts
-│   ├── bcrypt.d.ts
-│   └── order.ts
-│
-├── utils/
-│   └── cart.ts                              # Cart calculation helpers
-│
-└── public/
-    ├── heroes/                              # 34 hero slider images (WebP)
-    ├── products/                            # Product images (main + sub)
-    ├── profiles/                            # Color profile swatches (7 colors)
-    ├── measure/                             # Measurement guide images
-    ├── iyzico/                              # Payment branding assets
-    ├── logo/                                # Site logos
-    ├── docs/NowartPlicell.pdf               # Downloadable company document
-    ├── uploads/products/                    # Cloudinary-uploaded product images
-    ├── city.json                            # Turkish city/province data
-    └── og-image.webp                        # Open Graph image
+│   ├── schema.prisma        # Database schema
+│   ├── seed.ts               # Seeds admin account + categories/sub-categories only
+│   └── migrations/          # 11 migrations
+├── seed/                    # products.json, blogs.json, orders.json — present but unused by seed.ts
+├── types/                   # next-auth.d.ts, iyzipay.d.ts, nodemailer.d.ts, formidable.d.ts, bcrypt.d.ts, order.ts
+├── utils/cart.ts             # Cart calculation helpers
+└── public/                  # heroes/, products/, profiles/, measure/, iyzico/, logo/,
+                              # docs/NowartPlicell.pdf, uploads/{products,blogs}/, city.json, og-image.webp
 ```
 
 ---
 
-## 🗄️ Database Schema
-
-All models are managed with Prisma and stored in MySQL.
-
-### Core Tables
-
-```
-User              → Customer accounts (name, email, hashed password, role, phone, resetToken, resetTokenExpiry)
-Admin             → Admin accounts (username, hashed password) — seeded via env vars
-
-Product           → Curtain products (name, price, description, images[], mainImage,
-                    category, subCategory, colorProfiles[], stock, isFeatured)
-Category          → Top-level categories (Plicell, Zebra, Stor, Ahşap Jaluzi)
-SubCategory       → Sub-level categories linked to Category
-
-CartItem          → Items in user's active cart (userId, productId, quantity, variant, color)
-Favorite          → User wishlist (userId, productId)
-Review            → Product reviews (rating, comment, userId, productId)
-
-Order             → Customer orders (status, total, cargoCompany, trackingNo, timestamps)
-OrderItem         → Line items (productId, quantity, price, extras)
-OrderAddress      → Delivery address snapshot at order time (including tcNo for legal compliance)
-
-Address           → Saved user delivery addresses (city, district, neighborhood, detail, tcNo)
-Blog              → Blog posts (title, content, image, slug, publishedAt)
-```
-
-### Key Relationships
-
-- `Product` belongs to `Category` and optionally `SubCategory`
-- `Product` has many `CartItem`, `Favorite`, `Review`, `OrderItem`
-- `Order` belongs to `User`, has one `OrderAddress` and many `OrderItem`
-- `OrderAddress` captures a complete address snapshot including Turkish identity number (`tcNo`) for Distance Selling Law compliance
-- `User` has `resetToken` and `resetTokenExpiry` fields for the password reset flow
-- `Admin` is seeded from environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD`)
-
-### Migration History
-
-| Migration | Description |
-|-----------|-------------|
-| `20251020` | Add extra fields to OrderItem |
-| `20251021` | Add reset token fields to User |
-| `20251101` | Add default main image to Product |
-| `20251101` | Add Category model |
-| `20251101` | Initial full schema |
-| `20251101` | Add SubCategory model |
-| `20251101` | Add category/subcategory to Product |
-| `20251105` | Make User nullable on CartItem |
-| `20251120` | Add tcNo to Address |
-| `20251120` | Schema re-init |
-| `20251122` | Fix OrderAddress tcNo column |
-
----
-
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
+- Node.js and npm
+- A MySQL database
+- Cloudinary account (for `/api/upload` and `next-cloudinary`)
+- iyzico account (sandbox or production) for payment processing
+- SMTP credentials (e.g. an email provider) for Nodemailer
 
-- Node.js **18+**
-- MySQL **8.0+**
-- npm or yarn
-- Cloudinary account
-- iyzico account *(for payment processing)*
+> No `.engines` field is declared in `package.json`, so no specific Node.js version is enforced by the project itself.
 
----
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd NowArt
-```
-
----
-
-### 2. Install Dependencies
-
+### 1. Install dependencies
 ```bash
 npm install
 ```
+`postinstall` automatically runs `prisma generate`.
 
----
+### 2. Configure environment variables
+Create a `.env` (or `.env.local`) file at the project root. The variable **names** below are read directly from the codebase — see the Environment Variables table for what each one is used for. Do not commit real secret values.
 
-### 3. Configure Environment Variables
-
-Create a `.env.local` file in the project root:
-
-```env
-# Database
-DATABASE_URL="mysql://username:password@localhost:3306/nowart_db"
-
-# NextAuth
-NEXTAUTH_SECRET="your-nextauth-secret-min-32-chars"
-NEXTAUTH_URL="http://localhost:3000"
-
-# Admin Account (seeded on first run)
-ADMIN_EMAIL="admin@nowartplicell.com"
-ADMIN_PASSWORD="your-secure-admin-password"
-ADMIN_NAME="Admin"
-ADMIN_SURNAME="User"
-
-# Cloudinary
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-api-key"
-CLOUDINARY_API_SECRET="your-api-secret"
-
-# iyzico Payment Gateway
-IYZICO_API_KEY="your-iyzico-api-key"
-IYZICO_SECRET_KEY="your-iyzico-secret-key"
-IYZICO_BASE_URL="https://sandbox-api.iyzipay.com"  # Use production URL for live
-
-# Email (Gmail SMTP)
-EMAIL_USER="your-email@gmail.com"
-EMAIL_PASS="your-gmail-app-password"
-
-# App
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+### 3. Apply the database schema
+```bash
+npx prisma migrate dev
+npx prisma generate
 ```
 
-> **Admin Seeding:** The admin account is created from `ADMIN_EMAIL` and `ADMIN_PASSWORD` during the seed step. Change these to secure values before running in production.
-
-> **Gmail App Password:** Go to Google Account → Security → 2-Step Verification → App Passwords to generate a dedicated SMTP password for Nodemailer.
-
----
-
-### 4. Set Up the Database
-
+### 4. Seed the database (optional)
 ```bash
-# Run migrations
-npx prisma migrate dev
-
-# Generate Prisma client
-npx prisma generate
-
-# Seed initial data (products, blogs, orders, admin account)
 npm run seed
 ```
+This creates the admin `User` record (from `ADMIN_*` env vars) and the fixed set of `Category`/`SubCategory` rows hardcoded in `prisma/seed.ts`. It does **not** load `seed/products.json`, `seed/blogs.json`, or `seed/orders.json`.
+
+### 5. Run the dev server
+```bash
+npm run dev
+```
+Opens on `http://localhost:3000` (Next.js default) using Turbopack.
 
 ---
 
-### 5. Start the Development Server
+## Environment Variables
+
+Names and usages below were confirmed by grepping `process.env.*` across the source tree and cross-checking against the project's `.env` file (values were **not** read into this document).
+
+| Variable | Used in | Purpose |
+|---|---|---|
+| `DATABASE_URL` | `prisma/schema.prisma` | MySQL connection string for Prisma |
+| `NEXTAUTH_SECRET` | `auth.ts`, `lib/auth.ts` | NextAuth JWT signing secret |
+| `ADMIN_EMAIL` | `prisma/seed.ts` | Email for the seeded admin `User` |
+| `ADMIN_PASSWORD` | `prisma/seed.ts` | Plaintext password for the seeded admin, hashed with bcrypt before insert |
+| `ADMIN_NAME` | `prisma/seed.ts` | First name for the seeded admin `User` |
+| `ADMIN_SURNAME` | `prisma/seed.ts` | Surname for the seeded admin `User` |
+| `CLOUD_NAME` | `app/api/upload/route.ts` | Cloudinary `cloud_name` |
+| `API_KEY` | `app/api/upload/route.ts` | Cloudinary `api_key` |
+| `API_SECRET` | `app/api/upload/route.ts` | Cloudinary `api_secret` |
+| `IYZICO_API_KEY` | `pages/api/payment.ts` | iyzico API key |
+| `IYZICO_SECRET_KEY` | `pages/api/payment.ts` | iyzico secret key |
+| `IYZICO_BASE_URL` | `pages/api/payment.ts` | iyzico API base URL (sandbox vs. production) |
+| `EMAIL_HOST` | `app/api/send-mail/route.ts` | SMTP host for Nodemailer |
+| `EMAIL_PORT` | `app/api/send-mail/route.ts` | SMTP port (465 triggers TLS, otherwise plain) |
+| `EMAIL_USER` | `app/api/send-mail/route.ts` | SMTP auth username / "from" address |
+| `EMAIL_PASS` | `app/api/send-mail/route.ts` | SMTP auth password |
+| `NEXT_PUBLIC_BASE_URL` | multiple API routes (`order`, `order/user`, `account/forgot_password`, `products`) | Base URL used for server-to-server `fetch()` calls between the app's own API routes (e.g. order creation calling the payment endpoint) |
+
+**Present in `.env` but not found referenced in any `.ts`/`.tsx` source file:** `MNG_KEY`, `MNG_SECRET`. These appear to be unused/legacy variables — documented here for completeness, purpose unverifiable.
+
+**Referenced in code but not present in the project's `.env` file:** none found beyond the above — `NEXTAUTH_URL`, which the previous README documented, is **not** set in `.env`; NextAuth v4 can infer it from the request in most environments, but this could not be verified from static code alone.
+
+---
+
+## Available Scripts
+
+Exact contents of the `scripts` block in `package.json`:
+
+| Script | Command | Behavior |
+|---|---|---|
+| `npm run dev` | `next dev --turbopack` | Starts the Next.js development server with Turbopack |
+| `npm run build` | `next build --turbopack` | Production build using Turbopack |
+| `npm start` | `next start` | Serves the production build (run `build` first) |
+| `npm run seed` | `tsx prisma/seed.ts` | Seeds the admin account and category/sub-category data (see Database section). Uses `prisma.user.create` / `findFirst`+`create` — safe to re-run (skips existing records), does **not** delete data. |
+| `npm install` (implicit) | `postinstall`: `prisma generate` | Regenerates the Prisma Client into `lib/generated/prisma` after every install |
+
+No `test` or `lint` script is defined in `package.json`.
+
+**Destructive commands referenced elsewhere in this README** (not `package.json` scripts, but standard Prisma CLI commands relevant to this project):
+- `npx prisma migrate reset` — **destructive**: drops and recreates the database, discarding all data, before reapplying migrations.
+
+---
+
+## Development
 
 ```bash
 npm run dev
 ```
+Runs on Turbopack. Prisma Studio (`npx prisma studio`) can be used to inspect/edit data directly against the configured `DATABASE_URL`.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-> The dev server uses **Turbopack** for fast refresh and substantially faster builds.
-
----
-
-### Production Build
+## Build
 
 ```bash
 npm run build
@@ -558,293 +254,171 @@ npm start
 
 ---
 
-## 🔌 API Endpoints
+## API
 
-### Base URL
-```
-http://localhost:3000/api
-```
+All endpoints below were confirmed by reading each `route.ts` handler under `app/api/` and `pages/api/payment.ts`. "Auth" reflects what the handler itself checks via `getServerSession`, not what any UI page around it may check.
 
-### 🔐 Authentication
+### Authentication
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| * | `/api/auth/[...nextauth]` | — | NextAuth Credentials sign-in/callback handler |
+| POST | `/api/auth/logout` | none | Clears the NextAuth session cookie |
+| GET | `/api/account/check` | none | Returns the current session's user (or `null`) via `getServerSession` |
+| POST | `/api/account/register` | none | Creates a new `User` with a bcrypt-hashed password |
+| POST | `/api/account/forgot_password` | none | Generates a reset token (`Math.random` based, 30-minute expiry), stores it on the `User`, and calls `/api/send-mail` |
+| POST | `/api/account/reset_password` | none (token-based) | Validates the reset token/expiry and sets a new bcrypt-hashed password |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/[...nextauth]` | NextAuth sign-in handler |
-| POST | `/api/auth/logout` | Destroy session |
-| GET | `/api/account/check` | Check if email is registered |
-| POST | `/api/account/register` | Register new user |
-| POST | `/api/account/forgot_password` | Send password reset email |
-| POST | `/api/account/reset_password` | Reset password with token |
+### Products
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/products` | **none** | List all products with category/sub-category included |
+| POST | `/api/products` | **none** | Create a product (uploads main/sub images via `/api/upload` first) — **no session check in the handler** |
+| GET | `/api/products/[id]` | **none** | Get a single product by ID |
+| PUT | `/api/products/[id]` | **none** | Update a product — **no session check in the handler** |
+| DELETE | `/api/products/[id]` | **none** | Delete a product — **no session check in the handler** |
 
-### 📦 Products
+### Cart
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/cart` | session required | Get the current user's cart items |
+| POST | `/api/cart` | session required | Add an item to the cart |
+| DELETE | `/api/cart` | session required | Clear the current user's cart |
+| PATCH | `/api/cart/[id]` | session required | Update a cart item's quantity |
+| DELETE | `/api/cart/[id]` | session required | Remove a single cart item |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/products` | List all products (with filters) |
-| POST | `/api/products` | Create product (Admin) |
-| GET | `/api/products/[id]` | Get product by ID |
-| PUT | `/api/products/[id]` | Update product (Admin) |
-| DELETE | `/api/products/[id]` | Delete product (Admin) |
+### Orders
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/order` | **none** | Create an order: calls the internal payment endpoint, then creates `Order`/`OrderItem`/`OrderAddress` records and sends confirmation emails |
+| GET | `/api/order` | **none** | List **all** orders in the system, with items/addresses/user included — **no session check in the handler** |
+| PATCH | `/api/order` | **none** | Update any order's status by `orderId` — **no session check in the handler** |
+| GET | `/api/order/user` | session required | List the current user's own orders |
+| PATCH | `/api/order/user` | session required | Cancel the current user's own order (only if not already shipped/delivered/cancelled, and only the order's owner) |
 
-### 🛒 Cart
+### Payment
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/pages/api/payment` (Pages Router route, requested as `/api/payment`) | none | Submits card + buyer + basket data to iyzico via the `iyzipay` SDK and returns the result |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/cart` | Get user's active cart |
-| POST | `/api/cart` | Add item to cart |
-| PUT | `/api/cart/[id]` | Update cart item quantity |
-| DELETE | `/api/cart/[id]` | Remove item from cart |
+### Favorites
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/favorites` | session required | List the current user's favorites |
+| POST | `/api/favorites` | session required | Add a product to favorites |
+| DELETE | `/api/favorites/[id]` | session required | Remove a favorite |
 
-### 📋 Orders
+### Reviews
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/review` | session required | Create a review for a product (rating 1–5; unique per user/product) |
+| GET | `/api/review/[id]` | **none** | List reviews for a product — `[id]` is a **product ID**, not a review ID |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/order` | Create new order |
-| GET | `/api/order/user` | Get current user's orders |
+> No `GET /api/review` (list all) or `DELETE /api/review/[id]` (delete a review) endpoint exists, despite the previous README documenting both.
 
-### 💳 Payment
+### Blog
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/blog` | session required | List all blog posts — **requires a logged-in session**, so it is not directly usable by anonymous visitors of the public blog pages |
+| POST | `/api/blog` | session required (not role-checked) | Create a blog post |
+| PUT | `/api/blog/[id]` | session required (not role-checked) | Update a blog post, deleting its old image file if replaced |
+| DELETE | `/api/blog/[id]` | session required (not role-checked) | Delete a blog post and its image file from `public/upload/blogs` |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/pages/api/payment` | Initiate iyzico payment (Pages Router) |
+> No `GET /api/blog/[id]` (single post) endpoint exists, despite the previous README documenting one.
 
-### ❤️ Favorites
+### Addresses & Location
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/address` | session required | List the current user's saved addresses |
+| POST | `/api/address` | session or guest `userId` in body | Create an address (requires a valid 11-digit `tcno`) |
+| PATCH | `/api/address/[id]` | session required, ownership checked | Update an address owned by the current user |
+| DELETE | `/api/address/[id]` | session required, ownership checked | Delete an address owned by the current user |
+| GET | `/api/location/ilceler/[ilId]` | none | Districts for a province — proxies `api.turkiyeapi.dev` |
+| GET | `/api/location/mahalleler/[ilceId]` | none | Neighborhoods for a district — proxies `api.turkiyeapi.dev` |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/favorites` | Get user's wishlist |
-| POST | `/api/favorites` | Add to favorites |
-| DELETE | `/api/favorites/[id]` | Remove from favorites |
+### Users
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/api/user` | session required | Get the current user's profile + addresses |
+| PATCH | `/api/user` | session required | Update the current user's name/surname/phone |
+| GET | `/api/user/all` | session required (role check commented out) | List all users — **any authenticated user, not just admins, per current code** |
+| DELETE | `/api/user/all/[id]` | **none** | Delete a user by ID — **no session check in the handler** |
 
-### ⭐ Reviews
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/review` | List reviews |
-| POST | `/api/review` | Submit a review |
-| DELETE | `/api/review/[id]` | Delete review (Admin/Owner) |
-
-### 📝 Blog
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/blog` | List all blog posts |
-| POST | `/api/blog` | Create blog post (Admin) |
-| GET | `/api/blog/[id]` | Get post by ID |
-| PUT | `/api/blog/[id]` | Update blog post (Admin) |
-| DELETE | `/api/blog/[id]` | Delete blog post (Admin) |
-
-### 📍 Addresses & Location
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/address` | Get user's saved addresses |
-| POST | `/api/address` | Add new address |
-| PUT | `/api/address/[id]` | Update address |
-| DELETE | `/api/address/[id]` | Delete address |
-| GET | `/api/location/ilceler/[ilId]` | Get districts by province ID |
-| GET | `/api/location/mahalleler/[ilceId]` | Get neighborhoods by district ID |
-
-### 👤 Users
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/user` | Get current user profile |
-| PUT | `/api/user` | Update user profile |
-| GET | `/api/user/all` | List all users (Admin) |
-| PUT | `/api/user/all/[id]` | Update user (Admin) |
-| DELETE | `/api/user/all/[id]` | Delete user (Admin) |
-
-### 📬 Utilities
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/send-mail` | Send contact form email |
-| POST | `/api/upload` | Upload image to Cloudinary |
+### Utilities
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/send-mail` | none | Sends an email via Nodemailer (used internally by other routes and by contact forms) |
+| POST | `/api/upload` | none | Uploads a file to Cloudinary under `products/<folderName>` and returns the secure URL |
 
 ---
 
-## 💳 Payment Integration — iyzico
+## Database
 
-NowArt Plicell uses [iyzico](https://iyzico.com) for secure payment processing with installment support for major Turkish bank cards.
+MySQL via Prisma (`prisma/schema.prisma`). Model names as declared (note the lowercase `product` model, unlike every other model which is capitalized):
 
-### Why Pages Router for Payment?
+| Model | Key fields | Notes |
+|---|---|---|
+| `User` (`@@map("user")`) | `email` (unique), `password` (bcrypt hash), `role` (`UserRole`: `USER`/`ADMIN`), `phone`, `tcno`, `resetToken`, `resetTokenExpires` | No separate `Admin` table — admins are `User` rows with `role = ADMIN` |
+| `product` (`@@map` none, table name `product`) | `title`, `pricePerM2`, `rating`, `reviewCount`, `mainImage`, `subImage`, `categoryId`, `subCategoryId` | No `description`, `images[]`, `stock`, `isFeatured`, or `colorProfiles[]` fields exist on this model |
+| `Category` (`@@map("category")`) | `name` | Has many `SubCategory` and `product` |
+| `SubCategory` (`@@map("sub_category")`) | `name`, `categoryId` | Belongs to `Category` |
+| `CartItem` (`@@map("cartitem")`) | `userId` (nullable — guest carts), `productId`, `quantity`, `profile`, `width`, `height`, `m2`, `device` | |
+| `Favorite` (`@@map("favorite")`) | `userId`, `productId` | Unique per user/product |
+| `Review` (`@@map("review")`) | `rating`, `title`, `comment`, `userId`, `productId` | Unique per user/product |
+| `Order` (`@@map("order")`) | `userId`, `status` (`OrderStatus`), `totalPrice`, `paidPrice`, `currency`, `paymentMethod`, `transactionId` | Has many `OrderItem` and `OrderAddress` |
+| `OrderItem` (`@@map("orderitem")`) | `orderId`, `productId`, `quantity`, `unitPrice`, `totalPrice`, `profile`, `width`, `height`, `m2`, `device` | |
+| `OrderAddress` (`@@map("orderaddress")`) | `orderId`, `type` (`"shipping"`/`"billing"`), `tcno` | Snapshot copy of the address at order time |
+| `Address` (`@@map("address")`) | `userId`, `title`, `firstName`, `lastName`, `address`, `neighborhood`, `district`, `city`, `zip`, `tcno`, `phone`, `country` | User's saved addresses |
+| `Blog` (`@@map("blog")`) | `title`, `content`, `image`, `category` | No `slug` or `publishedAt` field exists |
 
-The payment endpoint is located at `pages/api/payment.ts` rather than the App Router. This is because iyzico's Node.js SDK relies on `formidable` for multipart form parsing, which requires the traditional Pages Router request/response objects for full compatibility.
+**Enums:** `OrderStatus` (`pending`, `paid`, `shipped`, `delivered`, `cancelled`), `UserRole` (`USER`, `ADMIN`).
 
-### Checkout Flow
+**Key relationships:**
+- `product` belongs to `Category`, optionally `SubCategory`; has many `CartItem`, `Favorite`, `Review`, `OrderItem`
+- `Order` belongs to `User`; has many `OrderItem` and `OrderAddress`
+- `Address` and `OrderAddress` both store a Turkish national ID (`tcno`), consistent with the `tcNo`-related legal/contract pages in `app/contracts`
 
-1. User reviews cart and proceeds to `/checkout`
-2. **Step 1 — Address**: Select or add a delivery address (with Turkish city/district/neighborhood cascading)
-3. **Step 2 — Cargo**: Review shipping details
-4. **Step 3 — Payment**: Card details submitted to iyzico via `pages/api/payment.ts`
-5. On success → order created in DB → redirect to `/checkout/success`
-6. On failure → redirect to `/checkout/unsuccess`
+**Migrations:** 11 migrations under `prisma/migrations/` — `add_orderitem_extra_fields`, `add_reset_token_fields`, `add_default_main_image`, `add_category_model`, `init`, `add_sub_category`, `add_category_subcategory_to_product`, `make_user_nullable`, `add_tcno_to_address`, `init` (re-init), `fix_orderaddress_tcno`.
 
-### Supported Cards
-
-Axess, Bonus, Maximum, World, Paraf, BankKart Combo
-
-> **Sandbox Testing:** Set `IYZICO_BASE_URL=https://sandbox-api.iyzipay.com` and use iyzico's [official test card numbers](https://dev.iyzipay.com/en/test-cards) during development.
-
----
-
-## 🔐 Password Reset Flow
-
-NowArt Plicell includes a complete email-based password reset system.
-
-```
-1. User visits /profile or navbar → clicks "Forgot Password"
-2. POST /api/account/forgot_password
-   → Generates resetToken + resetTokenExpiry (1 hour)
-   → Stores token on User record
-   → Sends email with reset link via Nodemailer
-3. User clicks link → /reset-password?token=...
-4. POST /api/account/reset_password
-   → Validates token and expiry
-   → Hashes new password with bcrypt
-   → Clears resetToken fields
-```
+**Seeding:** `prisma/seed.ts` only creates (a) one admin `User` from `ADMIN_*` env vars, and (b) the fixed `Category`/`SubCategory` set (`Plicell`, `Zebra`, `Stor`, `Ahsap-Jaluzi`, and 10 hardcoded Plicell sub-categories). It does not touch products, blogs, or orders, despite `seed/products.json`, `seed/blogs.json`, and `seed/orders.json` existing in the repo.
 
 ---
 
-## 🔐 Security
+## Authentication
 
-- **NextAuth.js** — User and admin sessions with encrypted JWT in HttpOnly cookies
-- **bcrypt** — Password hashing (salt rounds: 12)
-- **Reset Token** — Time-limited password reset tokens stored on the User model (expires in 1 hour)
-- **Zod** — Schema validation on all API route inputs
-- **Role-based access** — Admin API routes validate session role before executing
-- **TC Identity Number** — `tcNo` stored on `Address` and `OrderAddress` for Turkish Distance Selling Law compliance
-- **Cloudinary signed uploads** — Server-generated signatures for all upload requests
-- **Environment isolation** — All secrets in `.env.local`, never exposed to the client bundle
-- **KVKK compliance** — Dedicated KVKK, Personal Data, and Distance Sale Agreement pages
-
----
-
-## 🏷️ Product Color Profiles
-
-NowArt Plicell includes color profile swatch images for curtain variant selection. Available swatches in `public/profiles/`:
-
-| File | Color |
-|------|-------|
-| `antrasit_gri.webp` | Anthracite Grey |
-| `beyaz.webp` | White |
-| `gri.webp` | Grey |
-| `kahverengi.webp` | Brown |
-| `krem.webp` | Cream |
-| `parlak_bronz.webp` | Shiny Bronze |
-| `siyah.webp` | Black |
-
-These are displayed in the product detail page as clickable color selectors.
+- **Mechanism:** NextAuth.js v4 with a single **Credentials provider**, defined identically in both `auth.ts` (root) and `lib/auth.ts` (`authOptions`) — two parallel copies of the same configuration.
+- **Password verification:** on login, `prisma.user.findUnique({ where: { email } })` looks up the user, then `bcrypt.compare(password, user.password)` verifies the password. On registration and password reset, `bcrypt.hash(password, 10)` hashes the new password before storing it (the admin seed script uses the same `bcrypt.hash(..., 10)` call).
+- **Session strategy:** JWT (`session: { strategy: "jwt" }`), signed with `NEXTAUTH_SECRET`. The JWT and session callbacks copy `id`, `name`, `surname`, `email`, and `role` onto the token/session.
+- **Logout:** `POST /api/auth/logout` manually clears the `next-auth.session-token` (or `__Secure-next-auth.session-token` in production) cookie.
+- **Password reset:** a reset token is generated with `Math.random().toString(36).substring(2, 15)` (not a cryptographically secure token generator) and stored on `User.resetToken` / `resetTokenExpires` with a 30-minute expiry; the reset link is emailed via `/api/send-mail`.
+- **Role-based access control — page level vs. API level:**
+  - Every page under `app/admin/*` (`dashboard`, `products`, `orders`, `blogs`, `users`) checks `session.user.role === "ADMIN"` server-side and redirects to `/admin` otherwise. This protection is real and consistently applied at the page level.
+  - The underlying **API routes are not consistently protected the same way**: `app/api/products/route.ts` and `app/api/products/[id]/route.ts` (create/update/delete) have no session check at all; `app/api/order/route.ts` (list-all/update-status) has no session check; `app/api/user/all/route.ts` checks only that a session exists, with the admin-role check explicitly commented out in the source; `app/api/blog/*` and `app/api/user/all/[id]` require a session but do not check for the `ADMIN` role (or, for the user-delete route, no session check at all). Anyone who can reach these API routes directly (bypassing the admin UI) can perform the corresponding writes.
 
 ---
 
-## 🧪 Development Tools
+## Configuration
 
-### Database Management
-
-```bash
-# Open Prisma Studio (visual DB editor)
-npx prisma studio
-
-# Create a new migration
-npx prisma migrate dev --name describe-your-change
-
-# Reset and re-seed
-npx prisma migrate reset && npm run seed
-```
-
-### Seed System
-
-Seed data is stored as JSON files in the `/seed` directory and loaded via `prisma/seed.ts`:
-
-```bash
-npm run seed   # Runs: tsx prisma/seed.ts
-```
-
-Seeded data includes: products (with images and variants), blog posts, sample orders, and the admin account.
+- **`components.json`**: shadcn/ui config — style `new-york`, Tailwind base color `zinc`, CSS variables enabled, path aliases `@/components`, `@/lib`, `@/components/ui`, `@/hooks`.
+- **`tsconfig.json`**: path alias `@/*` → project root.
+- **`next.config.ts`**: sets `images.domains: ["res.cloudinary.com"]` to allow Next/Image to load Cloudinary-hosted images. No other custom Next.js configuration (no rewrites, headers, or experimental flags) is present.
+- **`prisma/schema.prisma`**: Prisma Client is generated to a non-default path, `lib/generated/prisma` — if you add or change models, remember `npx prisma generate` writes there, not to `node_modules/.prisma/client`.
 
 ---
 
-## 🚀 Deployment
+## Troubleshooting
 
-### Vercel (Recommended)
+Issues realistic for this exact stack, based on what was found in the code:
 
-1. Push your repository to GitHub
-2. Import the project at [vercel.com](https://vercel.com)
-3. Add all environment variables from `.env.local` in the Vercel dashboard
-4. Deploy — Vercel auto-detects Next.js and configures the build
-
-```bash
-# CLI deployment
-npx vercel --prod
-```
-
-### Docker
-
-```bash
-# Build the image
-docker build -t nowart-plicell .
-
-# Run the container
-docker run -p 3000:3000 --env-file .env nowart-plicell
-```
-
-### Production Checklist
-
-- Set `NODE_ENV=production`
-- Update `NEXTAUTH_URL` and `NEXT_PUBLIC_BASE_URL` to your production domain
-- Switch `IYZICO_BASE_URL` to `https://api.iyzipay.com`
-- Use a managed MySQL instance (PlanetScale, Railway, or AWS RDS)
-- Configure Cloudinary for the production environment
-- Set strong `ADMIN_EMAIL` / `ADMIN_PASSWORD` before seeding
-- Enable HTTPS (automatic on Vercel; use Let's Encrypt for VPS)
-- Remove `uploads/products/` from version control — use Cloudinary for all images in production
+- **`prisma generate` output path:** because the Prisma Client is generated into `lib/generated/prisma` instead of the default location, editors/type-checkers that assume the default `@prisma/client` import path may not resolve types correctly after a fresh clone — run `npx prisma generate` (or `npm install`, which triggers it via `postinstall`) before starting the dev server.
+- **Public blog page failing to load data:** `GET /api/blog` requires an authenticated session in the current code. If the public-facing blog listing calls this endpoint directly without a logged-in user, it will receive a 401 rather than the blog list.
+- **Product/order admin mutations reachable without login:** several write endpoints (`POST/PUT/DELETE /api/products*`, `GET/PATCH /api/order`, `DELETE /api/user/all/[id]`) have no server-side session check. If exposing this app beyond a trusted network, this is a functional gap to be aware of, not a documentation error.
+- **`iyzico` sandbox vs. production:** `IYZICO_BASE_URL` must point at iyzico's sandbox host during development and their production host in production; using the wrong one will cause `pages/api/payment.ts` calls to fail or behave unexpectedly.
+- **MySQL connection errors on `prisma migrate dev`:** confirm `DATABASE_URL` points at a running, reachable MySQL 8-compatible server before running migrations.
+- **Turbopack-specific build issues:** both `dev` and `build` scripts pass `--turbopack`; if a dependency or plugin does not yet support Turbopack, fall back to plain `next dev` / `next build` (not defined as an npm script, but runnable via `npx next dev`) to isolate the issue.
+- **Cloudinary uploads failing:** `app/api/upload/route.ts` reads `CLOUD_NAME` / `API_KEY` / `API_SECRET` (not the `CLOUDINARY_*`-prefixed names used by some Cloudinary docs/examples) — make sure your `.env` uses these exact names.
 
 ---
 
-## 🤝 Contributing
+## License
 
-1. **Fork** this repository
-2. Create a feature branch:
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m 'feat: add AmazingFeature'
-   ```
-4. Push your branch:
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-5. Open a **Pull Request**
-
-### Code Standards
-
-- Use **TypeScript** — avoid `any`, type all props and API responses
-- Validate all API inputs with **Zod**
-- Follow **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`)
-- Run `npm run build` before submitting PRs to catch type errors
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.
-
----
-
-## 📞 Contact
-
-- 🌐 Website: [nowartplicell.com](https://www.nowartplicell.com)
-- 📧 Email: info@nowartplicell.com
-
----
-
-<div align="center">
-
-*NowArt Plicell — Elegance for every window.* 🪟
-
-</div>
+No `LICENSE` file is present in the repository, so no license can be confirmed or documented here.
